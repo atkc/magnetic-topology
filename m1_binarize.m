@@ -1,3 +1,12 @@
+%Description:
+%This program produces a binarized image of a MFM image. There are 2 ways
+%of threshold process - global threshold value or a dynamic one. All input
+%parameters are at the top. Please change the filename address accordingly.
+%Also note that there are filters before (to smooth the iamge) and after
+%(to get rid of non-skyrmions by circular metric and the size). The program
+%also generates a mat (centroids) containing the approx mid points of each 
+%potential skyrmion 
+
 %**************************************************************************
 %*****************************Inputs and parameters************************
 %**************************************************************************
