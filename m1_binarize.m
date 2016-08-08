@@ -1,16 +1,18 @@
 %Description:
 %This program produces a binarized image of a MFM image. There are 2 ways
-%of threshold process - global threshold value or a dynamic one. All input
+%of threshold process - a global threshold value or a dynamic one. All input
 %parameters are at the top. Please change the filename address accordingly.
 %Also note that there are filters before (to smooth the iamge) and after
 %(to get rid of non-skyrmions by circular metric and the size). The program
-%also generates a mat (centroids) containing the approx mid points of each 
-%potential skyrmion 
+%lastly generates a mat (centroids) containing the approx mid points of each 
+%potential skyrmion for fitting in m2*.m routine. 
+%centroids = zeros(length(graindata),5); % [midx midy radius perimter roundness]
 
 %**************************************************************************
 %*****************************Inputs and parameters************************
 %**************************************************************************
 
+%%address to the image of interest
 filename='C:\Users\Anthony\Dropbox\Shared_MFM\DataAnalysis\Skyrmion Lattice\11d lattice\image 1\160517_x11d_n3k-p2k_sss.png'; %file directory
 
     %********Threshold options************
@@ -24,23 +26,23 @@ filename='C:\Users\Anthony\Dropbox\Shared_MFM\DataAnalysis\Skyrmion Lattice\11d 
     
     %********Pre-Filter Option(to smooth out image)*********
     
-    erode=true; %for erosion 
-    erodeSize=2;
-    
     filterArea =3; %area of filter (gaussian) (use odd number)
     filtermode='gaussian'; %shape of filer: 'disk' or 'gaussian'
     filterRepeat=13; % no of filter cycle
-    %********Post Filter Option 1(smoothen binary image after thresh)*********
+    
+    %********Post-Filter Option 1(distinguish skyrmions lumped together)********* 
+    erode=true; %for erosion of filtered binary image (essential to distinguish 2 multiple skyrmions lump together
+    erodeSize=2;
     
     %********Post-Filter Option 2(remove strips)*********
-    minD=5;
+    minD=5; %filter by parameter (not used)
     maxD=15;
     minPeri=2*pi*minD;
     maxPeri=2*pi*maxD;
     
-    maxMetric=0.30;
+    maxMetric=0.30; %circularity metric
     
-    minSize=0.7;
+    minSize=0.7; %filter by area
     maxSize=5;
 
 
@@ -205,4 +207,4 @@ gg=figure;
     end
 figure;
     imshow(filIm,[0,max(max(filIm))]);
-clearvars -except threshlevel dgrayIm centroids roundness binIm isofit xyfit filIm%area perimeter roundnes roundness binIm im fit avgRadius fitImage centroids dgrayIm avgRadius fitImage centroids ci mask x dgrayIm test filIm;
+clearvars -except threshlevel dgrayIm centroids binIm isofit xyfit filIm
