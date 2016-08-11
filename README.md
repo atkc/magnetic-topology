@@ -11,9 +11,9 @@ M2: For fitting routine -> Does iso and aniso 2D guassian fit, in dying need of 
 
 Analysis operations are by m3 and m4
 
-M3.: Does orientational (#NN, Angles between NN) and translational analysis -> needs a lot of upgrades
+M3: Does orientational (#NN, Angles between NN) and translational analysis -> needs a lot of upgrades
 
-M4.: Normalized analysis
+M4: Normalized analysis
 
 #Directions(broadly)
 1. Fixing pressing problems- ie. window for fitting
