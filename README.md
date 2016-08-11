@@ -4,12 +4,16 @@ Towards the grand vision of "button pressing" ease in topology analysis
 
 #Orientation
 The main files for data extraction are m1 and m2 -> run them sequentially
-m1: For threshold operation -> right now we have to visually chek if the threshold is good, details of how to control the operation is in the file
-m2: For fitting routine -> Does iso and aniso 2D guassian fit, in dying need of fixing the window for fitting (see job list)
+
+M1: For threshold operation -> right now we have to visually chek if the threshold is good, details of how to control the operation is in the file.
+
+M2: For fitting routine -> Does iso and aniso 2D guassian fit, in dying need of fixing the window for fitting (see job list)
 
 Analysis operations are by m3 and m4
-m3: Does orientational (#NN, Angles between NN) and translational analysis -> needs a lot of upgrades
-m4: Normalized analysis
+
+M3.: Does orientational (#NN, Angles between NN) and translational analysis -> needs a lot of upgrades
+
+M4.: Normalized analysis
 
 #Directions(broadly)
 1. Fixing pressing problems- ie. window for fitting
