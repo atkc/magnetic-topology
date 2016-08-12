@@ -1,5 +1,6 @@
 %Description:
 %sakdnklaskldn
+
 %This program produces a binarized image of a MFM image. There are 2 ways
 %of threshold process - a global threshold value or a dynamic one. All input
 %parameters are at the top. Please change the filename address accordingly.
