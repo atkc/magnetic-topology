@@ -15,13 +15,13 @@
 %**************************************************************************
 
 %%address to the image of interest
-filename='C:\Users\Anthony\Dropbox\Shared_MFM\DataAnalysis\Skyrmion Lattice\11d lattice\image 1\160517_x11d_n3k-p2k_sss.png'; %file directory
-
+%filename='C:\Users\Anthony\Dropbox\Shared_MFM\DataAnalysis\Skyrmion Lattice\11d lattice\image 1\160517_x11d_n3k-p2k_sss.png'; %file directory
+test_sample;
     %********Threshold options************
-    threshmode=2; % 1: regular threhold, 2: Dynamic thresh
+    threshmode=1; % 1: regular threhold, 2: Dynamic thresh
     
     %if option = 1:
-    threshlevel =0.5; %this is for regular thresholding
+    threshlevel =0.8; %this is for regular thresholding
     
     %if option = 2:
     adaptThreshArea =23; %this is for adaptivev threholding which requires an input area to thresh
@@ -30,7 +30,7 @@ filename='C:\Users\Anthony\Dropbox\Shared_MFM\DataAnalysis\Skyrmion Lattice\11d 
     
     filterArea =3; %area of filter (gaussian) (use odd number)
     filtermode='gaussian'; %shape of filer: 'disk' or 'gaussian'
-    filterRepeat=13; % no of filter cycle
+    filterRepeat=9; % no of filter cycle
     
     %********Post-Filter Option 1(distinguish skyrmions lumped together)********* 
     erode=true; %for erosion of filtered binary image (essential to distinguish 2 multiple skyrmions lump together
@@ -52,14 +52,15 @@ filename='C:\Users\Anthony\Dropbox\Shared_MFM\DataAnalysis\Skyrmion Lattice\11d 
 %*****************************Reading image file**************************
 %*************************************************************************
 
-    im=imread(filename);
+    %im=imread(filename);
     %grayIm = rgb2gray(im);
-    grayIm = im(:,:,1); %BGR chanels, grayIm will be based on the red intensity of the original image
-    dgrayIm= double(grayIm); %matrix with double precision
+    %grayIm = im(:,:,1); %BGR chanels, grayIm will be based on the red intensity of the original image
+    %dgrayIm= double(grayIm); %matrix with double precision
     
     %resize image to 0-255 intensity, why? cos i like =D
     %dgrayIm=(dgrayIm-ones(size(dgrayIm))*min(min(dgrayIm)))*255/((max(max(dgrayIm)))-min(min(dgrayIm)));
-    dgrayIm=dgrayIm*255/max(max(dgrayIm));
+    %dgrayIm=dgrayIm*255/max(max(dgrayIm));
+    dgrayIm=test;
 
 %*************************************************************************
 %*****************************Pre-Filter process**************************
@@ -209,4 +210,4 @@ gg=figure;
     end
 figure;
     imshow(filIm,[0,max(max(filIm))]);
-clearvars -except threshlevel dgrayIm centroids binIm isofit xyfit filIm
+clearvars -except threshlevel dgrayIm centroids binIm isofit xyfit filIm test
