@@ -1,8 +1,8 @@
-noise = 100/255;
-test=rand(512)*0.5*noise+50/255;
+noise = 50/255;
+test=rand(512)*0.5*noise+25/255;
 l=length(test);
-center=[150 150; 350 350];
-c=50;
+center=[300 260; 300 300; 260 280];
+c=10;
 a=1;
 
 test=test+ones(length(test)).*noise;

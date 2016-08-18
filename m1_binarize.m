@@ -1,6 +1,4 @@
 %Description:
-%sakdnklaskldn
-
 %This program produces a binarized image of a MFM image. There are 2 ways
 %of threshold process - a global threshold value or a dynamic one. All input
 %parameters are at the top. Please change the filename address accordingly.
@@ -21,7 +19,7 @@ test_sample;
     threshmode=1; % 1: regular threhold, 2: Dynamic thresh
     
     %if option = 1:
-    threshlevel =0.8; %this is for regular thresholding
+    threshlevel =0.7; %this is for regular thresholding
     
     %if option = 2:
     adaptThreshArea =23; %this is for adaptivev threholding which requires an input area to thresh
