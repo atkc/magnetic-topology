@@ -52,11 +52,11 @@ im=dgrayIm; %original image to fit on
 %**************************************************
 %individually fitted
 [l,~]=size(center);
-minR=0.4;
-maxR=4;
-stepR=0.4;
-stdevRes=zeros(l,int8(maxR-minR)/stepR);
-sigFit=zeros(l,int8(maxR-minR)/stepR);
+minR=0.5;
+maxR=3;
+stepR=0.1;
+stdevRes=zeros(l,1+int8((maxR-minR)/stepR));
+sigFit=zeros(l,1+int8((maxR-minR)/stepR));
     for i = 1:l
         ind=1;
         for range=(minR:stepR:maxR);
@@ -100,7 +100,8 @@ sigFit=zeros(l,int8(maxR-minR)/stepR);
             isofit(i,1:5) = [tmpiso.x0+double(center(i,1)) tmpiso.y0+double(center(i,2)) tmpiso.sigma tmpiso.a tmpiso.b];
             
             %****getting the residue*****
-            residue=zi-tmpiso.G;
+            residue=abs(zi-tmpiso.G);
+            
             [~,sigmahat] = normfit(residue(:));
             stdevRes(i,ind)=sigmahat;
             sigFit(i,ind)=tmpiso.sigma;
@@ -139,13 +140,21 @@ sigFit=zeros(l,int8(maxR-minR)/stepR);
     end
     figure
     plot((minR:stepR:maxR),sigFit(1,:));
+    xlabel('Fitting Window Range');
+    ylabel('Standard Dev of fit');
     figure
     plot((minR:stepR:maxR),stdevRes(1,:));
+    xlabel('Fitting Window Range');
+    ylabel('Standard Dev of Residue');
+    
     figure
-    plot(diff(stdevRes(1,:)));
+    plot((minR:stepR:maxR),gradient(stdevRes(1,:)));
+    xlabel('Fitting Window Range');
+    ylabel('d Standard Dev of Residue/ d Fitting range');
+    
     figure
     imshow(dgrayIm,[0,max(max(dgrayIm))])
-    for i = 1:length(isofit)
+    for i = 1:l
         hold on
         plot(isofit(i,1),isofit(i,2),'r.','MarkerSize',10);
     end
@@ -172,7 +181,7 @@ sigFit=zeros(l,int8(maxR-minR)/stepR);
 %%drawing and saving the image
 [m,n]=size(binIm);
 whiteImage = 255 * ones(m, n, 'uint8');
-for i = 1:length(isofit)
+for i = 1:l
     
     whiteImage(round(isofit(i,1)),round(isofit(i,2)))=false;
 end
