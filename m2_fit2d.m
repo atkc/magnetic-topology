@@ -52,11 +52,12 @@ im=dgrayIm; %original image to fit on
 %**************************************************
 %individually fitted
 [l,~]=size(center);
-minR=0.5;
-maxR=3;
-stepR=0.1;
+minR=1;
+maxR=5;
+stepR=0.2;
 stdevRes=zeros(l,1+int8((maxR-minR)/stepR));
 sigFit=zeros(l,1+int8((maxR-minR)/stepR));
+sseFit=zeros(l,1+int8((maxR-minR)/stepR));
     for i = 1:l
         ind=1;
         for range=(minR:stepR:maxR);
@@ -105,6 +106,7 @@ sigFit=zeros(l,1+int8((maxR-minR)/stepR));
             [~,sigmahat] = normfit(residue(:));
             stdevRes(i,ind)=sigmahat;
             sigFit(i,ind)=tmpiso.sigma;
+            sseFit(i,ind)=tmpiso.sse;
             ind=ind+1;
 
         end
@@ -138,62 +140,65 @@ sigFit=zeros(l,1+int8((maxR-minR)/stepR));
             end
         end
     end
-    figure
-    plot((minR:stepR:maxR),sigFit(1,:));
-    xlabel('Fitting Window Range');
-    ylabel('Standard Dev of fit');
-    figure
-    plot((minR:stepR:maxR),stdevRes(1,:));
-    xlabel('Fitting Window Range');
-    ylabel('Standard Dev of Residue');
     
-    figure
-    plot((minR:stepR:maxR),gradient(stdevRes(1,:)));
-    xlabel('Fitting Window Range');
-    ylabel('d Standard Dev of Residue/ d Fitting range');
-    
-    figure
-    imshow(dgrayIm,[0,max(max(dgrayIm))])
     for i = 1:l
-        hold on
-        plot(isofit(i,1),isofit(i,2),'r.','MarkerSize',10);
+        figure
+        [hAx,hLine1,hLine2]=plotyy((minR:stepR:maxR),sigFit(i,:),(minR:stepR:maxR),stdevRes(i,:));
+
+        xlabel('Fitting Window Range');
+        ylabel(hAx(1),'Standard Dev of fit');
+        ylabel(hAx(2),'Standard Dev of Residue');
     end
-%**************************************************
-%*******consoladation********************************
-%**************************************************    
+    
+    [~,minI]=min(stdevRes,[],2);
+    skxFit=zeros(length(minI),1);
+    for i=1:length(minI)
+        skxFit(i)=sigFit(i,minI(i));
+    end
     figure
-    histfit(isofit(:,3)*2.3548*5/1024);
-    %[mu, sigma] = normfit(fit(:,3),10);
-    mu=mean(isofit(:,3));
-    sigma=std(isofit(:,3));
-    
-    filteredIndex = ((isofit(:,3)>(mu-sigma)).*(isofit(:,3)<(mu+sigma)))>0;
-    filteredFit=isofit(filteredIndex,3);
-    
-    figure
-    histfit(filteredFit*2.3548*5/1024);
-    FWHM=mu*2*(2*log(2))^0.5;
-    FWHMer=sigma*2*(2*log(2))^0.5;
-    
-    figure
-    imshow(dgrayIm,[0,max(max(dgrayIm))])
-    
-%%drawing and saving the image
-[m,n]=size(binIm);
-whiteImage = 255 * ones(m, n, 'uint8');
-for i = 1:l
-    
-    whiteImage(round(isofit(i,1)),round(isofit(i,2)))=false;
-end
-
-whiteImage=logical(whiteImage);
-imwrite(whiteImage,'white.png','png');
-
-% gh=figure;
-% imshow(whiteImage)
-% 
+    plot(skxFit);
+%     figure
+%     imshow(dgrayIm,[0,max(max(dgrayIm))])
+%     for i = 1:l
+%         hold on
+%         plot(isofit(i,1),isofit(i,2),'r.','MarkerSize',10);
+%     end
+% %**************************************************
+% %*******consoladation********************************
+% %**************************************************    
+%     figure
+%     histfit(isofit(:,3)*2.3548*5/1024);
+%     %[mu, sigma] = normfit(fit(:,3),10);
+%     mu=mean(isofit(:,3));
+%     sigma=std(isofit(:,3));
 %     
-f=getframe(gca);
-[X, map] = frame2im(f);
-imwrite(X,'white.png','png');
+%     filteredIndex = ((isofit(:,3)>(mu-sigma)).*(isofit(:,3)<(mu+sigma)))>0;
+%     filteredFit=isofit(filteredIndex,3);
+%     
+%     figure
+%     histfit(filteredFit*2.3548*5/1024);
+%     FWHM=mu*2*(2*log(2))^0.5;
+%     FWHMer=sigma*2*(2*log(2))^0.5;
+%     
+%     figure
+%     imshow(dgrayIm,[0,max(max(dgrayIm))])
+%     
+% %%drawing and saving the image
+% [m,n]=size(binIm);
+% whiteImage = 255 * ones(m, n, 'uint8');
+% for i = 1:l
+%     
+%     whiteImage(round(isofit(i,1)),round(isofit(i,2)))=false;
+% end
+% 
+% whiteImage=logical(whiteImage);
+% imwrite(whiteImage,'white.png','png');
+% 
+% % gh=figure;
+% % imshow(whiteImage)
+% % 
+% %     
+% f=getframe(gca);
+% [X, map] = frame2im(f);
+% imwrite(X,'white.png','png');
     

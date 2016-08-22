@@ -19,7 +19,7 @@ test_sample;
     threshmode=1; % 1: regular threhold, 2: Dynamic thresh
     
     %if option = 1:
-    threshlevel =0.7; %this is for regular thresholding
+    threshlevel =0.75; %this is for regular thresholding
     
     %if option = 2:
     adaptThreshArea =23; %this is for adaptivev threholding which requires an input area to thresh
@@ -58,7 +58,7 @@ test_sample;
     %resize image to 0-255 intensity, why? cos i like =D
     %dgrayIm=(dgrayIm-ones(size(dgrayIm))*min(min(dgrayIm)))*255/((max(max(dgrayIm)))-min(min(dgrayIm)));
     %dgrayIm=dgrayIm*255/max(max(dgrayIm));
-    dgrayIm=test;
+    dgrayIm=testIm;
 
 %*************************************************************************
 %*****************************Pre-Filter process**************************
