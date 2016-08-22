@@ -19,7 +19,7 @@ test_sample;
     threshmode=1; % 1: regular threhold, 2: Dynamic thresh
     
     %if option = 1:
-    threshlevel =0.75; %this is for regular thresholding
+    threshlevel =0.93; %this is for regular thresholding
     
     %if option = 2:
     adaptThreshArea =23; %this is for adaptivev threholding which requires an input area to thresh
@@ -31,7 +31,7 @@ test_sample;
     filterRepeat=9; % no of filter cycle
     
     %********Post-Filter Option 1(distinguish skyrmions lumped together)********* 
-    erode=true; %for erosion of filtered binary image (essential to distinguish 2 multiple skyrmions lump together
+    erode=false; %for erosion of filtered binary image (essential to distinguish 2 multiple skyrmions lump together
     erodeSize=2;
     
     %********Post-Filter Option 2(remove strips)*********
@@ -42,7 +42,7 @@ test_sample;
     
     maxMetric=0.30; %circularity metric
     
-    minSize=0.7; %filter by area
+    minSize=0.2; %filter by area
     maxSize=5;
 
 
@@ -208,4 +208,4 @@ gg=figure;
     end
 figure;
     imshow(filIm,[0,max(max(filIm))]);
-clearvars -except threshlevel dgrayIm centroids binIm isofit xyfit filIm test
+clearvars -except threshlevel dgrayIm centroids binIm isofit xyfit filIm testIm

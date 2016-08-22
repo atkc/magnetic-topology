@@ -52,8 +52,8 @@ im=dgrayIm; %original image to fit on
 %**************************************************
 %individually fitted
 [l,~]=size(center);
-minR=1;
-maxR=5;
+minR=1.5;
+maxR=3.5;
 stepR=0.2;
 stdevRes=zeros(l,1+int8((maxR-minR)/stepR));
 sigFit=zeros(l,1+int8((maxR-minR)/stepR));
@@ -148,15 +148,27 @@ sseFit=zeros(l,1+int8((maxR-minR)/stepR));
         xlabel('Fitting Window Range');
         ylabel(hAx(1),'Standard Dev of fit');
         ylabel(hAx(2),'Standard Dev of Residue');
+        
+%         figure
+%         [hAx,hLine1,hLine2]=plotyy((minR:stepR:maxR),sigFit(i,:),(minR:stepR:maxR),sseFit(i,:));
+% 
+%         xlabel('Fitting Window Range');
+%         ylabel(hAx(1),'Standard Dev of fit');
+%         ylabel(hAx(2),'Chi-square');
+
     end
-    
-    [~,minI]=min(stdevRes,[],2);
-    skxFit=zeros(length(minI),1);
-    for i=1:length(minI)
-        skxFit(i)=sigFit(i,minI(i));
+    [~,minCSI]=min(sseFit,[],2);
+    [~,minSDI]=min(stdevRes,[],2);
+    skxSDFit=zeros(length(minSDI),1);
+    skxCSFit=zeros(length(minCSI),1);
+    for i=1:length(minSDI)
+        skxSDFit(i)=sigFit(i,minSDI(i));
+        skxCSFit(i)=sigFit(i,minCSI(i));
     end
     figure
-    plot(skxFit);
+    plot(skxSDFit);
+    figure
+    plot(skxCSFit);
 %     figure
 %     imshow(dgrayIm,[0,max(max(dgrayIm))])
 %     for i = 1:l
