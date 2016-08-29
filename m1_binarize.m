@@ -12,53 +12,52 @@
 %*****************************Inputs and parameters************************
 %**************************************************************************
 
-%%address to the image of interest
-%filename='C:\Users\Anthony\Dropbox\Shared_MFM\DataAnalysis\Skyrmion Lattice\11d lattice\image 1\160517_x11d_n3k-p2k_sss.png'; %file directory
-test_sample;
+filename='C:\Users\Anthony\Dropbox\Shared_MFM\DataAnalysis\Skyrmion Lattice\11b lattice\160504_x11b_n2k-p900_10u-4_sss (1)_8x8_crop.tiff'; %file directory
+
     %********Threshold options************
     threshmode=1; % 1: regular threhold, 2: Dynamic thresh
     
     %if option = 1:
-    threshlevel =0.93; %this is for regular thresholding
+    threshlevel =0.695; %this is for regular thresholding
     
     %if option = 2:
-    adaptThreshArea =23; %this is for adaptivev threholding which requires an input area to thresh
+    adaptThreshArea =15; %this is for adaptivev threholding which requires an input area to thresh
     
     %********Pre-Filter Option(to smooth out image)*********
     
-    filterArea =3; %area of filter (gaussian) (use odd number)
-    filtermode='gaussian'; %shape of filer: 'disk' or 'gaussian'
-    filterRepeat=9; % no of filter cycle
+    erode=true; %for erosion 
+    erodeSize=1;
     
-    %********Post-Filter Option 1(distinguish skyrmions lumped together)********* 
-    erode=false; %for erosion of filtered binary image (essential to distinguish 2 multiple skyrmions lump together
-    erodeSize=2;
+    filterArea =15; %area of filter (gaussian) (use odd number)
+    filtermode='gaussian'; %shape of filer: 'disk' or 'gaussian'
+    filterRepeat=15; % no of filter cycle
+    %********Post Filter Option 1(smoothen binary image after thresh)*********
     
     %********Post-Filter Option 2(remove strips)*********
-    minD=5; %filter by parameter (not used)
+    minD=5;
     maxD=15;
     minPeri=2*pi*minD;
     maxPeri=2*pi*maxD;
     
-    maxMetric=0.30; %circularity metric
+    maxMetric=0.20;
     
-    minSize=0.2; %filter by area
-    maxSize=5;
+    minSize=0.2;
+    maxSize=3;
 
 
 %*************************************************************************
 %*****************************Reading image file**************************
 %*************************************************************************
 
-    %im=imread(filename);
+    im=imread(filename);
     %grayIm = rgb2gray(im);
     %grayIm = im(:,:,1); %BGR chanels, grayIm will be based on the red intensity of the original image
-    %dgrayIm= double(grayIm); %matrix with double precision
+    dgrayIm= double(im); %matrix with double precision
     
     %resize image to 0-255 intensity, why? cos i like =D
-    %dgrayIm=(dgrayIm-ones(size(dgrayIm))*min(min(dgrayIm)))*255/((max(max(dgrayIm)))-min(min(dgrayIm)));
-    %dgrayIm=dgrayIm*255/max(max(dgrayIm));
-    dgrayIm=testIm;
+    dgrayIm=(dgrayIm-ones(size(dgrayIm))*min(min(dgrayIm)))*255/((max(max(dgrayIm)))-min(min(dgrayIm)));
+    dgrayIm=dgrayIm*255/max(max(dgrayIm));
+     %dgrayIm=testIm;
 
 %*************************************************************************
 %*****************************Pre-Filter process**************************

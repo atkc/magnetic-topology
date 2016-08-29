@@ -114,9 +114,11 @@ sseFit=zeros(l,1+int8((maxR-minR)/stepR));
         msg=sprintf('skyrmion %i fitted',i);
         disp(msg);
         
-                %********cross section plots for visual relief LOL **************
+        %********cross section plots for visual relief LOL **************
+        %Returns results, a struct with elements a,b,x0,y0,sigmax,sigmay for
+        %isofit(i,1:5)
         if redraw==1
-            zi = a*exp(-((xi-x0).^2/2/sigma^2 +(yi-y0).^2/2/sigma^2)) + b;
+            zi = isofit(i,1)*exp(-((xi-isofit(i,3)).^2/2/isofit(i,5)^2 +(yi-isofit(i,4)).^2/2/isofit(i,6)^2)) + isofit(i,2);
             mask=Gfun2D(size(im),fiti(i,1),fiti(i,2),fiti(i,3),fiti(i,4),fiti(i,5));
 
             %*****boundary for ploting*****
@@ -141,7 +143,8 @@ sseFit=zeros(l,1+int8((maxR-minR)/stepR));
         end
     end
     
-    for i = 1:l
+%     for i = 1:l
+i=10;
         figure
         [hAx,hLine1,hLine2]=plotyy((minR:stepR:maxR),sigFit(i,:),(minR:stepR:maxR),stdevRes(i,:));
 
@@ -156,7 +159,7 @@ sseFit=zeros(l,1+int8((maxR-minR)/stepR));
 %         ylabel(hAx(1),'Standard Dev of fit');
 %         ylabel(hAx(2),'Chi-square');
 
-    end
+%     end
     [~,minCSI]=min(sseFit,[],2);
     [~,minSDI]=min(stdevRes,[],2);
     skxSDFit=zeros(length(minSDI),1);
@@ -166,32 +169,37 @@ sseFit=zeros(l,1+int8((maxR-minR)/stepR));
         skxCSFit(i)=sigFit(i,minCSI(i));
     end
     figure
-    plot(skxSDFit);
+    plot((1:length(skxSDFit))',skxSDFit);
+    p1=polyfit((1:length(skxSDFit))',skxSDFit,0);
+    y1 = polyval(p1,(1:length(skxSDFit))');
+    hold on
+    plot((1:length(skxSDFit))',y1);
     figure
-    plot(skxCSFit);
-%     figure
-%     imshow(dgrayIm,[0,max(max(dgrayIm))])
-%     for i = 1:l
-%         hold on
-%         plot(isofit(i,1),isofit(i,2),'r.','MarkerSize',10);
-%     end
-% %**************************************************
-% %*******consoladation********************************
-% %**************************************************    
-%     figure
-%     histfit(isofit(:,3)*2.3548*5/1024);
-%     %[mu, sigma] = normfit(fit(:,3),10);
-%     mu=mean(isofit(:,3));
-%     sigma=std(isofit(:,3));
-%     
-%     filteredIndex = ((isofit(:,3)>(mu-sigma)).*(isofit(:,3)<(mu+sigma)))>0;
-%     filteredFit=isofit(filteredIndex,3);
-%     
-%     figure
-%     histfit(filteredFit*2.3548*5/1024);
-%     FWHM=mu*2*(2*log(2))^0.5;
-%     FWHMer=sigma*2*(2*log(2))^0.5;
-%     
+    plot((1:length(skxSDFit))',skxCSFit);
+    p2=polyfit((1:length(skxCSFit))',skxCSFit,0);
+    y2 = polyval(p2,(1:length(skxCSFit))');
+    hold on
+    plot((1:length(skxCSFit))',y2);
+
+%**************************************************
+%*******consoladation********************************
+%**************************************************    
+    figure
+    histfit((skxSDFit)*100*2.3548*8/410);
+    %[mu, sigma] = normfit(fit(:,3),10);
+    mu=mean(skxSDFit);
+    sigma=std(skxSDFit);
+    
+    filteredIndex = (((skxSDFit)>(mu-sigma)).*(skxSDFit<(mu+sigma)))>0;
+    filteredFit=skxSDFit(filteredIndex);
+    
+    figure
+    histfit(filteredFit*2.3548*5/1024);
+    mu=mean(filteredFit);
+    sigma=std(filteredFit);
+    FWHM=mu*2*(2*log(2))^0.5;
+    FWHMer=sigma*2*(2*log(2))^0.5;
+    
 %     figure
 %     imshow(dgrayIm,[0,max(max(dgrayIm))])
 %     

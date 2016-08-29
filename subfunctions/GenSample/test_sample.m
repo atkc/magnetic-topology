@@ -1,5 +1,5 @@
 nAmp1=50;
-nAmp2=0;
+nAmp2=50;
 noise1 = nAmp1/255;
 noise2 = (rand(512)*nAmp2/255)-nAmp2/(2*255);
 
