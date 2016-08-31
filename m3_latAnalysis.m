@@ -75,3 +75,25 @@ f5=figure;
 histogram(anglestat(:));
 xlabel('Angle in Degrees');
 ylabel('Frequency (#)');
+
+%%*******************************************
+%%Radial Distribution Function
+%%*******************************************
+%downloaded file
+%test_RDF
+%self written RDF
+[Gr,reduce_Gr, histox]=RDF(points,dgrayIm,300);
+figure
+bar(histox,reduce_Gr(1:round(length(Gr)/1)));
+xlabel('Distance, r (px)');
+ylabel('Counts (#)');
+
+figure
+plot(histox,reduce_Gr(1:round(length(Gr)/1)));
+xlabel('Distance, r (px)');
+ylabel('Counts (#)');
+
+figure
+bar(histox,Gr(1:round(length(Gr)/1)));
+xlabel('G(r)');
+ylabel('Counts (#)');
