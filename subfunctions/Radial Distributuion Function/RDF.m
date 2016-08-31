@@ -2,12 +2,11 @@ function [ Gr ] = RDF( points,im,nSteps )
 %RDF Summary of this function goes here
 %   Detailed explanation goes here
 
-totalCount=zeros(1,nSteps-1);
 totalN=zeros(1,nSteps-1);
 [m,n]=size(im);
-L=sqrt(m^2+n^2);
+L=sqrt((m)^2+(n)^2);
 
-edges=linspace(0,L,nSteps);
+edges=linspace(0,0.3*L,nSteps);
 avgD=length(points)/(m*n);
 
 for pointA=1:(length(points)-1)%round(length(points)/2):(round(length(points)/2)+10)
@@ -19,7 +18,7 @@ for pointA=1:(length(points)-1)%round(length(points)/2):(round(length(points)/2)
         
         % Add to g(r) if r is in the right range [0 L]
 
-        if (r < L)
+        if (r < 0.3*L)
             addI=sum(edges<r);
             totalN(addI)=totalN(addI)+1;
         end
@@ -52,7 +51,9 @@ for i=1:length(totalN)
 end
 
 Gr=2*(totalN./localV)/((length(points)-1)*avgD);
+histox=edges(2:end)-mean(diff(edges));
 figure
-bar(Gr(1:round(length(Gr)/1)));
+bar(histox,Gr(1:round(length(Gr)/1)));
+axis([0 120 0 1.6]);
 end
 
