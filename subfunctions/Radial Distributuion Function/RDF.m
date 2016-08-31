@@ -55,14 +55,14 @@ errorCor=(Gr<=0);
 reduce_Gr=length(points)*(Gr-1);
 reduce_Gr=reduce_Gr+(length(points)*errorCor);
 histox=edges(2:end)-mean(diff(edges));
-figure
-bar(histox,reduce_Gr(1:round(length(Gr)/1)));
-axis([0 300 -500 500])
-figure
-plot(histox,reduce_Gr(1:round(length(Gr)/1)));
-axis([0 300 -500 500])
-figure
-bar(histox,Gr(1:round(length(Gr)/1)));
+% figure
+% bar(histox,reduce_Gr(1:round(length(Gr)/1)));
+% axis([0 300 -500 500])
+% figure
+% plot(histox,reduce_Gr(1:round(length(Gr)/1)));
+% axis([0 300 -500 500])
+% figure
+% bar(histox,Gr(1:round(length(Gr)/1)));
 
 %axis([0 120 0 1.6]);
 end
