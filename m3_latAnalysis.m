@@ -82,7 +82,8 @@ ylabel('Frequency (#)');
 %downloaded file
 %test_RDF
 %self written RDF
-[Gr,reduce_Gr, histox]=RDF(points,dgrayIm,300);
+points=isofit(:,1:2);
+[Gr,reduce_Gr, histox]=RDF(points,dgrayIm,1000);
 figure
 bar(histox,reduce_Gr(1:round(length(Gr)/1)));
 xlabel('Distance, r (px)');
@@ -95,5 +96,5 @@ ylabel('Counts (#)');
 
 figure
 bar(histox,Gr(1:round(length(Gr)/1)));
-xlabel('G(r)');
-ylabel('Counts (#)');
+xlabel('Distance, r (px)');
+ylabel('G(r)');
