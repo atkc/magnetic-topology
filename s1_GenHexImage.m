@@ -1,4 +1,4 @@
-function varargout = m_sup1_GenHexImage( Psize, dist )
+function varargout = s1_GenHexImage( Psize, dist )
 % 
 %     m=Psize(1);
 %     n=Psize(2);
