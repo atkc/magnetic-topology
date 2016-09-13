@@ -25,17 +25,17 @@ rN=rN*a/a0;
 
 dr=mean(diff(xdata));
 
-%rN=rN(rN<xdata(end));
-%coorN=coorN(rN<xdata(end));
+% rN=rN(rN<xdata(end));
+% coorN=coorN(rN<xdata(end));
 
 fy=zeros(size(xdata));
 
 for i=1:length(coorN)
     fy=fy+(coorN(i)/(stdev*(2*pi*rN(i)/a)^0.5))*exp(-((xdata-rN(i)).^2)/((2*rN(i)*stdev^2)/a));
 end
-sum(coorN)
+sum(coorN);
 %fy=fy*N*dr;
-fy=(fy*N*dr./(1+exp((xdata-Rmax)/Wmax)))/2;
+fy=(fy*N*dr./(1+exp((xdata-Rmax)/Wmax)))/2;%was 2 please think about it
 
 end
 

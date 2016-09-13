@@ -1,7 +1,7 @@
 
 
-len=100;
-midpt=256/2;
+len=250;
+midpt=1024/2;
 dgrayIm=zeros(len);
 xlb=(points(:,1)>(midpt-len/2));
 xhb=(points(:,1)<(midpt+len/2));

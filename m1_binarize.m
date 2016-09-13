@@ -15,26 +15,26 @@
 %**************************************************************************
 
 %%address to the image of interest
-filename='C:\Users\Anthony\Dropbox\Shared_MFM\DataAnalysis\Skyrmion Lattice\11d lattice\image 1\160517_x11d_n3k-p2k_sss.png'; %file directory
+filename='C:\Users\Anthony\Dropbox\Shared_MFM\DataAnalysis\Skyrmion Lattice\glass analysis\11d\160831_x11d_n3k-p2k_sss\x11d_n3k-p2k_sss.tiff'; %file directory
 
     %********Threshold options************
     threshmode=2; % 1: regular threhold, 2: Dynamic thresh
     
     %if option = 1:
-    threshlevel =0.5; %this is for regular thresholding
+    threshlevel =0.579; %this is for regular thresholding
     
     %if option = 2:
-    adaptThreshArea =23; %this is for adaptivev threholding which requires an input area to thresh
+    adaptThreshArea =11; %this is for adaptivev threholding which requires an input area to thresh
     
     %********Pre-Filter Option(to smooth out image)*********
     
-    filterArea =3; %area of filter (gaussian) (use odd number)
+    filterArea =5; %area of filter (gaussian) (use odd number)
     filtermode='gaussian'; %shape of filer: 'disk' or 'gaussian'
-    filterRepeat=13; % no of filter cycle
+    filterRepeat=12; % no of filter cycle
     
     %********Post-Filter Option 1(distinguish skyrmions lumped together)********* 
     erode=true; %for erosion of filtered binary image (essential to distinguish 2 multiple skyrmions lump together
-    erodeSize=2;
+    erodeSize=1;
     
     %********Post-Filter Option 2(remove strips)*********
     minD=5; %filter by parameter (not used)
@@ -44,7 +44,7 @@ filename='C:\Users\Anthony\Dropbox\Shared_MFM\DataAnalysis\Skyrmion Lattice\11d 
     
     maxMetric=0.30; %circularity metric
     
-    minSize=0.7; %filter by area
+    minSize=0.55; %filter by area
     maxSize=5;
 
 

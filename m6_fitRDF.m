@@ -1,11 +1,11 @@
 
 
-datay=p12_pbc;
-sum(clGr);
-x0=[15,1,100,100,47];
-lb=[13,1,1,1,45];
-ub=[17,10,300,300,60];
-x=lsqcurvefit(@RDFfun,x0,histox,datay,lb,ub,'interior-point')
+datay=clGr2_pbc;
+
+x0=[35.0983	8.4618	136.8309	10.4773	49];
+lb=[30,0.5,1,1,49];
+ub=[40,20,1000,1000,49];
+x=lsqcurvefit(@RDFfun,x0,histox,datay,lb,ub)
 
 space=mean(diff(histox));
 fitx = (histox(1):space:histox(end));
@@ -24,3 +24,4 @@ a0=x(1);
 sigm=x(2);
 
 cor_l=(sigm^2/a0)*((sqrt(0.5+sqrt(0.25+4*(pi^2)*(sigm/a0)^4)))-1)^-1;
+fract=cor_l/a0;
