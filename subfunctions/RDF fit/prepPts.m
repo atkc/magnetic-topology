@@ -1,29 +1,46 @@
+%points=isofit(:,1:2);
 
+len=270;
+imagelen=410;
 
-len=250;
-midpt=1024/2;
 dgrayIm=zeros(len);
-xlb=(points(:,1)>(midpt-len/2));
-xhb=(points(:,1)<(midpt+len/2));
-ylb=(points(:,2)>(midpt-len/2));
-yhb=(points(:,2)<(midpt+len/2));
+if imagelen>2*len
+    xmidpt=[imagelen/2+len/2,imagelen/2+len/2,imagelen/2-len/2,imagelen/2-len/2];
+    ymidpt=[imagelen/2+len/2,imagelen/2-len/2,imagelen/2+len/2,imagelen/2-len/2];
+else
+    xmidpt=[len,len,imagelen-len,imagelen-len];
+    ymidpt=[len,imagelen-len,len,imagelen-len];
+end
+point1=[];
+point2=[];
+point3=[];
+point4=[];
+numImage=4;
+Npoint=zeros(1,numImage);
+for i=1:4
+    midptx=xmidpt(i);
+    midpty=ymidpt(i);
+    xlb=(points(:,1)>(midptx-len/2));
+    xhb=(points(:,1)<(midptx+len/2));
+    ylb=(points(:,2)>(midpty-len/2));
+    yhb=(points(:,2)<(midpty+len/2));
 
-b=logical(xlb.*ylb.*xhb.*yhb);
-sum(b)
-point_tempx=points(b',1)-(midpt-len/2);
-point_tempy=points(b',2)-(midpt-len/2);
-point1=[point_tempx,point_tempy];
+    b=logical(xlb.*ylb.*xhb.*yhb);
+    Npoint(i)=sum(b);
+    point_tempx=points(b',1)-(midptx-len/2);
+    point_tempy=points(b',2)-(midpty-len/2);
+    if isempty(point1)
+        point1=[point_tempx,point_tempy];
+    elseif isempty(point2)
+        point2=[point_tempx,point_tempy];
+    elseif isempty(point3)
+        point3=[point_tempx,point_tempy];
+    else 
+        point4=[point_tempx,point_tempy];
+    end
+                            
 
-
-% coorN=(2/738)*p12((2*p12/738)>4);
-% rN=histox((2*p12/738)>4);
-% for i=1:length(rN)
-%     if coorN(i)<=6
-%         coorN(i)=6;
-%     elseif coorN(i)<=12
-%         coorN(i)=12;
-%     else
-%         coorN(i)=18;
-%     end
-%     
-% end
+    clear point_tempx point_tempy b xlb xhb ylb yhb
+end
+Npoint
+clear i imagelen len xmidpt ymidpt midptx midpty 

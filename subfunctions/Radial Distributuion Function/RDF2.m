@@ -46,11 +46,12 @@ for i=1:length(totalN_pbc)
    localV(i)=2*pi*edges(i+1)*dx;
 end
 sum(totalN)
-avg_localp_pbc=(totalN_pbc./localV)/length(pointsRDF);
-avg_localp=(totalN./localV)/length(pointsRDF);
+avg_localp_pbc=(totalN_pbc./localV);
+avg_localp=(totalN./localV);
 
 clGr_pbc= 2*pi.*edges(1+1:end).*avg_localp_pbc;% g(R) as depeicted in can li's paper
 clGr= 2*pi.*edges(1+1:end).*avg_localp;
+
 Gr=2*(totalN_pbc./localV)/((length(pointsRDF)-1)*avgD);% standard def for g(R)
 
 histox=edges(2:end)-mean(diff(edges));%x-axis
@@ -105,6 +106,8 @@ avg_localp2=(totalN./localV);
 clGr2_pbc= 2*pi.*edges(1+1:end).*avg_localp2_pbc;% g(R) as depeicted in can li's paper
 clGr2= 2*pi.*edges(1+1:end).*avg_localp2;
 
+clGr2_pbc(1)=0;
+clGr2(1)=0;
 end
 
 

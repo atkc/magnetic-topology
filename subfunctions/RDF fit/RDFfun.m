@@ -31,11 +31,11 @@ dr=mean(diff(xdata));
 fy=zeros(size(xdata));
 
 for i=1:length(coorN)
-    fy=fy+(coorN(i)/(stdev*(2*pi*rN(i)/a)^0.5))*exp(-((xdata-rN(i)).^2)/((2*rN(i)*stdev^2)/a));
+    fy=fy+(coorN(i)/(stdev*((2*pi*rN(i)/a)^0.5)))*exp(-((xdata-rN(i)).^2)/((2*rN(i)*stdev^2)/a));
 end
 sum(coorN);
 %fy=fy*N*dr;
-fy=(fy*N*dr./(1+exp((xdata-Rmax)/Wmax)))/2;%was 2 please think about it
+fy=(fy*N./(1+exp((xdata-Rmax)/Wmax)))/1;%was 2 please think about it
 
 end
 

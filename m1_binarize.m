@@ -14,38 +14,37 @@
 %*****************************Inputs and parameters************************
 %**************************************************************************
 
-%%address to the image of interest
-filename='C:\Users\Anthony\Dropbox\Shared_MFM\DataAnalysis\Skyrmion Lattice\glass analysis\11d\160831_x11d_n3k-p2k_sss\x11d_n3k-p2k_sss.tiff'; %file directory
+filename='C:\Users\Anthony\Dropbox\Shared_MFM\DataAnalysis\Skyrmion Lattice\11c lattice\160510_010_ 10.0x10.0 _001_3x3_recrop.tiff'; %file directory
 
     %********Threshold options************
     threshmode=2; % 1: regular threhold, 2: Dynamic thresh
     
     %if option = 1:
-    threshlevel =0.579; %this is for regular thresholding
+    threshlevel =0; %this is for regular thresholding
     
     %if option = 2:
-    adaptThreshArea =11; %this is for adaptivev threholding which requires an input area to thresh
+    adaptThreshArea =5; %this is for adaptivev threholding which requires an input area to thresh
     
     %********Pre-Filter Option(to smooth out image)*********
     
-    filterArea =5; %area of filter (gaussian) (use odd number)
-    filtermode='gaussian'; %shape of filer: 'disk' or 'gaussian'
-    filterRepeat=12; % no of filter cycle
-    
-    %********Post-Filter Option 1(distinguish skyrmions lumped together)********* 
-    erode=true; %for erosion of filtered binary image (essential to distinguish 2 multiple skyrmions lump together
+    erode=false; %for erosion 
     erodeSize=1;
     
+    filterArea =9; %area of filter (gaussian) (use odd number)
+    filtermode='gaussian'; %shape of filer: 'disk' or 'gaussian'
+    filterRepeat=5; % no of filter cycle
+    %********Post Filter Option 1(smoothen binary image after thresh)*********
+    
     %********Post-Filter Option 2(remove strips)*********
-    minD=5; %filter by parameter (not used)
+    minD=5;
     maxD=15;
     minPeri=2*pi*minD;
     maxPeri=2*pi*maxD;
     
-    maxMetric=0.30; %circularity metric
+    maxMetric=0.30;
     
-    minSize=0.55; %filter by area
-    maxSize=5;
+    minSize=0.3;
+    maxSize=2.3;
 
 
 %*************************************************************************
