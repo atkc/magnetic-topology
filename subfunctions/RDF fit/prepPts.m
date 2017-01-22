@@ -1,23 +1,29 @@
 %points=isofit(:,1:2);
 
-len=270;
-imagelen=410;
+len=120;
+imagelen=512;
 
 dgrayIm=zeros(len);
+
+numImage=4;
 if imagelen>2*len
     xmidpt=[imagelen/2+len/2,imagelen/2+len/2,imagelen/2-len/2,imagelen/2-len/2];
     ymidpt=[imagelen/2+len/2,imagelen/2-len/2,imagelen/2+len/2,imagelen/2-len/2];
+elseif imagelen>len
+    xmidpt=[len/2,len/2,imagelen-len/2,imagelen-len/2];
+    ymidpt=[len/2,imagelen-len/2,len/2,imagelen-len/2];
 else
-    xmidpt=[len,len,imagelen-len,imagelen-len];
-    ymidpt=[len,imagelen-len,len,imagelen-len];
+    xmidpt=[imagelen/2,0,0,0];
+    ymidpt=[imagelen/2,0,0,0];
+    numImage=1;
 end
 point1=[];
 point2=[];
 point3=[];
 point4=[];
-numImage=4;
+
 Npoint=zeros(1,numImage);
-for i=1:4
+for i=1:numImage
     midptx=xmidpt(i);
     midpty=ymidpt(i);
     xlb=(points(:,1)>(midptx-len/2));

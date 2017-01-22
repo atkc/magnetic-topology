@@ -14,25 +14,25 @@
 %*****************************Inputs and parameters************************
 %**************************************************************************
 
-filename='C:\Users\Anthony\Dropbox\Shared_MFM\DataAnalysis\Skyrmion Lattice\11c lattice\160510_010_ 10.0x10.0 _001_3x3_recrop.tiff'; %file directory
+filename='C:\Users\Anthony\Desktop\LTEM-11b-tilt\11 b+20deg.tiff'; %file directory
 
     %********Threshold options************
     threshmode=2; % 1: regular threhold, 2: Dynamic thresh
     
     %if option = 1:
-    threshlevel =0; %this is for regular thresholding
+    threshlevel =0.5; %this is for regular thresholding
     
     %if option = 2:
-    adaptThreshArea =5; %this is for adaptivev threholding which requires an input area to thresh
+    adaptThreshArea =100; %this is for adaptivev threholding which requires an input area to thresh
     
     %********Pre-Filter Option(to smooth out image)*********
     
-    erode=false; %for erosion 
-    erodeSize=1;
+    erode=true; %for erosion 
+    erodeSize=5;
     
-    filterArea =9; %area of filter (gaussian) (use odd number)
+    filterArea =15; %area of filter (gaussian) (use odd number)
     filtermode='gaussian'; %shape of filer: 'disk' or 'gaussian'
-    filterRepeat=5; % no of filter cycle
+    filterRepeat=30; % no of filter cycle
     %********Post Filter Option 1(smoothen binary image after thresh)*********
     
     %********Post-Filter Option 2(remove strips)*********
@@ -41,10 +41,10 @@ filename='C:\Users\Anthony\Dropbox\Shared_MFM\DataAnalysis\Skyrmion Lattice\11c 
     minPeri=2*pi*minD;
     maxPeri=2*pi*maxD;
     
-    maxMetric=0.30;
+    maxMetric=0;
     
-    minSize=0.3;
-    maxSize=2.3;
+    minSize=2;
+    maxSize=30;
 
 
 %*************************************************************************
@@ -208,4 +208,4 @@ gg=figure;
     end
 figure;
     imshow(filIm,[0,max(max(filIm))]);
-clearvars -except threshlevel dgrayIm centroids binIm isofit xyfit filIm
+clearvars -except threshlevel dgrayIm centroids binIm isofit xyfit filIm fbinIm

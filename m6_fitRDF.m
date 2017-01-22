@@ -1,6 +1,6 @@
 clGr2_pbcT=[];
 clGr_T=[];
-numStep=100;
+numStep=70;
 for numi=1:numImage
     if numi==1
         [clGr,~,clGr2,clGr2_pbc,~,histox]=RDF2(point1,dgrayIm,numStep);
@@ -31,9 +31,9 @@ bar(histox,datay);
 
 Npoint_avg=sum(Npoint);
 
-x0=[25	1	1	1	Npoint_avg];
-lb=[25    1  1   1  Npoint_avg];
-ub=[40    15   1000    1000  Npoint_avg];
+x0=[10	1	1	1	Npoint_avg];
+lb=[1    1  1   1  Npoint_avg];
+ub=[24   20   1000    1000  Npoint_avg];
 x=lsqcurvefit(@RDFfun,x0,histox,datay,lb,ub);
 
 space=mean(diff(histox));
