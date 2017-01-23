@@ -1,39 +1,42 @@
-clGr2_pbcT=[];
-clGr_T=[];
-numStep=70;
+Gr_pbc_T=[];
+Gr_T=[];
+numStep=100;
+maxi=zeros(1,4);
 for numi=1:numImage
     if numi==1
-        [clGr,~,clGr2,clGr2_pbc,~,histox]=RDF2(point1,dgrayIm,numStep);
+        [Gr,Gr_pbc,stdGr,stdGr_pbc,histox]=RDF2(point1,dgrayIm,numStep);
+        maxi(1)=max(histox);
     elseif numi==2
-        [clGr,~,clGr2,clGr2_pbc,~,histox]=RDF2(point2,dgrayIm,numStep);
+        [Gr,Gr_pbc,stdGr,stdGr_pbc,histox]=RDF2(point2,dgrayIm,numStep);
+        maxi(2)=max(histox);
     elseif numi==3
-        [clGr,~,clGr2,clGr2_pbc,~,histox]=RDF2(point3,dgrayIm,numStep);
+        [Gr,Gr_pbc,stdGr,stdGr_pbc,histox]=RDF2(point3,dgrayIm,numStep);
+        maxi(3)=max(histox);
     else
-        [clGr,~,clGr2,clGr2_pbc,~,histox]=RDF2(point4,dgrayIm,numStep);
+        [Gr,Gr_pbc,stdGr,stdGr_pbc,histox]=RDF2(point4,dgrayIm,numStep);
+        maxi(4)=max(histox);
     end
-    if isempty (clGr2_pbcT)
-        clGr2_pbcT=clGr2_pbc;
-        clGr_T=clGr;
+    if isempty (Gr_pbc_T)
+        Gr_pbc_T=Gr_pbc;
+        Gr_T=Gr;
     else
-        clGr2_pbcT=clGr2_pbcT+clGr2_pbc;
-        clGr_T=clGr_T+clGr;
+        Gr_pbc_T=Gr_pbc_T+Gr_pbc;
+        Gr_T=Gr_T+Gr;
     end
 %     figure 
 %     bar(histox,clGr2_pbc);
 end
 
-clGr2_pbcT_avg=clGr2_pbcT/numImage;
-clGr_T_avg=clGr_T/numImage;
 
-datay=clGr2_pbcT;
+datay=Gr_T;
 figure
 bar(histox,datay);
 
 Npoint_avg=sum(Npoint);
 
-x0=[10	1	1	1	Npoint_avg];
-lb=[1    1  1   1  Npoint_avg];
-ub=[24   20   1000    1000  Npoint_avg];
+x0=[13	2.1	50	34	Npoint_avg];
+lb=[8  0  1   0 Npoint_avg];
+ub=[17   16  100   100  Npoint_avg];
 x=lsqcurvefit(@RDFfun,x0,histox,datay,lb,ub);
 
 space=mean(diff(histox));
@@ -55,3 +58,4 @@ sigm=x(2);
 cor_l=(sigm^2/a0)*((sqrt(0.5+sqrt(0.25+4*(pi^2)*(sigm/a0)^4)))-1)^-1;
 result=[x,cor_l]
 fract=cor_l/a0
+

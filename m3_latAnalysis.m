@@ -1,10 +1,10 @@
 
 fileInput=false;
 if fileInput
-    
-    filename='C:\Users\Anthony\Documents\MATLAB\fit_skyrmion\constructed lattice\white.png'; %file directory
-    im=imread(filename);
-    [py, px] = find(im == 0);
+    clear
+    filename='C:\Users\Anthony\Documents\MATLAB\magnetic_topology\reconstruct_lattice_40.png'; %file directory
+    dgrayIm=imread(filename);
+    [py, px] = find(dgrayIm == 0);
     isofit(:,1)=px;
     isofit(:,2)=py;
 end
@@ -93,12 +93,3 @@ bar(histox,clGr2_pbc);
 xlabel('Distance, r (px)');
 ylabel('Counts (#)');
 
-figure
-plot(histox,reduce_Gr(1:round(length(Gr)/1)));
-xlabel('Distance, r (px)');
-ylabel('Counts (#)');
-
-figure
-bar(histox,Gr(1:round(length(Gr)/1)));
-xlabel('Distance, r (px)');
-ylabel('G(r)');

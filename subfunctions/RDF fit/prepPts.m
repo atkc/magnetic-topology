@@ -1,6 +1,6 @@
 %points=isofit(:,1:2);
 
-len=120;
+len=100;
 imagelen=512;
 
 dgrayIm=zeros(len);

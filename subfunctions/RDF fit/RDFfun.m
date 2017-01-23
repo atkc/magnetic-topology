@@ -14,6 +14,8 @@ rN=[19.5697   34.0657   39.8641   52.9106   59.4338   68.8562   71.7554 ...
     203.6694  208.7430  210.1926  211.6422  215.9910  219.6151  222.5143 ...
     224.6887  226.8631  230.4871  235.5607  242.0839];
 
+
+
 a=x_0(1);
 stdev=x_0(2);
 Rmax=x_0(3);
@@ -22,20 +24,26 @@ N=x_0(5);
 
 a0=19.5697;
 rN=rN*a/a0;
-
+%rN=rN(rN<2*max(xdata));
+%coorN=coorN(rN<2*max(xdata));
 dr=mean(diff(xdata));
 
-% rN=rN(rN<xdata(end));
-% coorN=coorN(rN<xdata(end));
 
 fy=zeros(size(xdata));
-
+gy=zeros(size(xdata));
 for i=1:length(coorN)
+    gy=gy+(coorN(i)/(stdev*(2*pi*rN(i)/a)^0.5))*exp(-(xdata-rN(i)).^2/(rN(i)*2*stdev^2/a));
     fy=fy+(coorN(i)/(stdev*((2*pi*rN(i)/a)^0.5)))*exp(-((xdata-rN(i)).^2)/((2*rN(i)*stdev^2)/a));
 end
 sum(coorN);
-%fy=fy*N*dr;
-fy=(fy*N./(1+exp((xdata-Rmax)/Wmax)))/1;%was 2 please think about it
+display('mean is');
+display(mean(diff(xdata)));
+
+%%Function reproduced Inosov's fit
+%fy=(1/2*fy*N*dr./(1+exp((xdata-Rmax)/Wmax)));%has /2
+
+%%Function reproduced CL's fit
+fy=(fy*N*dr./(1+exp((xdata-Rmax)/Wmax)));%CL's definition
 
 end
 
