@@ -34,9 +34,9 @@ bar(histox,datay);
 
 Npoint_avg=sum(Npoint);
 
-x0=[13	2.1	50	34	Npoint_avg];
-lb=[8  0  1   0 Npoint_avg];
-ub=[17   16  100   100  Npoint_avg];
+x0=[20   20   100   100	Npoint_avg];
+lb=[10  0  1   0 Npoint_avg];
+ub=[70  50 1000   100  Npoint_avg];
 x=lsqcurvefit(@RDFfun,x0,histox,datay,lb,ub);
 
 space=mean(diff(histox));
