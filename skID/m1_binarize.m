@@ -1,5 +1,4 @@
 %Description:
-%sakdnklaskldn
 
 %This program produces a binarized image of a MFM image. There are 2 ways
 %of threshold process - a global threshold value or a dynamic one. All input
@@ -14,36 +13,36 @@
 %*****************************Inputs and parameters************************
 %**************************************************************************
 
-filename='C:\Users\Anthony\Desktop\LTEM-11b-tilt\11 b+20deg.tiff'; %file directory
+filename='C:\Users\Anthony\Documents\Matlab\magnetic_topology\skImReg\170308_fp226_1b_2_d2_n4k-p1k_p1.tiff';%'C:\Users\Anthony\Desktop\LTEM-11b-tilt\11 b+20deg.tiff'; %file directory
 
     %********Threshold options************
     threshmode=2; % 1: regular threhold, 2: Dynamic thresh
     
     %if option = 1:
-    threshlevel =0.5; %this is for regular thresholding
+    threshlevel =0; %this is for regular thresholding
     
     %if option = 2:
-    adaptThreshArea =100; %this is for adaptivev threholding which requires an input area to thresh
+    adaptThreshArea =7; %this is for adaptivev threholding which requires an input area to thresh
     
     %********Pre-Filter Option(to smooth out image)*********
     
-    erode=true; %for erosion 
-    erodeSize=5;
+    erode=false; %for erosion 
+    erodeSize=1;
     
-    filterArea =15; %area of filter (gaussian) (use odd number)
+    filterArea =10; %area of filter (gaussian) (use odd number)
     filtermode='gaussian'; %shape of filer: 'disk' or 'gaussian'
-    filterRepeat=30; % no of filter cycle
+    filterRepeat=0; % no of filter cycle
     %********Post Filter Option 1(smoothen binary image after thresh)*********
     
     %********Post-Filter Option 2(remove strips)*********
-    minD=5;
-    maxD=15;
+    minD=1;
+    maxD=30;
     minPeri=2*pi*minD;
     maxPeri=2*pi*maxD;
     
     maxMetric=0;
     
-    minSize=2;
+    minSize=0.4;
     maxSize=30;
 
 
@@ -59,7 +58,7 @@ filename='C:\Users\Anthony\Desktop\LTEM-11b-tilt\11 b+20deg.tiff'; %file directo
     %resize image to 0-255 intensity, why? cos i like =D
     %dgrayIm=(dgrayIm-ones(size(dgrayIm))*min(min(dgrayIm)))*255/((max(max(dgrayIm)))-min(min(dgrayIm)));
     dgrayIm=dgrayIm*255/max(max(dgrayIm));
-
+    
 %*************************************************************************
 %*****************************Pre-Filter process**************************
 %*************************************************************************
