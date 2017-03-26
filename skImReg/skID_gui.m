@@ -22,7 +22,7 @@ function varargout = skID_gui(varargin)
 
 % Edit the above text to modify the response to help skID_gui
 
-% Last Modified by GUIDE v2.5 24-Mar-2017 16:46:29
+% Last Modified by GUIDE v2.5 24-Mar-2017 19:06:18
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -78,7 +78,23 @@ function executeBtn_Callback(hObject, eventdata, handles)
 % hObject    handle to executeBtn (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-
+th = get(get(handles.threshOpt,'SelectedObject'), 'Tag')
+threshOpt=[];
+switch th
+    case 'threshOpt1'
+        threshOpt=1;
+    case 'threshOpt2'
+        threshOpt=2;
+end
+threshVal=get(handles.threshVal,value);
+adaptArea=get(handles.adaptArea,value);
+erodeSize=get(handles.erodeSize,value);
+filRpt=get(handles.filRpt,value);
+filSize=get(handles.filSize,value);
+% threshVal
+% adaptArea
+% erodeSize
+m1_binarize(im,threshOpt,threshVal,adaptArea,erodeSize,filRpt,filSize);
 
 % --- Executes on button press in doneBtn.
 function doneBtn_Callback(hObject, eventdata, handles)
@@ -87,6 +103,8 @@ function doneBtn_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 % Hint: get(hObject,'Value') returns toggle state of doneBtn
+
+
 
 
 
@@ -136,18 +154,95 @@ end
 
 
 
-function edit3_Callback(hObject, eventdata, handles)
+function erodeSize_Callback(hObject, eventdata, handles)
 % hObject    handle to erodeSize (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
 % Hints: get(hObject,'String') returns contents of erodeSize as text
 %        str2double(get(hObject,'String')) returns contents of erodeSize as a double
+%disp('1');
+str=hObject.String;
+if isempty(str2num(str))
+    set(hObject,'string','1');
+    warndlg('Input must be numerical');
+end
 
 
 % --- Executes during object creation, after setting all properties.
 function erodeSize_CreateFcn(hObject, eventdata, handles)
 % hObject    handle to erodeSize (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+% --- Executes on button press in threshOpt1.
+function threshOpt1_Callback(hObject, eventdata, handles)
+% hObject    handle to threshOpt1 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of threshOpt1
+
+
+% --- Executes on button press in threshOpt2.
+function threshOpt2_Callback(hObject, eventdata, handles)
+% hObject    handle to threshOpt2 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of threshOpt2
+
+
+% --- Executes on button press in loadBtn.
+function loadBtn_Callback(hObject, eventdata, handles)
+% hObject    handle to loadBtn (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+
+function filSize_Callback(hObject, eventdata, handles)
+% hObject    handle to filSize (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of filSize as text
+%        str2double(get(hObject,'String')) returns contents of filSize as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function filSize_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to filSize (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function filRpt_Callback(hObject, eventdata, handles)
+% hObject    handle to filRpt (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of filRpt as text
+%        str2double(get(hObject,'String')) returns contents of filRpt as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function filRpt_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to filRpt (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    empty - handles not created until after all CreateFcns called
 
