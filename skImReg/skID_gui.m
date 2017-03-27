@@ -407,6 +407,16 @@ function fitBtn_Callback(hObject, eventdata, handles)
 % hObject    handle to fitBtn (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+global dgrayIm centroids
+if ~isempty(centroids)
+    [xyfit,isofit]=m2_fit2d(centroids,dgrayIm);
+    centroids=isofit;
+    cla(handles.figBox,'reset');
+    axes(handles.figBox);
+    imshow(dgrayIm,[0,255]);
+    hold all;
+    plot_centers(handles,centroids);
+end
 
 
 % --- Executes on button press in outputBtn.
