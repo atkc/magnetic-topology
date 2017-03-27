@@ -22,9 +22,10 @@ function varargout = skID_gui(varargin)
 
 % Edit the above text to modify the response to help skID_gui
 
-% Last Modified by GUIDE v2.5 24-Mar-2017 19:06:18
+% Last Modified by GUIDE v2.5 27-Mar-2017 17:37:05
 
 % Begin initialization code - DO NOT EDIT
+%clear global;
 gui_Singleton = 1;
 gui_State = struct('gui_Name',       mfilename, ...
                    'gui_Singleton',  gui_Singleton, ...
@@ -40,6 +41,7 @@ if nargout
     [varargout{1:nargout}] = gui_mainfcn(gui_State, varargin{:});
 else
     gui_mainfcn(gui_State, varargin{:});
+    
 end
 % End initialization code - DO NOT EDIT
 
@@ -78,7 +80,8 @@ function executeBtn_Callback(hObject, eventdata, handles)
 % hObject    handle to executeBtn (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-th = get(get(handles.threshOpt,'SelectedObject'), 'Tag')
+global rawIm dgrayIm filIm binIm centroids;
+th = get(get(handles.threshOpt,'SelectedObject'), 'Tag');
 threshOpt=[];
 switch th
     case 'threshOpt1'
@@ -86,15 +89,20 @@ switch th
     case 'threshOpt2'
         threshOpt=2;
 end
-threshVal=get(handles.threshVal,value);
-adaptArea=get(handles.adaptArea,value);
-erodeSize=get(handles.erodeSize,value);
-filRpt=get(handles.filRpt,value);
-filSize=get(handles.filSize,value);
+threshVal=str2double(get(handles.threshVal,'String'));
+adaptArea=str2double(get(handles.adaptArea,'String'));
+erodeSize=str2double(get(handles.erodeSize,'String'));
+filRpt=str2double(get(handles.filRpt,'String'));
+filSize=str2double(get(handles.filSize,'String'));
+minSize=str2double(get(handles.minSize,'String'));
+maxSize=str2double(get(handles.maxSize,'String'));
 % threshVal
 % adaptArea
 % erodeSize
-m1_binarize(im,threshOpt,threshVal,adaptArea,erodeSize,filRpt,filSize);
+[dgrayIm, ~, ~, centroids]=m1_binarize(rawIm,threshOpt,threshVal,adaptArea,erodeSize,filRpt,filSize,minSize,maxSize);
+
+plot_centers(handles,centroids);
+set(handles.figBox, 'ButtonDownFcn', @figBox_ButtonDownFcn); 
 
 % --- Executes on button press in doneBtn.
 function doneBtn_Callback(hObject, eventdata, handles)
@@ -205,7 +213,13 @@ function loadBtn_Callback(hObject, eventdata, handles)
 % hObject    handle to loadBtn (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-
+global rawIm;
+%clearvars rawIm filIm binIm centroids;
+[filename,filepath]=uigetfile({'*.*','All Files'},...
+  'Select Data File 1')
+rawIm=imread([filepath filename]);
+axes(handles.figBox);
+imshow(rawIm);
 
 
 function filSize_Callback(hObject, eventdata, handles)
@@ -251,3 +265,137 @@ function filRpt_CreateFcn(hObject, eventdata, handles)
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
+
+
+
+function minSize_Callback(hObject, eventdata, handles)
+% hObject    handle to minSize (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of minSize as text
+%        str2double(get(hObject,'String')) returns contents of minSize as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function minSize_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to minSize (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function maxSize_Callback(hObject, eventdata, handles)
+% hObject    handle to maxSize (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of maxSize as text
+%        str2double(get(hObject,'String')) returns contents of maxSize as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function maxSize_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to maxSize (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+% --- Executes on mouse press over axes background.
+function figBox_ButtonDownFcn(hObject, eventdata, handles)
+% global rawIm filIm binIm centroids;
+% F=get(handles.figBox,'currentpoint')
+% x=F(1);
+% y=F(3);
+% size(centroids)
+% 
+% if strcmp( get(handles.figure1,'selectionType') , 'alt')
+%     if ~isempty(centroids)
+%         centroids=removePT(centroids,x,y);
+%         disp('1 point removed');
+%     end
+% elseif strcmp( get(handles.figure1,'selectionType') , 'normal')
+%     temp=zeros(size(centroids)+[1 0])
+%     temp=[centroids;[x y 0 0 0]]
+%     centroids=temp;
+% end
+% 
+% centroids
+% hObject    handle to figBox (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+function centroidsR = removePT(centroids,x,y)
+distxy=abs((centroids(:,1)-x).^2+(centroids(:,2)-y).^2);
+[~,i]=min(distxy);
+%disp('1 point removed');
+centroids(i,:)=[];
+centroidsR=centroids;
+
+
+
+% --- Executes on mouse motion over figure - except title and menu.
+function figure1_WindowButtonMotionFcn(hObject, eventdata, handles)
+% hObject    handle to figure1 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+F = get(handles.figBox,'currentpoint');
+x=F(1);
+y=F(3);
+
+xlim=get(handles.figBox,'xLim');
+ylim=get(handles.figBox,'yLim');
+
+if (x>xlim(1))&&(x<xlim(2))&&(y>ylim(1))&&(y<ylim(2));
+    
+    set(handles.xpos,'String',x);
+    set(handles.ypos,'String',y);
+end
+
+
+function figure1_WindowButtonDownFcn(hObject, eventdata, handles)
+% hObject    handle to figure1 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+% hObject    handle to figure1 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+global dgrayIm rawIm filIm binIm centroids;
+F = get(handles.figBox,'currentpoint');
+x=F(1);
+y=F(3);
+
+xlim=get(handles.figBox,'xLim');
+ylim=get(handles.figBox,'yLim');
+
+if (x>xlim(1))&&(x<xlim(2))&&(y>ylim(1))&&(y<ylim(2));
+    
+    size(centroids)
+
+    if strcmp( get(handles.figure1,'selectionType') , 'alt')
+        if ~isempty(centroids)
+            centroids=removePT(centroids,x,y);
+            disp('1 point removed');
+        end
+    elseif strcmp( get(handles.figure1,'selectionType') , 'normal')
+        centroids=[centroids;[x y 0 0 0]];
+    end
+    cla(handles.figBox,'reset');
+    axes(handles.figBox);
+    imshow(dgrayIm);
+    hold all;
+    plot_centers(handles,centroids);
+end
+
