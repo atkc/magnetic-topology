@@ -190,11 +190,11 @@ function [dgrayIm, filIm, binIm, centroids]= m1_binarize (im,threshmode,threshle
 %*************************************************************************
 %*****************************Plot****************************************
 %*************************************************************************
-f=figure;
-subplot(2,2,1), imshow(dgrayIm,[0,max(max(dgrayIm))])
-subplot(2,2,2), imshow(filIm,[0,max(max(filIm))])
-subplot(2,2,3), imshow(binIm,[0,max(max(binIm))])
-subplot(2,2,4), imshow(fbinIm,[0,max(max(fbinIm))])
+% f=figure;
+% subplot(2,2,1), imshow(dgrayIm,[0,max(max(dgrayIm))])
+% subplot(2,2,2), imshow(filIm,[0,max(max(filIm))])
+% subplot(2,2,3), imshow(binIm,[0,max(max(binIm))])
+% subplot(2,2,4), imshow(fbinIm,[0,max(max(fbinIm))])
 
 % gh=figure;
 %     imshow(dgrayIm,[0,max(max(dgrayIm))])
@@ -205,14 +205,14 @@ subplot(2,2,4), imshow(fbinIm,[0,max(max(fbinIm))])
 % figure
 % imshow(filIm,[0,max(max(filIm))]);
     
-gg=figure;
-    imshow(filIm,[0,max(max(filIm))]);
-    [noOfCentriods,~]=size(centroids);
-    for i = 1:noOfCentriods
-        hold on
-        plot(centroids(i,1),centroids(i,2),'r.','MarkerSize',5);
-    end
-figure;
-    imshow(filIm,[0,max(max(filIm))]);
+% gg=figure;
+%     imshow(filIm,[0,max(max(filIm))]);
+%     [noOfCentriods,~]=size(centroids);
+%     for i = 1:noOfCentriods
+%         hold on
+%         plot(centroids(i,1),centroids(i,2),'r.','MarkerSize',5);
+%     end
+% figure;
+%     imshow(filIm,[0,max(max(filIm))]);
 clearvars -except threshlevel dgrayIm centroids binIm isofit xyfit filIm fbinIm
 end

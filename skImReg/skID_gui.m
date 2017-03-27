@@ -22,7 +22,7 @@ function varargout = skID_gui(varargin)
 
 % Edit the above text to modify the response to help skID_gui
 
-% Last Modified by GUIDE v2.5 27-Mar-2017 17:37:05
+% Last Modified by GUIDE v2.5 27-Mar-2017 18:58:19
 
 % Begin initialization code - DO NOT EDIT
 %clear global;
@@ -100,17 +100,19 @@ maxSize=str2double(get(handles.maxSize,'String'));
 % adaptArea
 % erodeSize
 [dgrayIm, ~, ~, centroids]=m1_binarize(rawIm,threshOpt,threshVal,adaptArea,erodeSize,filRpt,filSize,minSize,maxSize);
-
+cla(handles.figBox,'reset');
+axes(handles.figBox);
+imshow(dgrayIm,[0,255]);
 plot_centers(handles,centroids);
 set(handles.figBox, 'ButtonDownFcn', @figBox_ButtonDownFcn); 
 
-% --- Executes on button press in doneBtn.
-function doneBtn_Callback(hObject, eventdata, handles)
-% hObject    handle to doneBtn (see GCBO)
+% --- Executes on button press in filBtn.
+function filBtn_Callback(hObject, eventdata, handles)
+% hObject    handle to filBtn (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-% Hint: get(hObject,'Value') returns toggle state of doneBtn
+% Hint: get(hObject,'Value') returns toggle state of filBtn
 
 
 
@@ -394,8 +396,21 @@ if (x>xlim(1))&&(x<xlim(2))&&(y>ylim(1))&&(y<ylim(2));
     end
     cla(handles.figBox,'reset');
     axes(handles.figBox);
-    imshow(dgrayIm);
+    imshow(dgrayIm,[0,255]);
     hold all;
     plot_centers(handles,centroids);
 end
 
+
+% --- Executes on button press in fitBtn.
+function fitBtn_Callback(hObject, eventdata, handles)
+% hObject    handle to fitBtn (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --- Executes on button press in outputBtn.
+function outputBtn_Callback(hObject, eventdata, handles)
+% hObject    handle to outputBtn (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
