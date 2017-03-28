@@ -28,7 +28,7 @@ drawMask=1;
 %**************************************************
 
 center=centroids(:,1:2); %retrieve the est center points of skx
-radius=centroids(:,3); %retrieve the est radius of skx
+radius=int64(2*max(centroids(:,3))); %retrieve the est radius of skx
 im=dgrayIm; %original image to fit on
 [m,n]=size(im);
 
@@ -54,7 +54,7 @@ im=dgrayIm; %original image to fit on
 %individually fitted
 
     for i = 1:length(center)
-        r=radius(i);%est radius of particular skx based in binary image
+        r=radius;%est radius of particular skx based in binary image (was radius(i)
         
         %***dynamic mesh routine***
         %***define a bounding box that encloses the skx****
@@ -90,11 +90,40 @@ im=dgrayIm; %original image to fit on
     zi=portion;
     [yf,xf]=size(portion);
     [xi,yi] = meshgrid(-((xf-1)/2):((xf-1)/2),-((yf-1)/2):((yf-1)/2));
-    tmpiso= autoGaussianSurf(xi,yi,zi,opts_iso);
-    tmpxy = autoGaussianSurf(xi,yi,zi,opts_tilted);
-    xyfit(i,1:5) = [tmpxy.x0+double(center(i,1)) tmpxy.y0+double(center(i,2)) tmpxy.sigmax tmpxy.sigmay tmpxy.sigmax/tmpxy.sigmay];
-    isofit(i,1:4) = [tmpiso.x0+double(center(i,1)) tmpiso.y0+double(center(i,2)) tmpiso.sigma sqrt((tmpiso.x0)^2 + (tmpiso.y0)^2)];
     
+    
+    try
+        tmpxy = autoGaussianSurf(xi,yi,zi,opts_tilted);
+        xyfit(i,1:5) = [tmpxy.x0+double(center(i,1)) tmpxy.y0+double(center(i,2)) tmpxy.sigmax tmpxy.sigmay tmpxy.sigmax/tmpxy.sigmay];
+    catch
+        msg=sprintf('skyrmion %i could not be fitted with an anisotropic guassian',i);
+        disp(msg);
+    end
+    
+    try
+        tmpiso= autoGaussianSurf(xi,yi,zi,opts_iso);
+        %     sse = sum((z-results.G).^2) - sum of squared error for the fitted Gaussian
+        %     sse0 = sum((z-mean(z)).^2) - sum of squared error the sum of squared error for a model with only an offset
+        %     r2 = 1-results.sse/results.sse0 - R^2 proportion of variance
+        isofit(i,1:5) = [tmpiso.x0+double(center(i,1)) tmpiso.y0+double(center(i,2)) tmpiso.sigma tmpiso.sse tmpiso.r2];
+    catch
+        msg=sprintf('skyrmion %i could not be fitted with an isotropic guassian',i);
+        disp(msg);
+    end
+        x0=tmpiso.x0;
+        y0=tmpiso.y0;
+        sigma=tmpiso.sigma;
+        b=tmpiso.b;
+        a=tmpiso.a;
+        
+        rawIm2=zi;
+        x0
+        y0
+        fitIm=a*exp(-((xi-x0).^2/2/sigma^2 +(yi-y0).^2/2/sigma^2)+b);
+        save('rawIm2.mat','rawIm2');
+        save('fitIm.mat','fitIm');
+        uiwait(indSk_gui)
+        
     msg=sprintf('skyrmion %i fitted',i);
     disp(msg);
 % % %     %%******fit routine 2********    
@@ -118,7 +147,7 @@ im=dgrayIm; %original image to fit on
 % % %     
 % % %     %%*******end fit routine 2************
 %     
-%     %********cross section plots for visual relief LOL **************
+    %********cross section plots for visual relief LOL **************
 %     if redraw==1
 %         mask=Gfun2D(size(im),fiti(i,1),fiti(i,2),fiti(i,3),fiti(i,4),fiti(i,5));
 %         
@@ -143,7 +172,7 @@ im=dgrayIm; %original image to fit on
 %         end
 %     end
 %     
-%     
+    
 end
 %     
 %     figure
@@ -152,19 +181,24 @@ end
 %         hold on
 %         plot(isofit(i,1),isofit(i,2),'r.','MarkerSize',10);
 %     end
-% %**************************************************
-% %*******consoladation********************************
-% %**************************************************    
-%     figure
-%     histfit(isofit(:,3)*2.3548*5/1024);
-%     %[mu, sigma] = normfit(fit(:,3),10);
-%     mu=mean(isofit(:,3));
-%     sigma=std(isofit(:,3));
-%     
+%**************************************************
+%*******consoladation********************************
+%**************************************************    
+    histFig=figure;
+    histfit(isofit(:,3)*2.3548);
+    %[mu, sigma] = normfit(fit(:,3),10);
+    mu=mean(isofit(:,3));
+    FWHM=mu*2*(2*log(2))^0.5;
+    sigma=std(isofit(:,3));
+    FWHMer=sigma*2*(2*log(2))^0.5;
+    title('Histogram of skyrmion sizes (FWHM) in px')
+    dim = [.2 .3 .3 .3];
+    str = strcat('mean FWHM =', num2str(FWHM),setstr(177),num2str(FWHMer));
+    annotation('textbox',dim,'String',str,'FitBoxToText','on');
 %     filteredIndex = ((isofit(:,3)>(mu-sigma)).*(isofit(:,3)<(mu+sigma)))>0;
 %     filteredFit=isofit(filteredIndex,3);
 %     
-%     figure
+%     figure;
 %     histfit(filteredFit*2.3548*5/1024);
 %     FWHM=mu*2*(2*log(2))^0.5;
 %     FWHMer=sigma*2*(2*log(2))^0.5;

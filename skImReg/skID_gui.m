@@ -56,7 +56,7 @@ function skID_gui_OpeningFcn(hObject, eventdata, handles, varargin)
 
 % Choose default command line output for skID_gui
 handles.output = hObject;
-
+set(handles.figure1, 'units', 'normalized', 'position', [0.05 0.15 0.9 0.8]);
 % Update handles structure
 guidata(hObject, handles);
 
@@ -215,7 +215,7 @@ function loadBtn_Callback(hObject, eventdata, handles)
 % hObject    handle to loadBtn (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-global rawIm;
+global rawIm filename filepath;
 %clearvars rawIm filIm binIm centroids;
 [filename,filepath]=uigetfile({'*.*','All Files'},...
   'Select Data File 1')
@@ -410,7 +410,8 @@ function fitBtn_Callback(hObject, eventdata, handles)
 global dgrayIm centroids
 if ~isempty(centroids)
     [xyfit,isofit]=m2_fit2d(centroids,dgrayIm);
-    centroids=isofit;
+    centroids
+    centroids=isofit
     cla(handles.figBox,'reset');
     axes(handles.figBox);
     imshow(dgrayIm,[0,255]);
@@ -424,3 +425,10 @@ function outputBtn_Callback(hObject, eventdata, handles)
 % hObject    handle to outputBtn (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+global centroids filepath filename;
+cd(filepath);
+[~,name,ext] = fileparts(filename) ;
+fileID = fopen(strcat(name,'_skyrmion_xy.txt'),'w');
+fprintf(fileID,'%.2d %2d\n',centroids(:,1:2));
+fclose(fileID);
+
