@@ -1,0 +1,105 @@
+ant:
+<ant>
+  <mkdir dir="C:\Users\Anthony\Documents\MATLAB\magnetic_topology\skID\Skyrmion_ID\for_redistribution" />
+  <mkdir dir="C:\Users\Anthony\Documents\MATLAB\magnetic_topology\skID\Skyrmion_ID\for_testing" />
+  <mkdir dir="C:\Users\Anthony\Documents\MATLAB\magnetic_topology\skID\Skyrmion_ID\for_redistribution_files_only" />
+</ant>
+mcc -C -o Skyrmion_ID -W WinMain:Skyrmion_ID -T link:exe -d C:\Users\Anthony\Documents\MATLAB\magnetic_topology\skID\Skyrmion_ID\for_testing -v C:\Users\Anthony\Documents\MATLAB\magnetic_topology\skImReg\skID_gui.m -a C:\Users\Anthony\Documents\Matlab\magnetic_topology\subfunctions\Adaptivethreshold\adaptivethreshold.m -a C:\Users\Anthony\Documents\Matlab\magnetic_topology\subfunctions\Guss2Dfit\autoGaussianSurf.m -a C:\Users\Anthony\Documents\Matlab\magnetic_topology\subfunctions\Guss2Dfit\doFinalOptimization.m -a C:\Users\Anthony\Documents\Matlab\magnetic_topology\subfunctions\Guss2Dfit\getSummaryStatistics.m -a C:\Users\Anthony\Documents\Matlab\magnetic_topology\skImReg\indSk_gui.fig -a C:\Users\Anthony\Documents\Matlab\magnetic_topology\skImReg\indSk_gui.m -a C:\Users\Anthony\Documents\MATLAB\magnetic_topology\skID\m1_binarize.m -a C:\Users\Anthony\Documents\MATLAB\magnetic_topology\skID\m2_fit2d.m -a C:\Users\Anthony\Documents\Matlab\magnetic_topology\subfunctions\Adaptivethreshold\opthr.m -a C:\Users\Anthony\Documents\Matlab\magnetic_topology\skImReg\plot_centers.m -a C:\Users\Anthony\Documents\Matlab\magnetic_topology\skImReg\skID_gui.fig 
+Compiler version: 6.0 (R2015a)
+Dependency analysis by REQUIREMENTS.
+[Warning: Adding path
+"C:\Users\Anthony\Documents\MATLAB\magnetic_topology\skImReg" to Compiler path
+instance.] 
+Parsing file "C:\Users\Anthony\Documents\Matlab\magnetic_topology\skImReg\skID_gui.m"
+	(Referenced from: "Compiler Command Line").
+Deleting 81 temporary MEX authorization files.
+Removing: 'C:\Users\Anthony\AppData\Local\Temp\mathworks_tmp_035fc26746_13820.auth'.
+Removing: 'C:\Users\Anthony\AppData\Local\Temp\mathworks_tmp_035fc22107_13820.auth'.
+Removing: 'C:\Users\Anthony\AppData\Local\Temp\mathworks_tmp_035fc29543_13820.auth'.
+Removing: 'C:\Users\Anthony\AppData\Local\Temp\mathworks_tmp_035fc7003_13820.auth'.
+Removing: 'C:\Users\Anthony\AppData\Local\Temp\mathworks_tmp_035fc12567_13820.auth'.
+Removing: 'C:\Users\Anthony\AppData\Local\Temp\mathworks_tmp_035fc24072_13820.auth'.
+Removing: 'C:\Users\Anthony\AppData\Local\Temp\mathworks_tmp_035fc2040_13820.auth'.
+Removing: 'C:\Users\Anthony\AppData\Local\Temp\mathworks_tmp_035fc18004_13820.auth'.
+Removing: 'C:\Users\Anthony\AppData\Local\Temp\mathworks_tmp_035fc11112_13820.auth'.
+Removing: 'C:\Users\Anthony\AppData\Local\Temp\mathworks_tmp_035fc23974_13820.auth'.
+Removing: 'C:\Users\Anthony\AppData\Local\Temp\mathworks_tmp_035fc7345_13820.auth'.
+Removing: 'C:\Users\Anthony\AppData\Local\Temp\mathworks_tmp_035fc12206_13820.auth'.
+Removing: 'C:\Users\Anthony\AppData\Local\Temp\mathworks_tmp_035fc21001_13820.auth'.
+Removing: 'C:\Users\Anthony\AppData\Local\Temp\mathworks_tmp_035fc25883_13820.auth'.
+Removing: 'C:\Users\Anthony\AppData\Local\Temp\mathworks_tmp_035fc14302_13820.auth'.
+Removing: 'C:\Users\Anthony\AppData\Local\Temp\mathworks_tmp_035fc27134_13820.auth'.
+Removing: 'C:\Users\Anthony\AppData\Local\Temp\mathworks_tmp_035fc7705_13820.auth'.
+Removing: 'C:\Users\Anthony\AppData\Local\Temp\mathworks_tmp_035fc1346_13820.auth'.
+Removing: 'C:\Users\Anthony\AppData\Local\Temp\mathworks_tmp_035fc23684_13820.auth'.
+Removing: 'C:\Users\Anthony\AppData\Local\Temp\mathworks_tmp_035fc11004_13820.auth'.
+Removing: 'C:\Users\Anthony\AppData\Local\Temp\mathworks_tmp_035fc5004_13820.auth'.
+Removing: 'C:\Users\Anthony\AppData\Local\Temp\mathworks_tmp_035fc11228_13820.auth'.
+Removing: 'C:\Users\Anthony\AppData\Local\Temp\mathworks_tmp_035fc17182_13820.auth'.
+Removing: 'C:\Users\Anthony\AppData\Local\Temp\mathworks_tmp_035fc6712_13820.auth'.
+Removing: 'C:\Users\Anthony\AppData\Local\Temp\mathworks_tmp_035fc17919_13820.auth'.
+Removing: 'C:\Users\Anthony\AppData\Local\Temp\mathworks_tmp_035fc22616_13820.auth'.
+Removing: 'C:\Users\Anthony\AppData\Local\Temp\mathworks_tmp_035fc9584_13820.auth'.
+Removing: 'C:\Users\Anthony\AppData\Local\Temp\mathworks_tmp_035fc8756_13820.auth'.
+Removing: 'C:\Users\Anthony\AppData\Local\Temp\mathworks_tmp_035fc28275_13820.auth'.
+Removing: 'C:\Users\Anthony\AppData\Local\Temp\mathworks_tmp_035fc13825_13820.auth'.
+Removing: 'C:\Users\Anthony\AppData\Local\Temp\mathworks_tmp_035fc16037_13820.auth'.
+Removing: 'C:\Users\Anthony\AppData\Local\Temp\mathworks_tmp_035fc6718_13820.auth'.
+Removing: 'C:\Users\Anthony\AppData\Local\Temp\mathworks_tmp_035fc11412_13820.auth'.
+Removing: 'C:\Users\Anthony\AppData\Local\Temp\mathworks_tmp_035fc13605_13820.auth'.
+Removing: 'C:\Users\Anthony\AppData\Local\Temp\mathworks_tmp_035fc4071_13820.auth'.
+Removing: 'C:\Users\Anthony\AppData\Local\Temp\mathworks_tmp_035fc18604_13820.auth'.
+Removing: 'C:\Users\Anthony\AppData\Local\Temp\mathworks_tmp_035fc4075_13820.auth'.
+Removing: 'C:\Users\Anthony\AppData\Local\Temp\mathworks_tmp_035fc16247_13820.auth'.
+Removing: 'C:\Users\Anthony\AppData\Local\Temp\mathworks_tmp_035fc21294_13820.auth'.
+Removing: 'C:\Users\Anthony\AppData\Local\Temp\mathworks_tmp_035fc23143_13820.auth'.
+Removing: 'C:\Users\Anthony\AppData\Local\Temp\mathworks_tmp_035fc16724_13820.auth'.
+Removing: 'C:\Users\Anthony\AppData\Local\Temp\mathworks_tmp_035fc2994_13820.auth'.
+Removing: 'C:\Users\Anthony\AppData\Local\Temp\mathworks_tmp_035fc4181_13820.auth'.
+Removing: 'C:\Users\Anthony\AppData\Local\Temp\mathworks_tmp_035fc29606_13820.auth'.
+Removing: 'C:\Users\Anthony\AppData\Local\Temp\mathworks_tmp_035fc24755_13820.auth'.
+Removing: 'C:\Users\Anthony\AppData\Local\Temp\mathworks_tmp_035fc21631_13820.auth'.
+Removing: 'C:\Users\Anthony\AppData\Local\Temp\mathworks_tmp_035fc2163_13820.auth'.
+Removing: 'C:\Users\Anthony\AppData\Local\Temp\mathworks_tmp_035fc15868_13820.auth'.
+Removing: 'C:\Users\Anthony\AppData\Local\Temp\mathworks_tmp_035fc27363_13820.auth'.
+Removing: 'C:\Users\Anthony\AppData\Local\Temp\mathworks_tmp_035fc30361_13820.auth'.
+Removing: 'C:\Users\Anthony\AppData\Local\Temp\mathworks_tmp_035fc27496_13820.auth'.
+Removing: 'C:\Users\Anthony\AppData\Local\Temp\mathworks_tmp_035fc6037_13820.auth'.
+Removing: 'C:\Users\Anthony\AppData\Local\Temp\mathworks_tmp_035fc15343_13820.auth'.
+Removing: 'C:\Users\Anthony\AppData\Local\Temp\mathworks_tmp_035fc14895_13820.auth'.
+Removing: 'C:\Users\Anthony\AppData\Local\Temp\mathworks_tmp_035fc2998_13820.auth'.
+Removing: 'C:\Users\Anthony\AppData\Local\Temp\mathworks_tmp_035fc18365_13820.auth'.
+Removing: 'C:\Users\Anthony\AppData\Local\Temp\mathworks_tmp_035fc389_13820.auth'.
+Removing: 'C:\Users\Anthony\AppData\Local\Temp\mathworks_tmp_035fc19338_13820.auth'.
+Removing: 'C:\Users\Anthony\AppData\Local\Temp\mathworks_tmp_035fc1171_13820.auth'.
+Removing: 'C:\Users\Anthony\AppData\Local\Temp\mathworks_tmp_035fc23713_13820.auth'.
+Removing: 'C:\Users\Anthony\AppData\Local\Temp\mathworks_tmp_035fc12711_13820.auth'.
+Removing: 'C:\Users\Anthony\AppData\Local\Temp\mathworks_tmp_035fc9967_13820.auth'.
+Removing: 'C:\Users\Anthony\AppData\Local\Temp\mathworks_tmp_035fc1596_13820.auth'.
+Removing: 'C:\Users\Anthony\AppData\Local\Temp\mathworks_tmp_035fc5722_13820.auth'.
+Removing: 'C:\Users\Anthony\AppData\Local\Temp\mathworks_tmp_035fc22948_13820.auth'.
+Removing: 'C:\Users\Anthony\AppData\Local\Temp\mathworks_tmp_035fc31687_13820.auth'.
+Removing: 'C:\Users\Anthony\AppData\Local\Temp\mathworks_tmp_035fc15499_13820.auth'.
+Removing: 'C:\Users\Anthony\AppData\Local\Temp\mathworks_tmp_035fc807_13820.auth'.
+Removing: 'C:\Users\Anthony\AppData\Local\Temp\mathworks_tmp_035fc22855_13820.auth'.
+Removing: 'C:\Users\Anthony\AppData\Local\Temp\mathworks_tmp_035fc19197_13820.auth'.
+Removing: 'C:\Users\Anthony\AppData\Local\Temp\mathworks_tmp_035fc972_13820.auth'.
+Removing: 'C:\Users\Anthony\AppData\Local\Temp\mathworks_tmp_035fc24525_13820.auth'.
+Removing: 'C:\Users\Anthony\AppData\Local\Temp\mathworks_tmp_035fc6199_13820.auth'.
+Removing: 'C:\Users\Anthony\AppData\Local\Temp\mathworks_tmp_035fc12538_13820.auth'.
+Removing: 'C:\Users\Anthony\AppData\Local\Temp\mathworks_tmp_035fc13341_13820.auth'.
+Removing: 'C:\Users\Anthony\AppData\Local\Temp\mathworks_tmp_035fc24142_13820.auth'.
+Removing: 'C:\Users\Anthony\AppData\Local\Temp\mathworks_tmp_035fc10474_13820.auth'.
+Removing: 'C:\Users\Anthony\AppData\Local\Temp\mathworks_tmp_035fc26932_13820.auth'.
+Removing: 'C:\Users\Anthony\AppData\Local\Temp\mathworks_tmp_035fc13810_13820.auth'.
+Removing: 'C:\Users\Anthony\AppData\Local\Temp\mathworks_tmp_035fc17576_13820.auth'.
+Removing: 'C:\Users\Anthony\AppData\Local\Temp\mathworks_tmp_035fc21117_13820.auth'.
+Generating file "C:\Users\Anthony\Documents\MATLAB\magnetic_topology\skID\Skyrmion_ID\for_testing\readme.txt".
+Packaging...
+Adding custom icon C:\Program Files\MATLAB\MATLAB Production Server\R2015a\toolbox\compiler\Resources\default_icon.ico to C:\Users\Anthony\Documents\MATLAB\magnetic_topology\skID\Skyrmion_ID\for_testing\Skyrmion_ID.exe.
+Attempting to embed the CTF archive into the application C:\Users\Anthony\Documents\MATLAB\magnetic_topology\skID\Skyrmion_ID\for_testing\Skyrmion_ID.exe.
+Finished embedding CTF archive. Deleting the external CTF archive.
+Creating the bundle...
+Web based installer created at C:\Users\Anthony\Documents\MATLAB\magnetic_topology\skID\Skyrmion_ID\for_redistribution\MyAppInstaller_web.exe.
+Packaging complete.
+Elapsed packaging time was: 1 minutes and 58 seconds.

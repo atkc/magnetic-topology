@@ -99,6 +99,7 @@ maxSize=str2double(get(handles.maxSize,'String'));
 % threshVal
 % adaptArea
 % erodeSize
+[threshOpt,threshVal,adaptArea,erodeSize,filRpt,filSize,minSize,maxSize]
 [dgrayIm, ~, ~, centroids]=m1_binarize(rawIm,threshOpt,threshVal,adaptArea,erodeSize,filRpt,filSize,minSize,maxSize);
 cla(handles.figBox,'reset');
 axes(handles.figBox);
@@ -409,9 +410,9 @@ function fitBtn_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 global dgrayIm centroids
 if ~isempty(centroids)
-    [xyfit,isofit]=m2_fit2d(centroids,dgrayIm);
-    centroids
-    centroids=isofit
+    [isofit]=m2_fit2d(centroids,dgrayIm);
+    centroids;
+    centroids=isofit;
     cla(handles.figBox,'reset');
     axes(handles.figBox);
     imshow(dgrayIm,[0,255]);
@@ -428,7 +429,7 @@ function outputBtn_Callback(hObject, eventdata, handles)
 global centroids filepath filename;
 cd(filepath);
 [~,name,ext] = fileparts(filename) ;
-fileID = fopen(strcat(name,'_skyrmion_xy.txt'),'w');
-fprintf(fileID,'%.2d %2d\n',centroids(:,1:2));
+fileID = fopen(strcat(name,'_skyrmion_xy.txt'),'wt');
+fprintf(fileID,'%.2d %.2d\n',centroids(:,1:2));
 fclose(fileID);
 

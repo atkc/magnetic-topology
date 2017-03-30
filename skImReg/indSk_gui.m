@@ -67,15 +67,22 @@ imshow(handles.fitIm,[0,255]);
 axes(handles.xsecFig);
 [sx,sy]=size(rawIm2);
 offs=max(max(rawIm2));
-for i = 1:1
-    xq=i*sx/2;
-    yq=1:0.5:sy;
+[~,midy]=max(max(fitIm));
+for i = 1:7
+    yq=midy+(3-i)*(sy/16);
+    xq=1:0.5:sx;
     Vq = interp2(rawIm2,xq,yq,'spline');
     Vfitq = interp2(fitIm,xq,yq,'spline');
-    plot(yq,Vq,'rx');%fit plot
+    plot(xq,Vq+(i-1)*offs,'rx');%fit plot
     hold on;
-    plot(yq,Vfitq);%fit plot
+    plot(xq,Vfitq+(i-1)*offs);%fit plot
     hold on;
+end
+axes(handles.dataFig);
+for i = 1:7
+    hold on;
+    yq=midy-(3-i)*(sy/16);
+    line([1,sx],[yq,yq],'Color','red');
 end
 guidata(hObject, handles);
 % UIWAIT makes indSk_gui wait for user response (see UIRESUME)
