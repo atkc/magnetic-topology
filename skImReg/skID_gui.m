@@ -80,7 +80,7 @@ function executeBtn_Callback(hObject, eventdata, handles)
 % hObject    handle to executeBtn (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-global rawIm dgrayIm filIm binIm centroids;
+global rawIm dgrayIm filIm binIm centroids radius;
 th = get(get(handles.threshOpt,'SelectedObject'), 'Tag');
 threshOpt=[];
 switch th
@@ -99,8 +99,9 @@ maxSize=str2double(get(handles.maxSize,'String'));
 % threshVal
 % adaptArea
 % erodeSize
-[threshOpt,threshVal,adaptArea,erodeSize,filRpt,filSize,minSize,maxSize]
+% [threshOpt,threshVal,adaptArea,erodeSize,filRpt,filSize,minSize,maxSize]
 [dgrayIm, ~, ~, centroids]=m1_binarize(rawIm,threshOpt,threshVal,adaptArea,erodeSize,filRpt,filSize,minSize,maxSize);
+%radius=1.5*max(centroids(:,3));
 cla(handles.figBox,'reset');
 axes(handles.figBox);
 imshow(dgrayIm,[0,255]);
@@ -341,11 +342,14 @@ function figBox_ButtonDownFcn(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 function centroidsR = removePT(centroids,x,y)
+global radius;
 distxy=abs((centroids(:,1)-x).^2+(centroids(:,2)-y).^2);
 [~,i]=min(distxy);
 %disp('1 point removed');
 centroids(i,:)=[];
 centroidsR=centroids;
+radius =1.5*(centroids(:,3));
+%radius =1.5* max(centroids(:,3));
 
 
 
@@ -408,10 +412,11 @@ function fitBtn_Callback(hObject, eventdata, handles)
 % hObject    handle to fitBtn (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-global dgrayIm centroids
+global isofit dgrayIm centroids radius filename
 if ~isempty(centroids)
-    [isofit]=m2_fit2d(centroids,dgrayIm);
-    centroids;
+    [~,name,ext] = fileparts(filename) ;
+    [isofit]=m2_fit2d(radius, centroids,dgrayIm,name);
+    
     centroids=isofit;
     cla(handles.figBox,'reset');
     axes(handles.figBox);
@@ -426,10 +431,11 @@ function outputBtn_Callback(hObject, eventdata, handles)
 % hObject    handle to outputBtn (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-global centroids filepath filename;
+global centroids isofit filepath filename;
 cd(filepath);
 [~,name,ext] = fileparts(filename) ;
 fileID = fopen(strcat(name,'_skyrmion_xy.txt'),'wt');
-fprintf(fileID,'%.2d %.2d\n',centroids(:,1:2));
+% isofit;
+fprintf(fileID,'%2.2f %2.2f %2.2f %2.2f %2.2f\n',isofit(:,1:5)');
 fclose(fileID);
 

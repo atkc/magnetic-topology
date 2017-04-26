@@ -1,0 +1,1 @@
+function cmap_hotcoal = hotcoal cmap_hotcoal = ... %IDL Hot coal color scale.    [ [zeros(1,71) linspace(0,255,70) linspace(255,255,115)]' ...       [linspace(0,85,71) linspace(85,0,70) linspace(0,255,70) 255*ones(1,45)]'  ...      [linspace(255,0,71) zeros(1,256-71)]' ...        ];        cmap_hotcoal = cmap_hotcoal./255;        colormap(cmap_hotcoal);

@@ -87,12 +87,12 @@ function [dgrayIm, filIm, binIm, centroids]= m1_binarize (im,threshmode,threshle
 %*************************************************************************
     if threshmode==1
         if threshlevel==0
-            threshlevel = multithresh(filIm/max(max(filIm))); %automatically detects the threshold value to use
+            threshlevel = multithresh(filIm/max(max(filIm))) %automatically detects the threshold value to use
         end
     
         binIm= im2bw(filIm/max(max(filIm)),threshlevel); %perform threhold with threshold value
-        
-        
+%         figure
+%         imshow(binIm)
     end
 
 %*************************************************************************
@@ -101,17 +101,19 @@ function [dgrayIm, filIm, binIm, centroids]= m1_binarize (im,threshmode,threshle
     if threshmode==2
         binIm= adaptivethreshold(filIm,adaptThreshArea,1,0); %perform dynamic threhold with threshold area
     end
- 
+%imshow(binIm)
 %*************************************************************************
 %*****************************Post-Filter process 1***********************
 %*************************************************************************
     if erode
+        %erode
         se = strel('disk',erodeSize);
         binIm=imerode(binIm,se);
     end
     %%*********fill the holes?*************
-    binIm=imfill(binIm,'holes');
-
+    %binIm=imfill(binIm,'holes');
+% figure
+% imshow(binIm)
     
 %*************************************************************************
 %*****************************Segregate Area******************************
@@ -122,10 +124,10 @@ function [dgrayIm, filIm, binIm, centroids]= m1_binarize (im,threshmode,threshle
     graindata = regionprops(cc,'centroid','Area','Perimeter');
     
 %     %%*****retrieve the area****************
-    area=[graindata.Area];
+    area=[graindata.Area]
     s=size(area);
-    avgArea=sum(area)/s(2);
-    
+    avgArea=sum(area)/s(2)
+    size(graindata)
     %%*****retrieve the perimeter****************
     perimeter=[graindata.Perimeter]; 
     
@@ -161,7 +163,7 @@ function [dgrayIm, filIm, binIm, centroids]= m1_binarize (im,threshmode,threshle
     graindata = graindata(index);
     cc.NumObjects=sum(index);%rearranging the indexes
     cc.PixelIdxList=cc.PixelIdxList(index);
-
+    size(graindata)
     labeled = labelmatrix(cc); %label the areas
     fbinIm=(labeled>0);%not necessary to see labels, just get final binary image =)
     

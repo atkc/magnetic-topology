@@ -22,7 +22,7 @@ function varargout = indSk_gui(varargin)
 
 % Edit the above text to modify the response to help indSk_gui
 
-% Last Modified by GUIDE v2.5 28-Mar-2017 16:09:42
+% Last Modified by GUIDE v2.5 07-Apr-2017 09:59:12
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -54,36 +54,53 @@ function indSk_gui_OpeningFcn(hObject, eventdata, handles, varargin)
 
 % Choose default command line output for indSk_gui
 handles.output = hObject;
-
+global fitx rawx fitIm rawxIm yint;
 % Update handles structure
+load indSk_prop.mat
 load rawIm2.mat
-load fitIm.mat
 handles.rawIm2 = rawIm2;
+fitIm=Gfun2D(size(rawIm2),indSk_prop(1),indSk_prop(2),indSk_prop(3),indSk_prop(4),indSk_prop(5));
 handles.fitIm = fitIm;
+save('fitIm.mat','fitIm');
+
 axes(handles.dataFig);
 imshow(handles.rawIm2,[0,255]);
+axis on;
 axes(handles.fitDataFig);
 imshow(handles.fitIm,[0,255]);
+axis on;
 axes(handles.xsecFig);
 [sx,sy]=size(rawIm2);
 offs=max(max(rawIm2));
-[~,midy]=max(max(fitIm));
-for i = 1:7
-    yq=midy+(3-i)*(sy/16);
-    xq=1:0.5:sx;
+nx=3;
+
+
+xq=1:0.5:sx;
+fitx=zeros(length(xq),nx+1);
+rawx=zeros(length(xq),nx+1);
+fitx(:,1)=xq;
+rawx(:,1)=xq;
+yint=zeros(1,3);
+for i = 1:nx
+    yq=indSk_prop(2)+((nx-1)/2+1-i)*(sy/16);
+    yint(i)=yq;
     Vq = interp2(rawIm2,xq,yq,'spline');
     Vfitq = interp2(fitIm,xq,yq,'spline');
     plot(xq,Vq+(i-1)*offs,'rx');%fit plot
     hold on;
     plot(xq,Vfitq+(i-1)*offs);%fit plot
     hold on;
+    
+    fitx(:,i+1)=Vfitq;
+    rawx(:,i+1)=Vq;
 end
 axes(handles.dataFig);
-for i = 1:7
+for i = 1:3
     hold on;
-    yq=midy-(3-i)*(sy/16);
+    yq=indSk_prop(2)-(2-i)*(sy/16);
     line([1,sx],[yq,yq],'Color','red');
 end
+
 guidata(hObject, handles);
 % UIWAIT makes indSk_gui wait for user response (see UIRESUME)
 % uiwait(handles.figure1);
@@ -106,3 +123,43 @@ function nextBtn_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 close(indSk_gui);
+
+
+% --- Executes on button press in Output.
+function Output_Callback(hObject, eventdata, handles)
+% hObject    handle to Output (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+global  fitx rawx fitIm rawxIm yint;
+% Update handles structure
+load indSk_prop.mat
+load rawIm2.mat
+
+fileID = fopen(strcat('x-skyrmion_fitx.txt'),'wt');
+% isofit;
+fprintf(fileID,'%2.2f %2.2f %2.2f %2.2f\n',fitx');
+fclose(fileID);
+
+fileID = fopen(strcat('x-skyrmion_rawx.txt'),'wt');
+fprintf(fileID,'%2.2f %2.2f %2.2f %2.2f\n',rawx');
+fclose(fileID);
+
+fileID = fopen(strcat('x-yintercept.txt'),'wt');
+fprintf(fileID,'%2.2f %2.2f %2.2f\n',yint');
+fclose(fileID);
+
+F = getframe(handles.dataFig);
+Image = frame2im(F);
+imwrite(Image, 'x-raw w lines.jpg')
+
+F = getframe(handles.xsecFig);
+Image = frame2im(F);
+imwrite(Image, 'x-section.jpg')
+
+F = getframe(handles.figure1);
+Image = frame2im(F);
+imwrite(Image, 'x-overview.jpg')
+
+save('x-rawIm.mat','rawIm2');
+save('x-fitIm.mat','fitIm');
+save('x-prop.mat','indSk_prop');

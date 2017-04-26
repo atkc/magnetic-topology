@@ -1,24 +1,37 @@
 %%*****load image***********
 %%***To be removed and amde into a function*****
-
-fixed=imread('corr_p1.tiff');
-fixedM=imread('170308_fp226_1b_2_d2_n4k-p1k_p1.tiff');
-
-MFM=true;%true: activate transformation on mfm images
+%%Reference folder
+cd('C:\Users\Anthony\Dropbox\Shared_MFM\Data\Nanostructures\fp226_nanostructures\fp226_1b_2um_d2\Reference images');
+%fixed=imread('170308_fp226_1b_2_d2_n4k-p1k_p1_ref.tiff');
+%fixedM=imread('170308_fp226_1b_2_d2_n4k-p1k_p1.tiff');
+%%Data folder
+cd('C:\Users\Anthony\Dropbox\Shared_MFM\Data\Nanostructures\fp226_nanostructures\fp226_1b_2um_d2\170421');
+MFM=false;%true: activate transformation on mfm images
 saveIm=true;
 displayIm=false;
-
-MFMfilename='170308_fp226_1b_2_d2_n4k-p1k_p';
-AFMfilename='corr_p';
-numIm=22; %Number of images to align
-for i=2:(numIm+1)
+fixed=imread('reg_170421_15k_1b_2um_d2_n4k-p1100_p2_MFM.tiff');
+%fixedM=imread('170421_15k_1b_2um_d2_n4k-p1100_p0_MFM.tiff');
+fixed=fixed(:,:,1);
+% fixed=flipud(fixed);
+% fixed=fliplr(fixed);
+% fixed=double(im2bw(fixed));
+MFMfilename='170421_15k_1b_2um_d2_n4k-p1100_p';% no need 16 bit
+AFMfilename='170421_15k_1b_2um_d2_n4k-p1100_p';%remember to save AFM in 16 bit!!!
+tf=0;
+for i= [4 23 25]
     fprintf('Processing image %i...',i);
-    moving=imread(strcat(AFMfilename,int2str(i),'.tiff'));
-    movingM=imread(strcat(MFMfilename,int2str(i),'.tiff'));
+    moving=imread(strcat(AFMfilename,int2str(i),'_MFM.tiff'));
+    moving=moving(:,:,1);
+    %moving=double(im2bw(moving));
 
     %******TO show misalignment************
     %non-grayscale colour shows distinct difference in intensities****
+    
     if (displayIm)
+        figure;
+        imshow(fixed);
+        figure;
+        imshow(moving);
         figure;
         imshowpair(fixed, moving,'Scaling','joint');
     end
@@ -28,12 +41,14 @@ for i=2:(numIm+1)
     %******************************************
 
     %***Create optimizer and metric for
-    [optimizer, metric] = imregconfig('monomodal');
+    [optimizer,metric] = imregconfig('monomodal');
+    %metric = registration.metric.MattesMutualInformation; %slow but should
+    %be more accurate
     %%----Need to read up on optimizer and metric--
     %%Needs to be tuned
 
     optimizer.MaximumIterations = 500;
-
+    optimizer.MaximumStepLength = 0.005;
 
     %****Executing intensity based registration block**
     %movingReg = imregister(moving, fixed, 'affine', optimizer, metric);
@@ -45,12 +60,18 @@ for i=2:(numIm+1)
     movingReg=imwarp(moving,tf,'OutputView',imref2d(size(fixed)));
     
     if (displayIm)
+ 
         figure;
         imshowpair(fixed, movingReg,'Scaling','joint');
+        figure;
+        imshow(fixed);
+        figure;
+        imshow(movingReg);
     end
     
-    imwrite(movingReg,strcat(MFMfilename,int2str(i),'_AFM.tiff'))
+    imwrite(movingReg,strcat('Reg_',AFMfilename,int2str(i),'_MFM.tiff'))
     if (MFM)
+        movingM=imread(strcat(MFMfilename,int2str(i),'_MFM.tiff'));
         movingMReg=imwarp(movingM,tf,'OutputView',imref2d(size(fixedM)));
     
         if (displayIm)
@@ -59,14 +80,42 @@ for i=2:(numIm+1)
         end
         
         if (saveIm)
-        imwrite(movingMReg,strcat(MFMfilename,int2str(i),'_MFM.tiff'))
+        imwrite(movingMReg,strcat('Reg_',MFMfilename,int2str(i),'_MFM.tiff'))
         end
     end
     
     fprintf('completed!\n');
 end
 fprintf('\n');
-if (saveIm)
-    imwrite(fixed,strcat(MFMfilename,'1_AFM.tiff'))
-    imwrite(fixedM,strcat(MFMfilename,'1_MFM.tiff'))
-end
+% if (saveIm)
+%     imwrite(fixed,strcat(MFMfilename,'1_AFM.tiff'))
+%     if MFM
+%         imwrite(fixedM,strcat(MFMfilename,'1_MFM.tiff'))
+%     end
+% end
+cd('C:\Users\Anthony\Dropbox\Shared_MFM\Data\Nanostructures\fp226_nanostructures\fp226_1b_2um_d2\170418_fp226_wires\Registered MFM');
+
+% %*****************2nd reg***************************************
+% %*****************2nd reg***************************************
+% %*****************2nd reg***************************************
+% for i=(21:40)
+%     fprintf('Processing image %i...',i);
+%     moving=imread(strcat('reg_',AFMfilename,int2str(i),'_MFM.tiff'));
+%     moving=moving(:,:,1);
+%     %moving=double(im2bw(moving));
+% 
+%     %******TO show misalignment************
+%     %non-grayscale colour shows distinct difference in intensities****
+%       
+%         movingMReg=imwarp(moving,tf,'OutputView',imref2d(size(fixed)));
+%         
+%         if (saveIm)
+%         imwrite(movingMReg,strcat('Reg_Reg_',MFMfilename,int2str(i),'_MFM.tiff'))
+%         end
+%     
+%     fprintf('completed!\n');
+% end
+% fprintf('\n');
+% %*****************2nd reg***************************************
+% %*****************2nd reg***************************************
+% %*****************2nd reg***************************************
