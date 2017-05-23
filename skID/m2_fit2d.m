@@ -7,9 +7,9 @@ function [isofit]=m2_fit2d(radius,centroids, dgrayIm, name)
 %the window to fit (ie size and position) dynamically varies with each 
 %centroid position. 
 
-checkInd=true;
+checkInd=false;
 saveInd=false;
-radius=2*radius/1.5;
+radius=radius/1.5;
 %problems:
 %#1 the size of window to fit drastically changes the fit -> need to optimised
 %this
@@ -49,7 +49,8 @@ im=dgrayIm; %original image to fit on
     %r=radius;%est radius of particular skx based in binary image (was radius(i)
     [mx,ny]=size(center)
     for i = 1:mx
-        r=3*radius(i);
+        try
+        r=2*radius;
         
         %***dynamic mesh routine***
         %***define a bounding box that encloses the skx****
@@ -74,8 +75,6 @@ im=dgrayIm; %original image to fit on
             end
     
     %Portion of image to be fitted based on bounding box
-    
-
     [cmask_y,cmask_x]=meshgrid(int64(y1):int64(y2),int64(x1):int64(x2));
     
     cmask=(((cmask_x-center(i,1)).^2+(cmask_y-center(i,2)).^2)<=r^2);
@@ -167,7 +166,9 @@ if (checkInd)
     %%*****Reconstructing of fitted image**********
     indSk_prop=[xo yo sigma b a];
     save('indSk_prop.mat','indSk_prop');
+
     rawIm2=portion;
+
 %     fitIm=Gfun2D(size(portion),xo,yo,sigma,b,a);
 % %     fitIm=a*exp(-((xi-xo).^2/2/sigma^2 + ...
 % %                                    (yi-yo).^2/2/sigma^2)) + b;
@@ -223,7 +224,7 @@ end
 %         end
 %     end
 %     
-    
+        end
 end
 %     
 %     figure

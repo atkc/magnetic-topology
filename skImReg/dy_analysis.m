@@ -17,12 +17,15 @@ binrange= linspace(0,2,nRange+1);
 [bincounts,ind]=histc(xpos,binrange);
  avgang=zeros(1,11);
  avgv=zeros(1,11);
+ stdv=zeros(1,11);
 for i =1:(nRange+1)
-    avgv(i)=sum(v(ind==i))/sum(ind==i);
-    avgang(i)=sum(ang(ind==i))/sum(ind==i);
+    avgv(i)=mean(v(ind==i));
+    stdv(i)=std(v(ind==i));
+%     avgv(i)=sum(v(ind==i))/sum(ind==i);
+%     avgang(i)=sum(ang(ind==i))/sum(ind==i);
 end
 figure
-bar(binrange,avgang,'histc')
+bar(binrange,avgv,'histc')
 xlim([0,2])
 title('Skyrmion Hall Angle along Wire Width')
 ylabel('Skyrmion Hall Angle (^o)')

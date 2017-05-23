@@ -101,7 +101,7 @@ maxSize=str2double(get(handles.maxSize,'String'));
 % erodeSize
 % [threshOpt,threshVal,adaptArea,erodeSize,filRpt,filSize,minSize,maxSize]
 [dgrayIm, ~, ~, centroids]=m1_binarize(rawIm,threshOpt,threshVal,adaptArea,erodeSize,filRpt,filSize,minSize,maxSize);
-%radius=1.5*max(centroids(:,3));
+radius=1.5*max(centroids(:,3));
 cla(handles.figBox,'reset');
 axes(handles.figBox);
 imshow(dgrayIm,[0,255]);
@@ -436,6 +436,10 @@ cd(filepath);
 [~,name,ext] = fileparts(filename) ;
 fileID = fopen(strcat(name,'_skyrmion_xy.txt'),'wt');
 % isofit;
-fprintf(fileID,'%2.2f %2.2f %2.2f %2.2f %2.2f\n',isofit(:,1:5)');
+if ~isempty(isofit) 
+    fprintf(fileID,'%2.2f %2.2f %2.2f %2.2f %2.2f\n',isofit(:,1:5)');
+else
+    fprintf(fileID,'%2.2f %2.2f %2.2f %2.2f %2.2f\n',centroids(:,1:2)');
+end
 fclose(fileID);
 

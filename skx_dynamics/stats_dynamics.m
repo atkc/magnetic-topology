@@ -1,14 +1,57 @@
-%%******initialization*******
-MasterList=zeros(1000,50,4);%#sk; frame; sk-id, x, y, size
-MasterList(:,1,1)=(1:1000)';%%sk-id
+%%*************************************************************************
+%%***************************Information***********************************
+%%*************************************************************************
+%This program needs the user to identify the positions of skyrmions before
+%hand and saving it as a skeleton image which only have colors:
+%1. gray as background
+%2. black to indicate skyrmion positions (ie skyrmion was there in the
+%   previous frame regardless of whether they moved or not
+%3. red to indicate additional skyrmions (ie was not there in the previous
+%   frame)
+%Summary: the skeleton image is a very human task and might be subjected to
+%individual human abilities - ie fraught with human errors/biasness
+%%*************************************************************************
+%%**********************Additional Information*****************************
+%% Created by Anthony K.C Tan for skyrmion research
+%%*************************************************************************
 
+%%===================Size fitting Options/Information======================
+sksz=true; %measure size?
+fitframe=[26 27 28]; %which frames to fit? number should correspnd to the pulse number
+radius=0.1*1080/13;
+%%==========Additional info on size fitting================================
+%%Please optimize the 
+%1. window size for fitting -> see m2_fit.m file
+%2. check options to save individual fits and also to check individual fits
+%   -> see m2_fit.m file
+
+%%==============directory of skeleton file=================================
 cd('C:\Users\Anthony\Dropbox\Shared_MFM\Data\Nanostructures\fp226_nanostructures\fp226_1b_2um_d2\170421\bio-analysis')
 filename='170421_15k_1b_2um_d2_n4k-p1100_p (';
 fullFileName=strcat(filename,'0)','.png');
+%%==============directory of skeleton file=================================
+
+%%==============directory of raw files to fit for size=====================
+fitfiledir=('C:\Users\Anthony\Dropbox\Shared_MFM\Data\Nanostructures\fp226_nanostructures\fp226_1b_2um_d2\170421\bio-analysis');
+fitfilename='MFM_170421_fp226_2um_d2_n4k-p1100_p';%MFM_170421_fp226_2um_d2_n4k-p1100_p26
+%%==============directory of raw files to fit for size=====================
+
+
+%%*************************************************************************
+%%*************************************************************************
+%%*****************************Processing begins here**********************
+%%*************************************************************************
+
+
+%%******************************initialization*****************************
+MasterList=zeros(200,50,4);%#sk; frame; sk-id, x, y, size
+
+%%load skeleton image to 
 im=imread(fullFileName);
 [ ~, beforeOld] = positionxy( im );
 MasterList(1:length(beforeOld),1,2:3)=beforeOld;
-
+MasterList(1:length(beforeOld),1,1)=1:length(beforeOld);%%sk-id
+skmax=length(beforeOld);
 threshold=30;
 %figure
 %plot(beforeOld(:,1),beforeOld(:,2),'r*');
@@ -26,7 +69,7 @@ oldIm=im;
 index=1;
 
 frameInd=2;
-for imageInd = 1%[2 3 6 7 10 11 14 15]%2:noOfimages
+for imageInd = 1:28%[2 3 6 7 10 11 14 15]%2:noOfimages
 
 fprintf('Analyzing image %i\n',imageInd);
 fullFileName=strcat(filename,int2str(imageInd),')','.png');
@@ -48,6 +91,7 @@ offset=abs(mafter-mbefore);
 %%*****capture old skyrmions in after frame that did nto move******
 MasterList(1:length(ibOld),frameInd,1)=skID(ibOld);
 MasterList(1:length(ibOld),frameInd,2:3)=beforeOld(ibOld,1:2);
+
 %%*****capture old skyrmions in after frame that did nto move******
 
 [C,~,sbOld] = setxor(afterOld,beforeOld,'rows','stable');
@@ -86,6 +130,7 @@ while (repeat)
 %     fig=imshow(oldIm(:,:,1)>120);
     repeat=false;
     p = randperm(mafter_unique);
+    skID_UniqueDup=skID_Unique;
     beforeUniqueDup=beforeUnique;
     for i = p
         minDist=999999;
@@ -107,11 +152,11 @@ while (repeat)
 %             'HorizontalAlignment', 'right', ...
 %             'VerticalAlignment', 'middle','color','red');
         %abs(minDist)
-        skID_min=skID_Unique(minj);
+        skID_min=skID_UniqueDup(minj);
         
         MasterList(length(ibOld)+i,frameInd,1)=skID_min;
         MasterList(length(ibOld)+i,frameInd,2:3)=afterUnique(i,:);
-        
+        skID_UniqueDup(minj)=[];
         beforeUniqueDup(minj,:)=[];
         if abs(minDist) >threshold
             repeat=true;
@@ -131,13 +176,13 @@ end
 % print(SavefullFileName,'-dpng');
 
 if ~isempty(afterNew)
-    MasterList((length(ibOld)+length(p)+1):(length(ibOld)+length(p)+1+numel(afterNew)/2),frameInd,2:3)=afterNew;
-    MasterList((length(ibOld)+length(p)+1):(length(ibOld)+length(p)+1+numel(afterNew)/2),frameInd,1)=skmax:numel(afterNew)/2;
+    MasterList((length(ibOld)+length(p)+1):(length(ibOld)+length(p)+numel(afterNew)/2),frameInd,2:3)=afterNew;
+    MasterList((length(ibOld)+length(p)+1):(length(ibOld)+length(p)+numel(afterNew)/2),frameInd,1)=(skmax+1):(skmax+numel(afterNew)/2);
     skmax=skmax+numel(afterNew)/2;
 end
 
-beforeOld=MasterList((length(ibOld)+length(p)+1):(length(ibOld)+length(p)+1+numel(afterNew)/2),frameInd,2:3);
-framInd=frameInd+1;
+beforeOld=[MasterList(1:(length(ibOld)+length(p)+numel(afterNew)/2),frameInd,2),MasterList(1:(length(ibOld)+length(p)+numel(afterNew)/2),frameInd,3)];
+frameInd=frameInd+1;
 oldIm=im;
 end
 fullstat=fullstat(1:(statInd-1),:);
@@ -146,6 +191,22 @@ sum(fullstat2(:,1)==23)
 % for pulseInd=[4 5 8 9 12 13 16 17 20 21]
 %     fullstat2(fullstat2(:,2)==pulseInd,:)=[];
 % end
+
+%%write a sort function*****
+
+if (sksz==true)
+    cd(fitfiledir);
+    for p=fitframe
+        rawIm=imread(strcat(fitfilename,int2str(p),'.png'));
+        dgrayIm=im2double(rawIm(:,:,1))*155;
+        skID_fit=MasterList(:,p+1,1);
+        coorxy=[MasterList(:,p+1,2),MasterList(:,p,3)];
+        coorxy=coorxy(skID_fit~=0,:);
+        z=length(coorxy);
+        isofit=m2_fit2d(radius,coorxy, dgrayIm,'');
+        MasterList(1:z,p+1,4)=isofit(:,4); %fwhm
+    end
+end
 
 
 %sum(fullstat2(:,1)==23)
@@ -207,81 +268,132 @@ sum(fullstat2(:,1)==23)
 % plot(80:binsize:180,avgv.*(binc>2),'ro')
 % end
 
-% for binsize=5:15;
-% binz=80:binsize:180;
-% l=length(binz);
-% avgv=zeros(l,1);
-% stdv=zeros(l,1);
-% figure;
-% 
-% 
-% for vt=[ 2.9 2.95 3  ];
-%     
-%     p= (vol1==vt);
-%     vp=v1(p);
-%     sp=s1(p);
-%     plot(sp,vp,'o');
-%     hold on;
-%     [binc,ind]=histc(sp,binz);
-%     for i=1:l
-%         sum((ind==i));
-%         tv=sum(vp((ind==i)));
-%         avgv(i)=tv/sum((ind==i));
-%         stdv(i)=std(vp((ind==i)));
-%     end
-%     plot(binz(binc>2),avgv(binc>2));
-%     [avgv,binc,stdv];
-% %     errorbar(binz,avgv,stdv');
-%     hold on;
-%     %[binz',binc,avgv,stdv]
-%     title(strcat('Bin Size:',int2str(binsize)));
-%     %[binc,ind]=histc(vp(:,2),80:binsize:180);
-% end
-% %legend('2.9','2.9','2.95','2.95','3','3');
-% end
-% z=zeros(11,3);
-%     index=1;
-% for i = [2.5 2.6 2.7 2.8 2.9 2.95 3]  
-% z(index,:)=[sum(abs(vol)==i),mean(spd(abs(vol)==i)),std(spd(abs(vol)==i))];
-% index=index+1;
-% end
-% 
-% z=zeros(11,1);
-% xtar=0:0.2:2;
-% ang=ang(abs(ang)<90);
-% x=x(abs(ang)<90);
-% for i = 2:11
-%     ind=(x<xtar(i)).*(x>xtar(i-1));
-%     z(i-1,1)=sum(ang.*ind)/sum(ind);
-% end
-% bar(xtar,z,'histc')
-% 
-% z2=zeros(11,1);
-% ang2=ang2(abs(ang2)<90);
-% x2=x2(abs(ang2)<90);
-% for i = 2:11
-%     ind2=(x2<xtar(i)).*(x2>xtar(i-1));
-%     z2(i-1,1)=sum(ang2.*ind2)/sum(ind2);
-% end
+for binsize=5:15;
+binz=80:binsize:180;
+l=length(binz);
+avgv=zeros(l,1);
+stdv=zeros(l,1);
+figure;
+
+
+for vt=[ 2.9 2.95 3  ];
+    
+    p= (vol1==vt);
+    vp=v1(p);
+    sp=s1(p);
+    plot(sp,vp,'o');
+    hold on;
+    [binc,ind]=histc(sp,binz);
+    for i=1:l
+        sum((ind==i));
+        tv=sum(vp((ind==i)));
+        avgv(i)=tv/sum((ind==i));
+        stdv(i)=std(vp((ind==i)));
+    end
+    plot(binz(binc>2),avgv(binc>2));
+    [avgv,binc,stdv];
+%     errorbar(binz,avgv,stdv');
+    hold on;
+    %[binz',binc,avgv,stdv]
+    title(strcat('Bin Size:',int2str(binsize)));
+    %[binc,ind]=histc(vp(:,2),80:binsize:180);
+end
+%legend('2.9','2.9','2.95','2.95','3','3');
+end
+z=zeros(11,3);
+    index=1;
+for i = [2.5 2.6 2.7 2.8 2.9 2.95 3]  
+z(index,:)=[sum(abs(vol)==i),mean(spd(abs(vol)==i)),std(spd(abs(vol)==i))];
+index=index+1;
+end
+
+for w = 11
+
+xtar=linspace(0,max(x),w);
+l=length(xtar);
+avgv=zeros(l,1);
+stdv=zeros(l,1);
+% x=x(abs(ang)<200);
+% ang=ang(abs(ang)<200);
+[binc,ind]=histc(x,xtar);
+ang=double(binc)/(29*(max(x)/w)*10);
+figure
+plot(xtar,ang,'ro')
+title(int2str(w));
+end
+for i = 1:l
+    avgv(i)=mean(ang((ind==i)));
+    stdv(i)=std(ang((ind==i)));
+end
+plot(xtar,avgv.*(binc>2),'ro')
+figure
+plot(xtar,avgv,'ro')
+
+z2=zeros(11,1);
+ang2=ang2(abs(ang2)<90);
+x2=x2(abs(ang2)<90);
+for i = 2:11
+    ind2=(x2<xtar(i)).*(x2>xtar(i-1));
+    z2(i-1,1)=sum(ang2.*ind2)/sum(ind2);
+end
+figure
+bar(xtar,z2,'histc')
+
+%%***********velocity vs angle binning*************
+th=th1(abs(th1)<90);
+v=v1(abs(th1)<90);
+sz=sz1(abs(th1)<90);
+v=v1(vol1==3);
+sz=sz1(vol1==3);
+lkl=linspace(0,4.6,10);
+l=length(lkl);
+avgv=zeros(l,1);
+stdv=zeros(l,1);
+
+[binc,ind]=histc(sz,lkl);
+for i=1:l
+    tv=sum(v((ind==i)));
+    avgv(i)=mean(v((ind==i)));
+    stdv(i)=std(v((ind==i)));
+end
+figure
+plot(lkl,avgv.*(binc>2),'ro')
+
+%%%***********angle vs x width binning*************
+
+v=v1(vol1==2.95);
+sz=sz1(vol1==2.95);
+for space=[2:20]
+
+lkl=100:space:175;
+l=length(lkl);
+avgv=zeros(l,1);
+stdv=zeros(l,1);
+% avgvv=zeros(l,1);
+% stdvv=zeros(l,1);
+[binc,ind]=histc(sz,lkl);
+for i=1:l
+avgv(i)=mean(v((ind==i)));
+stdv(i)=std(v((ind==i)));
+%     avgvv(i)=mean(v((ind==i)));
+%     stdvv(i)=std(v((ind==i)));
+end
+figure
+plot(lkl,avgv.*(binc>2),'ro')
+title(num2str(space));
+end
 % figure
-% bar(xtar,z2,'histc')
-% 
-% %%%***********velocity vs angle binning*************
-% th=th1(abs(th1)<90);
-% v=v1(abs(th1)<90);
-% lkl=linspace(0,4.6,10);
-% l=length(lkl);
-% avgv=zeros(l,1);
-% stdv=zeros(l,1);
-% 
-% [binc,ind]=histc(v,lkl);
-% for i=1:l
-%     tv=sum(th((ind==i)));
-%     avgv(i)=mean(th((ind==i)));
-%     stdv(i)=std(th((ind==i)));
-% end
-% figure
-% plot(lkl,avgv.*(binc>2),'ro')
-% 
-% %%%***********angle vs x width binning*************
-% [lkl'+mean(diff(lkl)/2),avgv,stdv,binc]
+% plot(lkl,avgvv.*(binc>2),'ro')
+% title(num2str(space));
+[lkl'+mean(diff(lkl)/2),avgv,stdv,binc]
+
+pointx=zeros(1,10000);
+st=1;
+    for p=0:29
+        coorx=MasterList(:,p+1,2);
+        coorx=coorx(coorx~=0,:);
+        l=length(coorx);
+        pointx(st:st+l-1)=coorx;
+        st=st+l;
+    end
+    pointx=pointx(1:st-1);
