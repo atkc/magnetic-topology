@@ -58,6 +58,12 @@ global fitx rawx fitIm rawxIm yint;
 % Update handles structure
 load indSk_prop.mat
 load rawIm2.mat
+
+FWHM=indSk_prop(3)*2*(2*log(2))^0.5;
+FWHMreal=indSk_prop(3)*1000*indSk_prop(6)*2*(2*log(2))^0.5;
+set(handles.text4,'string',num2str(FWHM));
+set(handles.text6,'string',num2str(FWHMreal));
+
 handles.rawIm2 = rawIm2;
 fitIm=Gfun2D(size(rawIm2),indSk_prop(1),indSk_prop(2),indSk_prop(3),indSk_prop(4),indSk_prop(5));
 handles.fitIm = fitIm;
@@ -71,7 +77,7 @@ imshow(handles.fitIm,[0,255]);
 axis on;
 axes(handles.xsecFig);
 [sx,sy]=size(rawIm2);
-offs=max(max(rawIm2));
+offs=2*max(max(fitIm));
 nx=3;
 
 
@@ -81,6 +87,8 @@ rawx=zeros(length(xq),nx+1);
 fitx(:,1)=xq;
 rawx(:,1)=xq;
 yint=zeros(1,3);
+maxy=1.5*max(max(fitIm));
+miny=min(min(fitIm));
 for i = 1:nx
     yq=indSk_prop(2)+((nx-1)/2+1-i)*(sy/16);
     yint(i)=yq;
@@ -90,7 +98,7 @@ for i = 1:nx
     hold on;
     plot(xq,Vfitq+(i-1)*offs);%fit plot
     hold on;
-    
+    ylim([miny,nx*offs+maxy]);
     fitx(:,i+1)=Vfitq;
     rawx(:,i+1)=Vq;
 end
@@ -130,7 +138,7 @@ function Output_Callback(hObject, eventdata, handles)
 % hObject    handle to Output (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-global  fitx rawx fitIm rawxIm yint;
+global  fitx rawx fitIm rawxIm yint FWHM;
 % Update handles structure
 load indSk_prop.mat
 load rawIm2.mat

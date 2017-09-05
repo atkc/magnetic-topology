@@ -124,10 +124,10 @@ function [dgrayIm, filIm, binIm, centroids]= m1_binarize (im,threshmode,threshle
     graindata = regionprops(cc,'centroid','Area','Perimeter');
     
 %     %%*****retrieve the area****************
-    area=[graindata.Area]
+    area=[graindata.Area];
     s=size(area);
-    avgArea=sum(area)/s(2)
-    size(graindata)
+    avgArea=sum(area)/s(2);
+    size(graindata);
     %%*****retrieve the perimeter****************
     perimeter=[graindata.Perimeter]; 
     
@@ -163,7 +163,7 @@ function [dgrayIm, filIm, binIm, centroids]= m1_binarize (im,threshmode,threshle
     graindata = graindata(index);
     cc.NumObjects=sum(index);%rearranging the indexes
     cc.PixelIdxList=cc.PixelIdxList(index);
-    size(graindata)
+    size(graindata);
     labeled = labelmatrix(cc); %label the areas
     fbinIm=(labeled>0);%not necessary to see labels, just get final binary image =)
     

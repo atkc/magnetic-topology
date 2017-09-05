@@ -22,7 +22,7 @@ function varargout = skID_gui(varargin)
 
 % Edit the above text to modify the response to help skID_gui
 
-% Last Modified by GUIDE v2.5 27-Mar-2017 18:58:19
+% Last Modified by GUIDE v2.5 05-Jun-2017 16:05:16
 
 % Begin initialization code - DO NOT EDIT
 %clear global;
@@ -100,8 +100,9 @@ maxSize=str2double(get(handles.maxSize,'String'));
 % adaptArea
 % erodeSize
 % [threshOpt,threshVal,adaptArea,erodeSize,filRpt,filSize,minSize,maxSize]
-[dgrayIm, ~, ~, centroids]=m1_binarize(rawIm,threshOpt,threshVal,adaptArea,erodeSize,filRpt,filSize,minSize,maxSize);
-radius=1.5*max(centroids(:,3));
+[dgrayIm, filIm, ~, centroids]=m1_binarize(rawIm,threshOpt,threshVal,adaptArea,erodeSize,filRpt,filSize,minSize,maxSize);
+[threshOpt,threshVal,adaptArea,erodeSize,filRpt,filSize,minSize,maxSize];
+radius=max(centroids(:,3));
 cla(handles.figBox,'reset');
 axes(handles.figBox);
 imshow(dgrayIm,[0,255]);
@@ -348,7 +349,7 @@ distxy=abs((centroids(:,1)-x).^2+(centroids(:,2)-y).^2);
 %disp('1 point removed');
 centroids(i,:)=[];
 centroidsR=centroids;
-radius =1.5*(centroids(:,3));
+radius =max(centroids(:,3));
 %radius =1.5* max(centroids(:,3));
 
 
@@ -389,7 +390,7 @@ ylim=get(handles.figBox,'yLim');
 
 if (x>xlim(1))&&(x<xlim(2))&&(y>ylim(1))&&(y<ylim(2));
     
-    size(centroids)
+    %size(centroids)
 
     if strcmp( get(handles.figure1,'selectionType') , 'alt')
         if ~isempty(centroids)
@@ -403,6 +404,7 @@ if (x>xlim(1))&&(x<xlim(2))&&(y>ylim(1))&&(y<ylim(2));
     axes(handles.figBox);
     imshow(dgrayIm,[0,255]);
     hold all;
+    %disp(centroids)
     plot_centers(handles,centroids);
 end
 
@@ -412,10 +414,13 @@ function fitBtn_Callback(hObject, eventdata, handles)
 % hObject    handle to fitBtn (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-global isofit dgrayIm centroids radius filename
+global isofit dgrayIm centroids radius filename 
 if ~isempty(centroids)
+    maxr = str2double(get(handles.maxr_edit,'string'));
+    imageSize = str2double(get(handles.size_text,'string'));
+    saveInd = get(handles.saveInd_box,'value');
     [~,name,ext] = fileparts(filename) ;
-    [isofit]=m2_fit2d(radius, centroids,dgrayIm,name);
+    [isofit]=m2_fit2d(radius, centroids,dgrayIm,name,maxr,saveInd,imageSize);
     
     centroids=isofit;
     cla(handles.figBox,'reset');
@@ -443,3 +448,57 @@ else
 end
 fclose(fileID);
 
+
+% --- Executes on button press in saveInd_box.
+function saveInd_box_Callback(hObject, eventdata, handles)
+% hObject    handle to saveInd_box (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of saveInd_box
+
+
+
+function maxr_edit_Callback(hObject, eventdata, handles)
+% hObject    handle to maxr_edit (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of maxr_edit as text
+%        str2double(get(hObject,'String')) returns contents of maxr_edit as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function maxr_edit_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to maxr_edit (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function size_text_Callback(hObject, eventdata, handles)
+% hObject    handle to size_text (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of size_text as text
+%        str2double(get(hObject,'String')) returns contents of size_text as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function size_text_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to size_text (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
