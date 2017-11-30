@@ -19,26 +19,30 @@ while (~isempty(x))
         sumz=int64(0);
         if ((sum(y == (fx(i)+1) & x == (fy(i))))==0)
             totals=totals+1;
-            rawim(fx(i)+1,fy(i))
+            indi=rawim(fx(i)+1,fy(i));
+            %disp(strcat('down:',int2str(indi)));
             sumz=sumz+int64(rawim(fx(i)+1,fy(i)));
         end
         if ((sum(y == (fx(i)-1) & x == (fy(i))))==0)
             totals=totals+1;
-            rawim(fx(i)-1,fy(i))
+            indi=rawim(fx(i)-1,fy(i));
             sumz=sumz+int64(rawim(fx(i)-1,fy(i)));
+            %disp(strcat('up:',int2str(indi)));
         end
         if ((sum(y == (fx(i)) & x == (fy(i)+1)))==0)
             totals=totals+1;
-            rawim(fx(i),fy(i)+1)
+            indi=rawim(fx(i),fy(i)+1);
             sumz=sumz+int64(rawim(fx(i),fy(i)+1));
+            %disp(strcat('right:',int2str(indi)));
         end
         if ((sum(y == (fx(i)) & x == (fy(i)-1)))==0)
             totals=totals+1;
-            rawim(fx(i),fy(i)-1)
+            indi=rawim(fx(i),fy(i)-1);
             sumz=sumz+int64(rawim(fx(i),fy(i)-1));
+            %disp(strcat('left:',int2str(indi)));
         end
-        avg_sum=(sumz/int64(totals))
-        avg_sum_16=uint16(avg_sum)
+        avg_sum=(sumz/int64(totals));
+        avg_sum_16=uint16(avg_sum);
         rawim(fx(i),fy(i))=(avg_sum_16);
     end
     C = setdiff([y,x],[fx,fy],'rows');

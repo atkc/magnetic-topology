@@ -47,7 +47,7 @@ function [dgrayIm, filIm, binIm, centroids]= m1_binarize (im,threshmode,threshle
     minPeri=2*pi*minD;
     maxPeri=2*pi*maxD;
     
-    maxMetric=0;
+    maxMetric=0.7;
     
     %minSize=0;
     %maxSize=30;
@@ -163,20 +163,26 @@ function [dgrayIm, filIm, binIm, centroids]= m1_binarize (im,threshmode,threshle
     graindata = graindata(index);
     cc.NumObjects=sum(index);%rearranging the indexes
     cc.PixelIdxList=cc.PixelIdxList(index);
-    size(graindata);
+    length(size(graindata));
+    
     labeled = labelmatrix(cc); %label the areas
     fbinIm=(labeled>0);%not necessary to see labels, just get final binary image =)
     
+    
     centroids = zeros(length(graindata),5); % [midx midy radius perimter roundness]
-    centroids(:,1:2)=cat(1,graindata.Centroid);
-    centroids(:,3)=sqrt([graindata.Area]/pi());
-    centroids(:,4)=[graindata.Perimeter];
+    
+    if (length(graindata)>1)
+        
+        centroids(:,1:2)=cat(1,graindata.Centroid);
+        centroids(:,3)=sqrt([graindata.Area]/pi());
+        centroids(:,4)=[graindata.Perimeter];
 
-        area=[graindata.Area];
-        perimeter=[graindata.Perimeter]; 
-        roundness = 4*pi*area./perimeter.^2;
+            area=[graindata.Area];
+            perimeter=[graindata.Perimeter]; 
+            roundness = 4*pi*area./perimeter.^2;
 
-    centroids(:,5)=roundness;
+        centroids(:,5)=roundness;
+    end
 
     
 %*************************************************************************

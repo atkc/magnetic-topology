@@ -100,8 +100,13 @@ maxSize=str2double(get(handles.maxSize,'String'));
 % adaptArea
 % erodeSize
 % [threshOpt,threshVal,adaptArea,erodeSize,filRpt,filSize,minSize,maxSize]
+[threshOpt,threshVal,adaptArea,erodeSize,filRpt,filSize,minSize,maxSize]'
 [dgrayIm, filIm, ~, centroids]=m1_binarize(rawIm,threshOpt,threshVal,adaptArea,erodeSize,filRpt,filSize,minSize,maxSize);
-[threshOpt,threshVal,adaptArea,erodeSize,filRpt,filSize,minSize,maxSize];
+
+if ~isempty(centroids)
+    [no,~]=size(centroids)
+    set(handles.noSk_text,'String',no);
+end
 radius=max(centroids(:,3));
 cla(handles.figBox,'reset');
 axes(handles.figBox);
@@ -223,7 +228,7 @@ global rawIm filename filepath;
 [filename,filepath]=uigetfile({'*.*','All Files'},...
   'Select Data File 1')
 rawIm=imread([filepath filename]);
-axes(handles.figBox);
+%rawIm=imcomplement(rawIm);
 imshow(rawIm);
 
 

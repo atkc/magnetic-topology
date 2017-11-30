@@ -92,7 +92,8 @@ function loadBtn_Callback(hObject, eventdata, handles)
 % hObject    handle to loadBtn (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-global rawIm rawImraw filename filepath immean imstd;
+global rawIm rawImraw filename filepath immean imstd centroids;
+centroids=[0,0];
 %clearvars rawIm filIm binIm centroids;
 [filename,filepath]=uigetfile({'*.*','All Files'},...
   'Select Data File 1')
@@ -100,11 +101,16 @@ rawImraw=imread([filepath filename]);
 rawIm=rawImraw(:,:,1);
 rawImraw=rawIm;
 axes(handles.figBox);
-immean=mean(reshape(rawIm(:,:,1),[length(rawIm)^2,1]));
+[lengthim,widthim]=size(rawIm);
+immean=mean(reshape(rawIm(:,:,1),[lengthim*widthim,1]));
 imstd=std(double((reshape(rawIm(:,:,1),[length(rawIm)^2,1]))));
 imshow(rawIm,[immean-0.5*imstd,immean+0.5*imstd]);
-clearvars centroids
-
+[c_max,r_max]=find(rawIm>(immean+0.5*imstd));
+[c_min,r_min]=find(rawIm<(immean-0.5*imstd));
+centroids= [[r_min;r_max],[c_min;c_max]];
+if ~isempty(centroids)
+    plot_centers(handles,centroids);
+end
 
 
 % --- Executes on mouse press over axes background.
@@ -173,9 +179,9 @@ global dgrayIm rawIm filIm binIm centroids immean imstd;
 F = get(handles.figBox,'currentpoint');
 x=round(F(1));
 y=round(F(3));
-
 xlim=get(handles.figBox,'xLim');
 ylim=get(handles.figBox,'yLim');
+
 
 if (x>xlim(1))&&(x<xlim(2))&&(y>ylim(1))&&(y<ylim(2));
     
