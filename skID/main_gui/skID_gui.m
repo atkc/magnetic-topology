@@ -22,7 +22,7 @@ function varargout = skID_gui(varargin)
 
 % Edit the above text to modify the response to help skID_gui
 
-% Last Modified by GUIDE v2.5 05-Jun-2017 16:05:16
+% Last Modified by GUIDE v2.5 01-Dec-2017 11:38:27
 
 % Begin initialization code - DO NOT EDIT
 %clear global;
@@ -228,6 +228,11 @@ global rawIm filename filepath;
 [filename,filepath]=uigetfile({'*.*','All Files'},...
   'Select Data File 1')
 rawIm=imread([filepath filename]);
+InvertInd = get(handles.invert_box,'value');
+if InvertInd
+    rawIm = imcomplement(rawIm);
+end
+
 %rawIm=imcomplement(rawIm);
 imshow(rawIm);
 
@@ -413,20 +418,27 @@ if (x>xlim(1))&&(x<xlim(2))&&(y>ylim(1))&&(y<ylim(2));
     plot_centers(handles,centroids);
 end
 
+if ~isempty(centroids)
+    [no,~]=size(centroids)
+    set(handles.noSk_text,'String',no);
+end
+
 
 % --- Executes on button press in fitBtn.
 function fitBtn_Callback(hObject, eventdata, handles)
 % hObject    handle to fitBtn (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+set(handles.text31,'String','Fitting...');
 global isofit dgrayIm centroids radius filename 
 if ~isempty(centroids)
     maxr = str2double(get(handles.maxr_edit,'string'));
     imageSize = str2double(get(handles.size_text,'string'));
-    saveInd = get(handles.saveInd_box,'value');
-    [~,name,ext] = fileparts(filename) ;
-    [isofit]=m2_fit2d(radius, centroids,dgrayIm,name,maxr,saveInd,imageSize);
+    saveInd = get(handles.saveInd_box,'value');    
+    [~,name,ext] = fileparts(filename);
+    [isofit,unfitno]=m2_fit2d(radius, centroids,dgrayIm,name,maxr,saveInd,imageSize);
     
+    set(handles.text31,'String',strcat('Fitting done, Unable to fit  ',num2str(unfitno),' sk'));
     centroids=isofit;
     cla(handles.figBox,'reset');
     axes(handles.figBox);
@@ -446,10 +458,13 @@ cd(filepath);
 [~,name,ext] = fileparts(filename) ;
 fileID = fopen(strcat(name,'_skyrmion_xy.txt'),'wt');
 % isofit;
+% print a title, followed by a blank line
+fprintf(fileID, '%s %s %s %s %s\n\n','x (px)','y (px)','sigma (px)','fwhm (px)');
+
 if ~isempty(isofit) 
-    fprintf(fileID,'%2.2f %2.2f %2.2f %2.2f %2.2f\n',isofit(:,1:5)');
+    fprintf(fileID,'\n%2.2f %2.2f %2.2f %2.2f',isofit(:,1:4)');
 else
-    fprintf(fileID,'%2.2f %2.2f %2.2f %2.2f %2.2f\n',centroids(:,1:2)');
+    fprintf(fileID,'\n%2.2f %2.2f %2.2f %2.2f',centroids(:,1:2)');
 end
 fclose(fileID);
 
@@ -507,3 +522,17 @@ function size_text_CreateFcn(hObject, eventdata, handles)
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
+
+
+% --- Executes on button press in invert_box.
+function invert_checkbox_Callback(hObject, eventdata, handles)
+global rawIm
+% hObject    handle to invert_box (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+rawIm = imcomplement(rawIm);
+cla(handles.figBox,'reset');
+axes(handles.figBox);
+imshow(rawIm,[0,255]);
+% Hint: get(hObject,'Value') returns toggle state of invert_box
+
