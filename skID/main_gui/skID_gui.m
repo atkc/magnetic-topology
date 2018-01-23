@@ -22,7 +22,7 @@ function varargout = skID_gui(varargin)
 
 % Edit the above text to modify the response to help skID_gui
 
-% Last Modified by GUIDE v2.5 01-Dec-2017 11:38:27
+% Last Modified by GUIDE v2.5 22-Jan-2018 10:07:12
 
 % Begin initialization code - DO NOT EDIT
 %clear global;
@@ -72,7 +72,7 @@ function varargout = skID_gui_OutputFcn(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 % Get default command line output from handles structure
-varargout{1} = handles.output;
+varargout{1} = handles.output; 
 
 
 % --- Executes on button press in executeBtn.
@@ -228,6 +228,8 @@ global rawIm filename filepath;
 [filename,filepath]=uigetfile({'*.*','All Files'},...
   'Select Data File 1')
 rawIm=imread([filepath filename]);
+%fil_basic=[0 1/5 0;1/5 1/5 1/5;0 1/5 0];
+%rawIm=imfilter(rawIm,fil_basic);
 InvertInd = get(handles.invert_box,'value');
 if InvertInd
     rawIm = imcomplement(rawIm);
@@ -430,16 +432,18 @@ function fitBtn_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 set(handles.text31,'String','Fitting...');
-global isofit dgrayIm centroids radius filename 
+global xyfit isofit dgrayIm centroids radius filename 
 if ~isempty(centroids)
     maxr = str2double(get(handles.maxr_edit,'string'));
     imageSize = str2double(get(handles.size_text,'string'));
     saveInd = get(handles.saveInd_box,'value');    
     [~,name,ext] = fileparts(filename);
-    [isofit,unfitno]=m2_fit2d(radius, centroids,dgrayIm,name,maxr,saveInd,imageSize);
+    %[isofit,unfitno]=m2_fit2d(radius, centroids,dgrayIm,name,maxr,saveInd,imageSize);
+    [xyfit,unfitno]=m2_fit2d_aniso(radius, centroids,dgrayIm,name,maxr,saveInd,imageSize);
     
     set(handles.text31,'String',strcat('Fitting done, Unable to fit  ',num2str(unfitno),' sk'));
-    centroids=isofit;
+    %centroids=isofit;
+    centroids=xyfit;
     cla(handles.figBox,'reset');
     axes(handles.figBox);
     imshow(dgrayIm,[0,255]);
@@ -453,7 +457,7 @@ function outputBtn_Callback(hObject, eventdata, handles)
 % hObject    handle to outputBtn (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-global centroids isofit filepath filename;
+global centroids xyfit isofit filepath filename;
 cd(filepath);
 [~,name,ext] = fileparts(filename) ;
 fileID = fopen(strcat(name,'_skyrmion_xy.txt'),'wt');
@@ -466,7 +470,15 @@ if ~isempty(isofit)
 else
     fprintf(fileID,'\n%2.2f %2.2f %2.2f %2.2f',centroids(:,1:2)');
 end
+
 fclose(fileID);
+
+if ~isempty(xyfit)
+    fileID = fopen(strcat(name,'_skyrmion_xy.txt'),'wt');
+    fprintf(fileID, '%s %s %s %s %s %s %s','x (px)','y (px)','sigma1 (px)','sigma2 (px)','theta (o)','noise','amplitude');
+    fprintf(fileID,'\n%2.2f %2.2f %2.2f %2.2f %2.2f %2.2f %2.2f',xyfit(:,1:7)');
+    fclose(fileID);
+end
 
 
 % --- Executes on button press in saveInd_box.
@@ -536,3 +548,16 @@ axes(handles.figBox);
 imshow(rawIm,[0,255]);
 % Hint: get(hObject,'Value') returns toggle state of invert_box
 
+
+
+% --- Executes on button press in checkEdge.
+function checkEdge_Callback(hObject, eventdata, handles)
+global centroids radius dgrayIm
+centroids=checkEdge(centroids,2*radius,size(dgrayIm));
+cla(handles.figBox,'reset');
+axes(handles.figBox);
+imshow(dgrayIm,[0,255]);
+plot_centers(handles,centroids);
+% hObject    handle to checkEdge (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)

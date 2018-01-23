@@ -61,11 +61,17 @@ load rawIm2.mat
 
 FWHM=indSk_prop(3)*2*(2*log(2))^0.5;
 FWHMreal=indSk_prop(3)*1000*indSk_prop(6)*2*(2*log(2))^0.5;
-set(handles.text4,'string',num2str(FWHM));
-set(handles.text6,'string',num2str(FWHMreal));
+set(handles.text4,'string',num2str(indSk_prop(3)));
+set(handles.text6,'string',num2str(indSk_prop(4)));
 
 handles.rawIm2 = rawIm2;
-fitIm=Gfun2D(size(rawIm2),indSk_prop(1),indSk_prop(2),indSk_prop(3),indSk_prop(4),indSk_prop(5));
+indSk_prop
+if (length(indSk_prop)==6)
+    fitIm=Gfun2D(size(rawIm2),indSk_prop(1),indSk_prop(2),indSk_prop(3),indSk_prop(4),indSk_prop(5));
+else
+    fitIm=Gfun2D_aniso(size(rawIm2),indSk_prop(1),indSk_prop(2),indSk_prop(3),indSk_prop(4),indSk_prop(5),indSk_prop(6),indSk_prop(7));
+end
+max(max(fitIm))
 handles.fitIm = fitIm;
 save('fitIm.mat','fitIm');
 
