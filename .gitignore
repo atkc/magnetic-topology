@@ -15,3 +15,13 @@ slprj/
 
 # Session info
 octave-workspace
+
+#common image files
+*.tiff 
+*.png 
+*.jpg 
+*.tif
+
+
+#common matlab mat files
+*.mat

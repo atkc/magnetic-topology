@@ -1,4 +1,4 @@
-function [dgrayIm, filIm, binIm, centroids]= m1_binarize (im,threshmode,threshlevel,adaptThreshArea,erodeSize,filterRepeat,filterArea,minSize,maxSize)
+function [dgrayIm, filIm, binIm1, binIm2 ,binIm3, centroids]= m1_binarize (im,threshmode,threshlevel,adaptThreshArea,erodeSize,filterRepeat,filterArea,minSize,maxSize,c_th,e_th,imageSize,conn)
 
 %Description:
 
@@ -47,8 +47,8 @@ function [dgrayIm, filIm, binIm, centroids]= m1_binarize (im,threshmode,threshle
     minPeri=2*pi*minD;
     maxPeri=2*pi*maxD;
     
-    maxMetric=0.7;
-    
+    c_th_1=c_th; %circularity index 1
+    c_th_2=0.38; %circularity index 2
     %minSize=0;
     %maxSize=30;
 
@@ -87,7 +87,7 @@ function [dgrayIm, filIm, binIm, centroids]= m1_binarize (im,threshmode,threshle
 %*************************************************************************
     if threshmode==1
         if threshlevel==0
-            threshlevel = multithresh(filIm/max(max(filIm))) %automatically detects the threshold value to use
+            threshlevel = multithresh(filIm/max(max(filIm))); %automatically detects the threshold value to use
         end
     
         binIm= im2bw(filIm/max(max(filIm)),threshlevel); %perform threhold with threshold value
@@ -118,22 +118,23 @@ function [dgrayIm, filIm, binIm, centroids]= m1_binarize (im,threshmode,threshle
 %*************************************************************************
 %*****************************Segregate Area******************************
 %*************************************************************************
-
+    binIm = imfill(binIm,'holes');
     %%****segregate the patches*************
-    cc=bwconncomp(binIm);
-    graindata = regionprops(cc,'centroid','Area','Perimeter');
+    %binIm=chopIT(binIm);
+    cc=bwconncomp(binIm,conn);
+    graindata = regionprops(cc,'centroid','Area','PerimeterOld','MajorAxisLength','MinorAxisLength');
     
 %     %%*****retrieve the area****************
     area=[graindata.Area];
     s=size(area);
-    avgArea=sum(area)/s(2);
-    size(graindata);
+    avgArea=median(area);
     %%*****retrieve the perimeter****************
-    perimeter=[graindata.Perimeter]; 
-    
+    perimeter=[graindata.PerimeterOld]; %not good for roundness (too much approx)
+    %perimeter=Peri_noob(cc,size(binIm));
     % compute the roundness metric
-    roundness = 4*pi*area./perimeter.^2;
-
+    roundness = 4*pi*(area./(perimeter.^2));
+    
+    
     
 %*************************************************************************
 %*****************************Post-filter 2*******************************
@@ -143,13 +144,20 @@ function [dgrayIm, filIm, binIm, centroids]= m1_binarize (im,threshmode,threshle
 %*************************************************************************
 
     %%******1: remove small/big areas *********
-    index1=([graindata.Area]>minSize*avgArea);
-    index2=([graindata.Area]<maxSize*avgArea);
-    index= index1 & index2;
-    graindata = graindata(index);
+    minArea=pi*(length(im)*minSize/(imageSize*1000))^2;
+    maxArea=pi*(length(im)*maxSize/(imageSize*1000))^2;
+    index1=([graindata.Area]>minArea);%minSize*avgArea);
+    index2=([graindata.Area]<maxArea);%maxSize*avgArea);
+    index3=(roundness>c_th_1);
+    index= (index1 & index2) & index3;
+    graindata1 = graindata(index);
+    
+    index4=([graindata.Area]<(6*(minArea+maxArea)/2));
+    graindata2 = graindata((~index)&index4);
     roundness=roundness(index);
-    cc.NumObjects=sum(index);%rearranging the indexes
-    cc.PixelIdxList=cc.PixelIdxList(index);
+%     cc.NumObjects=sum(index);%rearranging the indexes
+%     cc.PixelIdxList=cc.PixelIdxList(index);
+    
     
 %     %%******2: remove areas with min/max perimeter *********
 %     index=((roundness>maxMetric).*([graindata.Perimeter]>minPeri).*([graindata.Perimeter]<maxPeri))>0; % retrival of index
@@ -159,32 +167,54 @@ function [dgrayIm, filIm, binIm, centroids]= m1_binarize (im,threshmode,threshle
 %     cc.PixelIdxList=cc.PixelIdxList(index); % Updating the objects list
     
     %%******3: remove areas with high circularity metric *********
-    index=(roundness>maxMetric);
-    graindata = graindata(index);
+%     index1=(roundness>c_th_1);
+%     index2=logical((roundness<c_th_1).*(roundness>c_th_2));
+%     index3=(roundness<c_th_2);
+%     
+%     graindata3 = graindata(index3); %ee
+%     graindata2 = graindata(index2); %dd
+%     graindata = graindata(index1);
+
+%     ee.Connectivity=cc.Connectivity;
+%     ee.ImageSize=cc.ImageSize;
+%     ee.NumObjects=sum(index3);%rearranging the indexes
+%     ee.PixelIdxList=cc.PixelIdxList(index3);
+    
+    dd.Connectivity=cc.Connectivity;
+    dd.ImageSize=cc.ImageSize;
+    dd.NumObjects=sum((~index)&index4);%rearranging the indexes
+    dd.PixelIdxList=cc.PixelIdxList((~index)&index4);
+    
     cc.NumObjects=sum(index);%rearranging the indexes
     cc.PixelIdxList=cc.PixelIdxList(index);
     length(size(graindata));
+    binIm3=0;
+%     labeled3 = labelmatrix(ee); %label the areas
+%     binIm3=(labeled3>0);%not necessary to see labels, just get final binary image =)
     
-    labeled = labelmatrix(cc); %label the areas
-    fbinIm=(labeled>0);%not necessary to see labels, just get final binary image =)
+    labeled2 = labelmatrix(dd); %label the areas
+    binIm2=(labeled2>0);%not necessary to see labels, just get final binary image =)
+    
+    labeled1 = labelmatrix(cc); %label the areas
+    binIm1=(labeled1>0);%not necessary to see labels, just get final binary image =)
+    
+    centroids = zeros(length(graindata1),5); % [midx midy radius perimter roundness]
     
     
-    centroids = zeros(length(graindata),5); % [midx midy radius perimter roundness]
     
     if (length(graindata)>1)
         
-        centroids(:,1:2)=cat(1,graindata.Centroid);
-        centroids(:,3)=sqrt([graindata.Area]/pi());
-        centroids(:,4)=[graindata.Perimeter];
+        centroids(:,1:2)=cat(1,graindata1.Centroid);
+        centroids(:,3)=sqrt([graindata1.Area]/pi());
+        centroids(:,4)=[graindata1.PerimeterOld];
 
-            area=[graindata.Area];
-            perimeter=[graindata.Perimeter]; 
-            roundness = 4*pi*area./perimeter.^2;
-
+        area=[graindata1.Area];
+        perimeter=[graindata1.PerimeterOld]; 
+        roundness = 4*pi*area./perimeter.^2;
         centroids(:,5)=roundness;
     end
 
-    
+    assignin('base','C',graindata);
 %*************************************************************************
 %*****************************Get mask************************************
 %not necessary: fitting will be done with centroids on the original image
@@ -222,5 +252,5 @@ function [dgrayIm, filIm, binIm, centroids]= m1_binarize (im,threshmode,threshle
 %     end
 % figure;
 %     imshow(filIm,[0,max(max(filIm))]);
-clearvars -except threshlevel dgrayIm centroids binIm isofit xyfit filIm fbinIm
+clearvars -except threshlevel dgrayIm centroids binIm isofit xyfit filIm binIm1 binIm2 binIm3
 end

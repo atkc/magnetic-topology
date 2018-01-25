@@ -22,7 +22,7 @@ function varargout = skID_gui(varargin)
 
 % Edit the above text to modify the response to help skID_gui
 
-% Last Modified by GUIDE v2.5 22-Jan-2018 10:07:12
+% Last Modified by GUIDE v2.5 25-Jan-2018 23:22:04
 
 % Begin initialization code - DO NOT EDIT
 %clear global;
@@ -96,22 +96,56 @@ filRpt=str2double(get(handles.filRpt,'String'));
 filSize=str2double(get(handles.filSize,'String'));
 minSize=str2double(get(handles.minSize,'String'));
 maxSize=str2double(get(handles.maxSize,'String'));
+c_th=str2double(get(handles.c_th,'String'));
+e_th=str2double(get(handles.e_th,'String'));
+imageSize = str2double(get(handles.size_text,'string'));
 % threshVal
 % adaptArea
 % erodeSize
 % [threshOpt,threshVal,adaptArea,erodeSize,filRpt,filSize,minSize,maxSize]
+connect=4;%8
 [threshOpt,threshVal,adaptArea,erodeSize,filRpt,filSize,minSize,maxSize]'
-[dgrayIm, filIm, ~, centroids]=m1_binarize(rawIm,threshOpt,threshVal,adaptArea,erodeSize,filRpt,filSize,minSize,maxSize);
+[dgrayIm, filIm, binIm1, binIm2, binIm3, centroids]=m1_binarize(rawIm,threshOpt,threshVal,adaptArea,erodeSize,filRpt,filSize,minSize,maxSize,c_th,e_th,imageSize,connect);
 
-if ~isempty(centroids)
-    [no,~]=size(centroids)
-    set(handles.noSk_text,'String',no);
-end
-radius=max(centroids(:,3));
+
+radius=mean(centroids(:,3));
 cla(handles.figBox,'reset');
 axes(handles.figBox);
 imshow(dgrayIm,[0,255]);
+
+
+binIm1= filIT( binIm1,minSize,maxSize,c_th,e_th,imageSize,connect);
+drawBoundaries(handles,binIm1,'r',1,connect);
+
+binIm2=chopIT(binIm2);
+binIm2= filIT( binIm2,minSize,maxSize,0.38,e_th,imageSize,connect);
+drawBoundaries(handles,binIm2,'b',1,connect);
+
+binIm=binIm2 + binIm1;
+cc=bwconncomp(binIm,connect);
+graindata = regionprops(cc,'centroid','Area','PerimeterOld','MajorAxisLength','MinorAxisLength');
+centroids=zeros(length(graindata),5);
+if (length(graindata)>1)
+
+    centroids(:,1:2)=cat(1,graindata.Centroid);
+    centroids(:,3)=sqrt([graindata.Area]/pi());
+    centroids(:,4)=[graindata.PerimeterOld];
+
+    area=[graindata.Area];
+    perimeter=[graindata.PerimeterOld]; 
+    roundness = 4*pi*area./perimeter.^2;
+    centroids(:,5)=roundness;
+    [no,~]=size(centroids)
+    set(handles.noSk_text,'String',no);
+end
 plot_centers(handles,centroids);
+%binIm3=chopIT(binIm3);
+%binIm3= filIT( binIm3,0.6);
+%drawBoundaries(handles,binIm3,'w',1,connect);
+
+assignin('base','binIm1',binIm1);
+assignin('base','binIm2',binIm2);
+figure;imshow(binIm1);
 set(handles.figBox, 'ButtonDownFcn', @figBox_ButtonDownFcn); 
 
 % --- Executes on button press in filBtn.
@@ -122,10 +156,6 @@ function filBtn_Callback(hObject, eventdata, handles)
 
 % Hint: get(hObject,'Value') returns toggle state of filBtn
 
-
-
-
-
 function threshVal_Callback(hObject, eventdata, handles)
 % hObject    handle to threshVal (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
@@ -133,7 +163,6 @@ function threshVal_Callback(hObject, eventdata, handles)
 
 % Hints: get(hObject,'String') returns contents of threshVal as text
 %        str2double(get(hObject,'String')) returns contents of threshVal as a double
-
 
 % --- Executes during object creation, after setting all properties.
 function threshVal_CreateFcn(hObject, eventdata, handles)
@@ -147,17 +176,12 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
     set(hObject,'BackgroundColor','white');
 end
 
-
-
 function adaptArea_Callback(hObject, eventdata, handles)
 % hObject    handle to adaptArea (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-
 % Hints: get(hObject,'String') returns contents of adaptArea as text
 %        str2double(get(hObject,'String')) returns contents of adaptArea as a double
-
-
 % --- Executes during object creation, after setting all properties.
 function adaptArea_CreateFcn(hObject, eventdata, handles)
 % hObject    handle to adaptArea (see GCBO)
@@ -169,8 +193,6 @@ function adaptArea_CreateFcn(hObject, eventdata, handles)
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
-
-
 
 function erodeSize_Callback(hObject, eventdata, handles)
 % hObject    handle to erodeSize (see GCBO)
@@ -185,8 +207,6 @@ if isempty(str2num(str))
     set(hObject,'string','1');
     warndlg('Input must be numerical');
 end
-
-
 % --- Executes during object creation, after setting all properties.
 function erodeSize_CreateFcn(hObject, eventdata, handles)
 % hObject    handle to erodeSize (see GCBO)
@@ -198,27 +218,21 @@ function erodeSize_CreateFcn(hObject, eventdata, handles)
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
-
-
 % --- Executes on button press in threshOpt1.
 function threshOpt1_Callback(hObject, eventdata, handles)
 % hObject    handle to threshOpt1 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-
 % Hint: get(hObject,'Value') returns toggle state of threshOpt1
-
-
 % --- Executes on button press in threshOpt2.
 function threshOpt2_Callback(hObject, eventdata, handles)
 % hObject    handle to threshOpt2 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-
 % Hint: get(hObject,'Value') returns toggle state of threshOpt2
-
-
 % --- Executes on button press in loadBtn.
+
+
 function loadBtn_Callback(hObject, eventdata, handles)
 % hObject    handle to loadBtn (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
@@ -234,7 +248,7 @@ InvertInd = get(handles.invert_box,'value');
 if InvertInd
     rawIm = imcomplement(rawIm);
 end
-
+rawIm = imresize(rawIm,1024/length(rawIm),'bicubic');
 %rawIm=imcomplement(rawIm);
 imshow(rawIm);
 
@@ -242,35 +256,26 @@ imshow(rawIm);
 function filSize_Callback(hObject, eventdata, handles)
 % hObject    handle to filSize (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
+% handles    structure with handles and user data (see GUIDATA)=
 % Hints: get(hObject,'String') returns contents of filSize as text
 %        str2double(get(hObject,'String')) returns contents of filSize as a double
-
-
 % --- Executes during object creation, after setting all properties.
 function filSize_CreateFcn(hObject, eventdata, handles)
 % hObject    handle to filSize (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    empty - handles not created until after all CreateFcns called
-
 % Hint: edit controls usually have a white background on Windows.
 %       See ISPC and COMPUTER.
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
 
-
-
 function filRpt_Callback(hObject, eventdata, handles)
 % hObject    handle to filRpt (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-
 % Hints: get(hObject,'String') returns contents of filRpt as text
 %        str2double(get(hObject,'String')) returns contents of filRpt as a double
-
-
 % --- Executes during object creation, after setting all properties.
 function filRpt_CreateFcn(hObject, eventdata, handles)
 % hObject    handle to filRpt (see GCBO)
@@ -283,17 +288,12 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
     set(hObject,'BackgroundColor','white');
 end
 
-
-
 function minSize_Callback(hObject, eventdata, handles)
 % hObject    handle to minSize (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-
 % Hints: get(hObject,'String') returns contents of minSize as text
 %        str2double(get(hObject,'String')) returns contents of minSize as a double
-
-
 % --- Executes during object creation, after setting all properties.
 function minSize_CreateFcn(hObject, eventdata, handles)
 % hObject    handle to minSize (see GCBO)
@@ -306,30 +306,22 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
     set(hObject,'BackgroundColor','white');
 end
 
-
-
 function maxSize_Callback(hObject, eventdata, handles)
 % hObject    handle to maxSize (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-
 % Hints: get(hObject,'String') returns contents of maxSize as text
 %        str2double(get(hObject,'String')) returns contents of maxSize as a double
-
-
 % --- Executes during object creation, after setting all properties.
 function maxSize_CreateFcn(hObject, eventdata, handles)
 % hObject    handle to maxSize (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    empty - handles not created until after all CreateFcns called
-
 % Hint: edit controls usually have a white background on Windows.
 %       See ISPC and COMPUTER.
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
-
-
 % --- Executes on mouse press over axes background.
 function figBox_ButtonDownFcn(hObject, eventdata, handles)
 % global rawIm filIm binIm centroids;
@@ -363,8 +355,6 @@ centroids(i,:)=[];
 centroidsR=centroids;
 radius =max(centroids(:,3));
 %radius =1.5* max(centroids(:,3));
-
-
 
 % --- Executes on mouse motion over figure - except title and menu.
 function figure1_WindowButtonMotionFcn(hObject, eventdata, handles)
@@ -486,20 +476,13 @@ function saveInd_box_Callback(hObject, eventdata, handles)
 % hObject    handle to saveInd_box (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-
 % Hint: get(hObject,'Value') returns toggle state of saveInd_box
-
-
-
 function maxr_edit_Callback(hObject, eventdata, handles)
 % hObject    handle to maxr_edit (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-
 % Hints: get(hObject,'String') returns contents of maxr_edit as text
 %        str2double(get(hObject,'String')) returns contents of maxr_edit as a double
-
-
 % --- Executes during object creation, after setting all properties.
 function maxr_edit_CreateFcn(hObject, eventdata, handles)
 % hObject    handle to maxr_edit (see GCBO)
@@ -511,18 +494,12 @@ function maxr_edit_CreateFcn(hObject, eventdata, handles)
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
-
-
-
 function size_text_Callback(hObject, eventdata, handles)
 % hObject    handle to size_text (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-
 % Hints: get(hObject,'String') returns contents of size_text as text
 %        str2double(get(hObject,'String')) returns contents of size_text as a double
-
-
 % --- Executes during object creation, after setting all properties.
 function size_text_CreateFcn(hObject, eventdata, handles)
 % hObject    handle to size_text (see GCBO)
@@ -534,8 +511,6 @@ function size_text_CreateFcn(hObject, eventdata, handles)
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
-
-
 % --- Executes on button press in invert_box.
 function invert_checkbox_Callback(hObject, eventdata, handles)
 global rawIm
@@ -561,3 +536,20 @@ plot_centers(handles,centroids);
 % hObject    handle to checkEdge (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+
+
+function c_th_Callback(hObject, eventdata, handles)
+
+function c_th_CreateFcn(hObject, eventdata, handles)
+
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+function e_th_Callback(hObject, eventdata, handles)
+
+function e_th_CreateFcn(hObject, eventdata, handles)
+
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
