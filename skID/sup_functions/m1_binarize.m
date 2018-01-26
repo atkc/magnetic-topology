@@ -1,4 +1,4 @@
-function [dgrayIm, filIm, binIm1, binIm2 ,binIm3, centroids]= m1_binarize (im,threshmode,threshlevel,adaptThreshArea,erodeSize,filterRepeat,filterArea,minSize,maxSize,c_th,e_th,imageSize,conn)
+function [dgrayIm, filIm, binIm1, binIm2 ,binIm3, centroids,threshVal]= m1_binarize (im,threshmode,threshlevel,adaptThreshArea,erodeSize,filterRepeat,filterArea,minSize,maxSize,c_th,e_th,imageSize,conn)
 
 %Description:
 
@@ -88,6 +88,7 @@ function [dgrayIm, filIm, binIm1, binIm2 ,binIm3, centroids]= m1_binarize (im,th
     if threshmode==1
         if threshlevel==0
             threshlevel = multithresh(filIm/max(max(filIm))); %automatically detects the threshold value to use
+            threshVal=threshlevel;
         end
     
         binIm= im2bw(filIm/max(max(filIm)),threshlevel); %perform threhold with threshold value
@@ -252,5 +253,5 @@ function [dgrayIm, filIm, binIm1, binIm2 ,binIm3, centroids]= m1_binarize (im,th
 %     end
 % figure;
 %     imshow(filIm,[0,max(max(filIm))]);
-clearvars -except threshlevel dgrayIm centroids binIm isofit xyfit filIm binIm1 binIm2 binIm3
+clearvars -except threshlevel dgrayIm centroids binIm isofit xyfit filIm binIm1 binIm2 binIm3 threshVal
 end

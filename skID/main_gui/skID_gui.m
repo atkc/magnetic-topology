@@ -80,7 +80,7 @@ function executeBtn_Callback(hObject, eventdata, handles)
 % hObject    handle to executeBtn (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-global rawIm dgrayIm filIm binIm centroids radius;
+global rawIm dgrayIm filIm binIm centroids radius param imageSize;
 th = get(get(handles.threshOpt,'SelectedObject'), 'Tag');
 threshOpt=[];
 switch th
@@ -104,8 +104,8 @@ imageSize = str2double(get(handles.size_text,'string'));
 % erodeSize
 % [threshOpt,threshVal,adaptArea,erodeSize,filRpt,filSize,minSize,maxSize]
 connect=4;%8
-[threshOpt,threshVal,adaptArea,erodeSize,filRpt,filSize,minSize,maxSize]'
-[dgrayIm, filIm, binIm1, binIm2, binIm3, centroids]=m1_binarize(rawIm,threshOpt,threshVal,adaptArea,erodeSize,filRpt,filSize,minSize,maxSize,c_th,e_th,imageSize,connect);
+%[threshOpt,threshVal,adaptArea,erodeSize,filRpt,filSize,minSize,maxSize]'
+[dgrayIm, filIm, binIm1, binIm2, binIm3, centroids,threshVal]=m1_binarize(rawIm,threshOpt,threshVal,adaptArea,erodeSize,filRpt,filSize,minSize,maxSize,c_th,e_th,imageSize,connect);
 
 
 radius=mean(centroids(:,3));
@@ -135,10 +135,9 @@ if (length(graindata)>1)
     perimeter=[graindata.PerimeterOld]; 
     roundness = 4*pi*area./perimeter.^2;
     centroids(:,5)=roundness;
-    [no,~]=size(centroids)
-    set(handles.noSk_text,'String',no);
 end
 plot_centers(handles,centroids);
+update_count( handles,centroids,imageSize )
 %binIm3=chopIT(binIm3);
 %binIm3= filIT( binIm3,0.6);
 %drawBoundaries(handles,binIm3,'w',1,connect);
@@ -146,6 +145,7 @@ plot_centers(handles,centroids);
 assignin('base','binIm1',binIm1);
 assignin('base','binIm2',binIm2);
 figure;imshow(binIm1);
+param=[threshOpt,threshVal,adaptArea,erodeSize,filRpt,filSize,minSize,maxSize,c_th,e_th,connect];
 set(handles.figBox, 'ButtonDownFcn', @figBox_ButtonDownFcn); 
 
 % --- Executes on button press in filBtn.
@@ -382,7 +382,7 @@ function figure1_WindowButtonDownFcn(hObject, eventdata, handles)
 % hObject    handle to figure1 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-global dgrayIm rawIm filIm binIm centroids;
+global dgrayIm rawIm filIm binIm centroids imageSize;
 F = get(handles.figBox,'currentpoint');
 x=F(1);
 y=F(3);
@@ -410,10 +410,7 @@ if (x>xlim(1))&&(x<xlim(2))&&(y>ylim(1))&&(y<ylim(2));
     plot_centers(handles,centroids);
 end
 
-if ~isempty(centroids)
-    [no,~]=size(centroids)
-    set(handles.noSk_text,'String',no);
-end
+update_count( handles,centroids,imageSize);
 
 
 % --- Executes on button press in fitBtn.
@@ -422,7 +419,7 @@ function fitBtn_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 set(handles.text31,'String','Fitting...');
-global xyfit isofit dgrayIm centroids radius filename 
+global xyfit isofit dgrayIm centroids radius filename imageSize
 if ~isempty(centroids)
     maxr = str2double(get(handles.maxr_edit,'string'));
     imageSize = str2double(get(handles.size_text,'string'));
@@ -439,6 +436,7 @@ if ~isempty(centroids)
     imshow(dgrayIm,[0,255]);
     hold all;
     plot_centers(handles,centroids);
+    update_count( handles,centroids,imageSize);
 end
 
 
@@ -447,13 +445,30 @@ function outputBtn_Callback(hObject, eventdata, handles)
 % hObject    handle to outputBtn (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-global centroids xyfit isofit filepath filename;
+global centroids xyfit isofit filepath filename param imageSize;
 cd(filepath);
 [~,name,ext] = fileparts(filename) ;
 fileID = fopen(strcat(name,'_skyrmion_xy.txt'),'wt');
 % isofit;
 % print a title, followed by a blank line
-fprintf(fileID, '%s %s %s %s %s\n\n','x (px)','y (px)','sigma (px)','fwhm (px)');
+%parameters
+%threshOpt,threshVal,adaptArea,erodeSize,filRpt,filSize,minSize,maxSize,c_th,e_th,imageSize,connect
+
+
+if ~isempty(centroids) 
+    fprintf(fileID, '\n%s %s %s\n\n','Sk no(#)','Density (#/um^2)');
+    [skno,~]=size(centroids);
+    fprintf(fileID,'\n%2.2f %2.2f',skno,skno/(imageSize)^2);
+end
+    
+fprintf(fileID, '\n\n%s %s %s %s %s %s %s %s %s %s %s %s','threshOpt(#)','threshVal(#)','adaptArea(px)','erodeSize(px)','filRpt(#)','filSize(px^2)','minSize(px^2)','maxSize(px^2)','c_th(#)','e_th(#)','connect(px)','image length(um)');
+if ~isempty(param) 
+    fprintf(fileID, '\n%2.2f %2.2f %2.2f %2.2f %2.2f %2.2f %2.2f %2.2f %2.2f %2.2f %2.2f %2.2f',param,imageSize);
+else
+    fprintf(fileID, '\n%2.2f %2.2f %2.2f %2.2f %2.2f %2.2f %2.2f %2.2f %2.2f %2.2f %2.2f %2.2f',zeros(1,12));
+end
+
+fprintf(fileID, '\n\n%s %s %s %s %s\n\n','x (px)','y (px)','sigma (px)','fwhm (px)');
 
 if ~isempty(isofit) 
     fprintf(fileID,'\n%2.2f %2.2f %2.2f %2.2f',isofit(:,1:4)');
@@ -527,12 +542,13 @@ imshow(rawIm,[0,255]);
 
 % --- Executes on button press in checkEdge.
 function checkEdge_Callback(hObject, eventdata, handles)
-global centroids radius dgrayIm
+global centroids radius dgrayIm imageSize
 centroids=checkEdge(centroids,2*radius,size(dgrayIm));
 cla(handles.figBox,'reset');
 axes(handles.figBox);
 imshow(dgrayIm,[0,255]);
 plot_centers(handles,centroids);
+update_count( handles,centroids,imageSize);
 % hObject    handle to checkEdge (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
