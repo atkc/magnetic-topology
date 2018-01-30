@@ -1,4 +1,4 @@
-function [ binIm1 ] = filIT( binIm,minSize,maxSize,c_th,e_th,imageSize,conn)
+function [ binIm1 ] = filIT( binIm,minSize,maxSize,c_th,e_th,imageSize,conn,pro)
 %UNTITLED Summary of this function goes here
 %   Detailed explanation goes here
     cc=bwconncomp(binIm,conn);
@@ -36,25 +36,14 @@ function [ binIm1 ] = filIT( binIm,minSize,maxSize,c_th,e_th,imageSize,conn)
     roundness=roundness(index);
     cc.NumObjects=sum(index);%rearranging the indexes
     cc.PixelIdxList=cc.PixelIdxList(index);
-    
-%     %%******2: remove areas with min/max perimeter *********
-%     index=((roundness>maxMetric).*([graindata.Perimeter]>minPeri).*([graindata.Perimeter]<maxPeri))>0; % retrival of index
-%     sum(index)
-%     graindata = graindata(index); %removal of graindata with peri < minPeri and >maxPeri
-%     cc.NumObjects=sum(index);% Updating the number of objects left
-%     cc.PixelIdxList=cc.PixelIdxList(index); % Updating the objects list
-    
-    %%******3: remove areas with high circularity metric *********
-    index=(roundness>c_th_1);
    
-    graindata = graindata(index);
-    
-    cc.NumObjects=sum(index);%rearranging the indexes
-    cc.PixelIdxList=cc.PixelIdxList(index);
+
     length(size(graindata));
     
     labeled1 = labelmatrix(cc); %label the areas
     binIm1=(labeled1>0);%not necessary to see labels, just get final binary image =)
-
+    cell_rd=num2cell(roundness);
+    [graindata.Roundness] = cell_rd{:};
+    assignin('base',strcat('sk_data',num2str(pro)),graindata);
 end
 

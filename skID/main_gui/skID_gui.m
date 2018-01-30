@@ -114,11 +114,11 @@ axes(handles.figBox);
 imshow(dgrayIm,[0,255]);
 
 
-binIm1= filIT( binIm1,minSize,maxSize,c_th,e_th,imageSize,connect);
+binIm1= filIT( binIm1,minSize,maxSize,c_th,e_th,imageSize,connect,1);
 drawBoundaries(handles,binIm1,'r',1,connect);
 
 binIm2=chopIT(binIm2);
-binIm2= filIT( binIm2,minSize,maxSize,0.38,e_th,imageSize,connect);
+binIm2= filIT( binIm2,minSize,maxSize,c_th,e_th,imageSize,connect,2);
 drawBoundaries(handles,binIm2,'b',1,connect);
 
 binIm=binIm2 + binIm1;

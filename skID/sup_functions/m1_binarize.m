@@ -88,9 +88,9 @@ function [dgrayIm, filIm, binIm1, binIm2 ,binIm3, centroids,threshVal]= m1_binar
     if threshmode==1
         if threshlevel==0
             threshlevel = multithresh(filIm/max(max(filIm))); %automatically detects the threshold value to use
-            threshVal=threshlevel;
+            
         end
-    
+        threshVal=threshlevel;
         binIm= im2bw(filIm/max(max(filIm)),threshlevel); %perform threhold with threshold value
 %         figure
 %         imshow(binIm)
@@ -215,7 +215,7 @@ function [dgrayIm, filIm, binIm1, binIm2 ,binIm3, centroids,threshVal]= m1_binar
         centroids(:,5)=roundness;
     end
 
-    assignin('base','C',graindata);
+    
 %*************************************************************************
 %*****************************Get mask************************************
 %not necessary: fitting will be done with centroids on the original image
