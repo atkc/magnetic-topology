@@ -114,14 +114,14 @@ axes(handles.figBox);
 imshow(dgrayIm,[0,255]);
 
 
-binIm1= filIT( binIm1,minSize,maxSize,c_th,e_th,imageSize,connect,1);
-drawBoundaries(handles,binIm1,'r',1,connect);
+binIm1_fil= filIT( binIm1,minSize,maxSize,c_th,e_th,imageSize,connect,1);
+drawBoundaries(handles,binIm1_fil,'r',1,connect);
 
-binIm2=chopIT(binIm2);
-binIm2= filIT( binIm2,minSize,maxSize,c_th,e_th,imageSize,connect,2);
-drawBoundaries(handles,binIm2,'b',1,connect);
+binIm2_chop=chopIT(binIm2);
+binIm2_fil= filIT( binIm2_chop,minSize,maxSize,c_th,e_th,imageSize,connect,2);
+%drawBoundaries(handles,binIm2_fil,'r',1,connect);
 
-binIm=binIm2 + binIm1;
+binIm=binIm2_fil + binIm1_fil;
 cc=bwconncomp(binIm,connect);
 graindata = regionprops(cc,'centroid','Area','PerimeterOld','MajorAxisLength','MinorAxisLength');
 centroids=zeros(length(graindata),5);
@@ -136,7 +136,7 @@ if (length(graindata)>1)
     roundness = 4*pi*area./perimeter.^2;
     centroids(:,5)=roundness;
 end
-plot_centers(handles,centroids);
+% plot_centers(handles,centroids);
 update_count( handles,centroids,imageSize )
 %binIm3=chopIT(binIm3);
 %binIm3= filIT( binIm3,0.6);
@@ -144,7 +144,23 @@ update_count( handles,centroids,imageSize )
 
 assignin('base','binIm1',binIm1);
 assignin('base','binIm2',binIm2);
-figure;imshow(binIm1);
+assignin('base','binIm3',binIm3);
+assignin('base','binIm1_fil',binIm1_fil);
+assignin('base','binIm2_fil',binIm2_fil);
+c=figure;imshow(dgrayIm(479-70:(479+307-70),454+20:(454+307+20)),[0,255]);
+
+a=figure;imshow(dgrayIm(479-70:(479+307-70),454+20:(454+307+20)),[0,255]);
+
+drawBoundaries(handles,binIm1_fil(479-70:(479+307-70),454+20:(454+307+20)),'r',1,connect);
+drawBoundaries(handles,binIm2_fil(479-70:(479+307-70),454+20:(454+20+307)),'b',1,connect);
+binIm_temp=binIm1+binIm2+binIm3;
+b=figure;imshow(binIm_temp(479-70:(479+307-70),454+20:(454+20+307)));
+%drawBoundaries(handles,binIm1_fil(479-70:(479+307-70),454+20:(454+20+307)),'r',1,connect);
+
+drawBoundaries(handles,binIm2_fil(479-70:(479+307-70),454+20:(454+20+307)),'b',1,connect);
+bd=figure;imshow(binIm_temp(479-70:(479+307-70),454+20:(454+20+307)));
+bd=figure;imshow(binIm2(479-70:(479+307-70),454+20:(454+20+307)));
+bd=figure;imshow(binIm1_fil(479-70:(479+307-70),454+20:(454+20+307)));
 param=[threshOpt,threshVal,adaptArea,erodeSize,filRpt,filSize,minSize,maxSize,c_th,e_th,connect];
 set(handles.figBox, 'ButtonDownFcn', @figBox_ButtonDownFcn); 
 
@@ -425,12 +441,12 @@ if ~isempty(centroids)
     imageSize = str2double(get(handles.size_text,'string'));
     saveInd = get(handles.saveInd_box,'value');    
     [~,name,ext] = fileparts(filename);
-    %[isofit,unfitno]=m2_fit2d(radius, centroids,dgrayIm,name,maxr,saveInd,imageSize);
-    [xyfit,unfitno]=m2_fit2d_aniso(radius, centroids,dgrayIm,name,maxr,saveInd,imageSize);
+    [isofit,unfitno]=m2_fit2d(radius, centroids,dgrayIm,name,maxr,saveInd,imageSize);
+    %[xyfit,unfitno]=m2_fit2d_aniso(radius, centroids,dgrayIm,name,maxr,saveInd,imageSize);
     
     set(handles.text31,'String',strcat('Fitting done, Unable to fit  ',num2str(unfitno),' sk'));
-    %centroids=isofit;
-    centroids=xyfit;
+    centroids=isofit;
+    %centroids=xyfit;
     cla(handles.figBox,'reset');
     axes(handles.figBox);
     imshow(dgrayIm,[0,255]);

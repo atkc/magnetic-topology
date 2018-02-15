@@ -5,7 +5,7 @@ function [  ] = plot_centers( handles, centroids )
     axes(handles.figBox);
     for i = 1:noOfCentriods
         hold on
-        plot(centroids(i,1),centroids(i,2),'bs','MarkerSize',7,'LineWidth',2);
+        plot(centroids(i,1),centroids(i,2),'r*','MarkerSize',5);
     end
     
     

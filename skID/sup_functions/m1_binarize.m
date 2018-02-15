@@ -149,12 +149,12 @@ function [dgrayIm, filIm, binIm1, binIm2 ,binIm3, centroids,threshVal]= m1_binar
     maxArea=pi*(length(im)*maxSize/(imageSize*1000))^2;
     index1=([graindata.Area]>minArea);%minSize*avgArea);
     index2=([graindata.Area]<maxArea);%maxSize*avgArea);
-    index3=(roundness>c_th_1);
-    index= (index1 & index2) & index3;
+    %index3=(roundness>c_th_1);
+    index= (index1 & index2);
     graindata1 = graindata(index);
     
     index4=([graindata.Area]<(6*(minArea+maxArea)/2));
-    graindata2 = graindata((~index)&index4);
+    graindata2 = graindata((~index2)&(index4));
     roundness=roundness(index);
 %     cc.NumObjects=sum(index);%rearranging the indexes
 %     cc.PixelIdxList=cc.PixelIdxList(index);
@@ -183,19 +183,26 @@ function [dgrayIm, filIm, binIm1, binIm2 ,binIm3, centroids,threshVal]= m1_binar
     
     dd.Connectivity=cc.Connectivity;
     dd.ImageSize=cc.ImageSize;
-    dd.NumObjects=sum((~index)&index4);%rearranging the indexes
-    dd.PixelIdxList=cc.PixelIdxList((~index)&index4);
+    dd.NumObjects=sum((~index2)&index4);%rearranging the indexes
+    dd.PixelIdxList=cc.PixelIdxList((~index2)&index4);
+    
+    ee.Connectivity=cc.Connectivity;
+    ee.ImageSize=cc.ImageSize;
+    ee.NumObjects=sum((~index4));%rearranging the indexes
+    ee.PixelIdxList=cc.PixelIdxList((~index4));    
     
     cc.NumObjects=sum(index);%rearranging the indexes
     cc.PixelIdxList=cc.PixelIdxList(index);
     length(size(graindata));
-    binIm3=0;
+
 %     labeled3 = labelmatrix(ee); %label the areas
 %     binIm3=(labeled3>0);%not necessary to see labels, just get final binary image =)
     
     labeled2 = labelmatrix(dd); %label the areas
-    binIm2=(labeled2>0);%not necessary to see labels, just get final binary image =)
+    labeled3 = labelmatrix(ee); %label the areas
     
+    binIm2=(labeled2>0);%not necessary to see labels, just get final binary image =)
+    binIm3=(labeled3>0);
     labeled1 = labelmatrix(cc); %label the areas
     binIm1=(labeled1>0);%not necessary to see labels, just get final binary image =)
     
