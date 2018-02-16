@@ -434,11 +434,11 @@ function fitBtn_Callback(hObject, eventdata, handles)
 % hObject    handle to fitBtn (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-set(handles.text31,'String','Fitting...');
+%set(handles.text31,'String','Fitting...');
 global xyfit isofit dgrayIm centroids radius filename imageSize
 ft = get(get(handles.fitOpt,'SelectedObject'), 'Tag');
 fitOpt=[];
-switch th
+switch ft
     case 'fitOpt1'
         fitOpt=1;
     case 'fitOpt2'
