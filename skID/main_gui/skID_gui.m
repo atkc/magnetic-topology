@@ -436,17 +436,33 @@ function fitBtn_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 set(handles.text31,'String','Fitting...');
 global xyfit isofit dgrayIm centroids radius filename imageSize
+ft = get(get(handles.fitOpt,'SelectedObject'), 'Tag');
+fitOpt=[];
+switch th
+    case 'fitOpt1'
+        fitOpt=1;
+    case 'fitOpt2'
+        fitOpt=2;
+end
+
+
 if ~isempty(centroids)
     maxr = str2double(get(handles.maxr_edit,'string'));
     imageSize = str2double(get(handles.size_text,'string'));
     saveInd = get(handles.saveInd_box,'value');    
     [~,name,ext] = fileparts(filename);
-    [isofit,unfitno]=m2_fit2d(radius, centroids,dgrayIm,name,maxr,saveInd,imageSize);
-    %[xyfit,unfitno]=m2_fit2d_aniso(radius, centroids,dgrayIm,name,maxr,saveInd,imageSize);
+    if fitOpt==1
+        [isofit,unfitno]=m2_fit2d(radius, centroids,dgrayIm,name,maxr,saveInd,imageSize);
+        centroids=isofit;
+        clearvars xyfit
+    elseif fitOpt==2
+        [xyfit,unfitno]=m2_fit2d_aniso(radius, centroids,dgrayIm,name,maxr,saveInd,imageSize);
+        centroids=xyfit;
+        clearvars isofit
+    end
     
     set(handles.text31,'String',strcat('Fitting done, Unable to fit  ',num2str(unfitno),' sk'));
-    centroids=isofit;
-    %centroids=xyfit;
+
     cla(handles.figBox,'reset');
     axes(handles.figBox);
     imshow(dgrayIm,[0,255]);
