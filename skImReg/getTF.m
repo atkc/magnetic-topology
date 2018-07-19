@@ -5,25 +5,27 @@
 %fixed=imread('170308_fp226_1b_2_d2_n4k-p1k_p1_ref.tiff');
 %fixedM=imread('170308_fp226_1b_2_d2_n4k-p1k_p1.tiff');
 %%Data folder
-cd('C:\Users\Anthony\Desktop\For hopin demo');
-MFM=false;%true: activate transformation on mfm images
+cd('C:\Users\Anthony\Dropbox\Shared_MFM\Data\Nanostructures\fp553_nanostructures\180413-1_fp553_1b_d3_2um_n4k-p1050\analysis');
+MFM=false;%true;%true: activate transformation on mfm images
 saveIm=true;
 displayIm=false;
-fixed=imread('170308_fp226_1b_2_d2_n4k-p1k_p1_AFM.tiff');
-%fixedM=imread('170421_15k_1b_2um_d2_n4k-p1100_p0_MFM.tiff');
-fixed=fixed(:,:,1);
+fixed=imread('180413_fp553_1b_d3_p13_MFM.tiff');
+%fixedM=imread('180302_fp266_1c_d1_2um_p3_MFM.tiff');
+fixed=fixed(:,:,1);%C:\Users\Anthony\Dropbox\Shared_MFM\Data\Nanostructures\fp553_nanostructures\180411-1a_fp553_1b_d2_2um_n4k-p1050\analysis_1050\skel (p3-27)
+fixed = imresize(fixed,[256 256]);
 % fixed=flipud(fixed);
 % fixed=fliplr(fixed);
 % fixed=double(im2bw(fixed));
-%MFMfilename='170421_15k_1b_2um_d2_n4k-p1100_p';% no need 16 bit
+%MFMfilename='180302_fp266_1c_d1_2um_p';% no need 16 bit
 
-AFMfilename='170415_fp226_1b_2um_d2_n3k-1200_p';%remember to save AFM in 16 bit!!!
+AFMfilename='180413_fp553_1b_d3_p';%remember to save AFM in 16 bit!!!
 %save as 170421_15k_1b_2um_d2_n4k-p1100_p1_MFM.tiff
 tf=0;
-for i= [17 18 19]%<-----insert pulse number here
+for i= [1:21]%<-----insert pulse number here
     fprintf('Processing image %i...',i);
-    moving=imread(strcat(AFMfilename,int2str(i),'_AFM.tiff'));
+    moving=imread(strcat(AFMfilename,int2str(i),'_MFM.tiff'));
     moving=moving(:,:,1);
+    moving = imresize(moving,[256 256]);
     %moving=double(im2bw(moving));
 
     %******TO show misalignment************
@@ -49,16 +51,16 @@ for i= [17 18 19]%<-----insert pulse number here
     %%----Need to read up on optimizer and metric--
     %%Needs to be tuned
 
-    optimizer.MaximumIterations = 500;
-    optimizer.MaximumStepLength = 0.005;
+    optimizer.MaximumIterations = 5000;
+    optimizer.MaximumStepLength = 0.001;
 
     %****Executing intensity based registration block**
     %movingReg = imregister(moving, fixed, 'affine', optimizer, metric);
 
     %% imregister uses imregtform to retrive the geometric transformation 
     %% Please use imregtform to retrieve the information
-    tf=imregtform(moving, fixed, 'affine', optimizer, metric);
-
+    tf=imregtform(moving, fixed, 'translation', optimizer, metric);
+    %tf=imregtform(moving, fixed, 'affine', optimizer, metric);
     movingReg=imwarp(moving,tf,'OutputView',imref2d(size(fixed)));
     
     if (displayIm)

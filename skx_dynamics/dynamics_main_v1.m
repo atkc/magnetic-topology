@@ -4,7 +4,7 @@
 %This program needs the user to identify the positions of skyrmions before
 %hand and saving it as a skeleton image which only have colors:
 %1. gray as background
-%2. black to indicate skyrmion positions (ie skyrmion was there in the
+%2. BLACK to indicate skyrmion positions (ie skyrmion was there in the
 %   previous frame regardless of whether they moved or not
 %3. red to indicate additional skyrmions (ie was not there in the previous
 %   frame)
@@ -16,7 +16,7 @@
 %%*************************************************************************
 
 %%===================Size fitting Options/Information======================
-sksz=true; %measure size?
+sksz=false; %measure size?
 fitframe=[26 27 28]; %which frames to fit? number should correspnd to the pulse number
 radius=0.1*1080/13;
 %%==========Additional info on size fitting================================
@@ -26,9 +26,9 @@ radius=0.1*1080/13;
 %   -> see m2_fit.m file
 
 %%==============directory of skeleton file=================================
-cd('C:\Users\Anthony\Dropbox\Shared_MFM\Data\Nanostructures\fp226_nanostructures\fp226_1b_2um_d2\170421\bio-analysis')
-filename='170421_15k_1b_2um_d2_n4k-p1100_p (';
-fullFileName=strcat(filename,'0)','.png');
+cd('C:\Users\Anthony\Dropbox\Shared_MFM\Data\Nanostructures\180412\skel')
+filename='Reg_180412_fp553_1b_d2_2um_p (';
+fullFileName=strcat(filename,'4)','.png');
 %%==============directory of skeleton file=================================
 
 %%==============directory of raw files to fit for size=====================
@@ -52,7 +52,7 @@ im=imread(fullFileName);
 MasterList(1:length(beforeOld),1,2:3)=beforeOld;
 MasterList(1:length(beforeOld),1,1)=1:length(beforeOld);%%sk-id
 skmax=length(beforeOld);
-threshold=30;
+threshold=50;%~60m/s
 %figure
 %plot(beforeOld(:,1),beforeOld(:,2),'r*');
 noOfimages=10;
@@ -69,36 +69,47 @@ oldIm=im;
 index=1;
 
 frameInd=2;
-for imageInd = 1:28%[2 3 6 7 10 11 14 15]%2:noOfimages
+for imageInd = [5]%[2 3 6 7 10 11 14 15]%2:noOfimages
 
 fprintf('Analyzing image %i\n',imageInd);
 fullFileName=strcat(filename,int2str(imageInd),')','.png');
 im=imread(fullFileName);
-[ afterNew, afterOld] = positionxy( im );
-skID=MasterList(1:length(beforeOld),frameInd-1,1);%skID of beforeOld list of skyrmions
+
+[ afterNew, afterOld] = positionxy( im ); 
+%afterNew: newly created skyrmion positions in the after frame
+%afterNew: Previosu skyrmion positions from the before frame in the after frame
+
+skID=MasterList(1:length(beforeOld),frameInd-1,1);
+%skID of skyrmions from before frame (beforeOld)
+
 
 [mbefore,~]=size(beforeOld);
 [mafter,~]=size(afterOld);
 offset=abs(mafter-mbefore);
+
 % hold on
 % if imageInd==2
 %     plot(afterOld(:,1),afterOld(:,2),'bo');
 % else
 %     plot(afterOld(:,1),afterOld(:,2),'go');
 % end
+
 [~,iaOld,ibOld]=intersect(afterOld,beforeOld,'rows','stable');
 
-%%*****capture old skyrmions in after frame that did nto move******
+%%*****capture old skyrmions in after frame that did not move******
 MasterList(1:length(ibOld),frameInd,1)=skID(ibOld);
 MasterList(1:length(ibOld),frameInd,2:3)=beforeOld(ibOld,1:2);
 
-%%*****capture old skyrmions in after frame that did nto move******
+%%*****capture old skyrmions in after frame that move******
 
 [C,~,sbOld] = setxor(afterOld,beforeOld,'rows','stable');
+skID_Unique=skID(sbOld);
 afterUnique=C(1:(length(C)-offset)/2,:);
 beforeUnique=C((((length(C)-offset)/2)+1):end,:);%beforeUnique>=afterUnique
-
-skID_Unique=skID(sbOld);
+%afterUnique: Unique skyrmion positions but not newly created from after 
+%frame (aka skyrmions that moved from the before frame)
+%beforeUnique: Unique skyrmion positions from before frame but not newly
+%created (aka skyrmions that moved in the after fame)
 
 % ************************************************************************
 % % *******vectorization method --> limitiation is on permutation (n<11)
@@ -126,10 +137,26 @@ skID_Unique=skID(sbOld);
 
 %%***randomized 
 repeat=true;
+repeat_i=1; %i know its inefficient
 while (repeat)
 %     fig=imshow(oldIm(:,:,1)>120);
     repeat=false;
-    p = randperm(mafter_unique);
+    
+    %randomized order
+    p0 = randperm(mafter_unique);
+    %order from top to btm
+    scapegoat=afterUnique;
+    scapegoat(:,2)=round(scapegoat(:,2)/100)*100;
+    [~,p1] = sortrows(scapegoat,[2,1]);
+    p1=p1';
+    %order from btm to top
+    p2=fliplr(p1);
+    if repeat_i==1
+        p=p1;
+    else
+        p=p2;
+    end
+    p=p0;
     skID_UniqueDup=skID_Unique;
     beforeUniqueDup=beforeUnique;
     for i = p
@@ -159,7 +186,9 @@ while (repeat)
         skID_UniqueDup(minj)=[];
         beforeUniqueDup(minj,:)=[];
         if abs(minDist) >threshold
+            %abs(minDist)
             repeat=true;
+            repeat_i=repeat_i+1;
         end
         
         fullstat2(statInd2,:)=[index,imageInd,minDist,minx,miny,coortext(1),coortext(2),skID_min];
@@ -208,7 +237,34 @@ if (sksz==true)
     end
 end
 
-
+conv=13000/1080; %estimated nm/px
+p_width=20;
+%quick frame statistics
+frame_stats=zeros(100,3);
+framelist=unique(fullstat2(:,2))';
+for frameid=framelist
+    idx=(fullstat2(:,2)==frameid);
+    v=fullstat2(idx,3);
+    if ~isempty(v)
+        avg_v=mean(abs(v))*conv*10^-9/(p_width*10^-9);
+        med_v=median(abs(v))*conv*10^-9/(p_width*10^-9);
+        max_v=max(abs(v))*conv*10^-9/(p_width*10^-9);%avg_v+2*std(abs(v))*conv*10^-9/(p_width*10^-9);
+        frame_stats(frameid,1)=avg_v;
+        frame_stats(frameid,2)=med_v;
+        frame_stats(frameid,3)=max_v;
+    end
+end
+frame_stats=frame_stats(min(framelist):max(framelist),:);
+figure
+plot(i1,frame_stats(:,1),'bo','LineWidth',2)
+xlabel('Current Density (A/m^2')
+ylabel('Speed(|m/s|)')
+title('Average Speed');
+figure
+plot(i1,frame_stats(:,3),'ro','LineWidth',2)
+xlabel('Current Density (A/m^2')
+ylabel('Speed(|m/s|)')
+title('Average Speed + 2 Std');
 %sum(fullstat2(:,1)==23)
 % cd('C:\Users\Anthony\Documents\Matlab')
 
@@ -276,7 +332,7 @@ stdv=zeros(l,1);
 figure;
 
 
-for vt=[ 2.9 2.95 3  ];
+for vt=[3.3 3.3 3.3 3.3];
     
     p= (vol1==vt);
     vp=v1(p);

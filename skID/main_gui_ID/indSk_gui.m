@@ -59,10 +59,10 @@ global fitx rawx fitIm rawxIm yint;
 load indSk_prop.mat
 load rawIm2.mat
 
-FWHM=indSk_prop(3)*2*(2*log(2))^0.5;
-FWHMreal=indSk_prop(3)*1000*indSk_prop(6)*2*(2*log(2))^0.5;
-set(handles.text4,'string',num2str(indSk_prop(3)));
-set(handles.text6,'string',num2str(indSk_prop(4)));
+FWHM=indSk_prop(3)*2*(2*log(2))^0.5
+FWHMreal=indSk_prop(3)*1000*indSk_prop(6)*2*(2*log(2))^0.5
+set(handles.text4,'string',num2str(FWHM));
+set(handles.text6,'string',num2str(FWHMreal));
 
 handles.rawIm2 = rawIm2;
 indSk_prop

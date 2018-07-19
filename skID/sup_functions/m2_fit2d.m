@@ -172,7 +172,7 @@ im=dgrayIm; %original image to fit on
     
     
 
-if (checkInd)
+if (checkInd)&&((sigma*2*(2*log(2))^0.5)<8)
     %%*****Reconstructing of fitted image**********
     indSk_prop=[xo yo sigma b a imageSize/m];
     save('indSk_prop.mat','indSk_prop');

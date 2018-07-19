@@ -461,7 +461,7 @@ if ~isempty(centroids)
         clearvars isofit
     end
     
-    set(handles.text31,'String',strcat('Fitting done, Unable to fit  ',num2str(unfitno),' sk'));
+    %set(handles.text31,'String',strcat('Fitting done, Unable to fit  ',num2str(unfitno),' sk'));
 
     cla(handles.figBox,'reset');
     axes(handles.figBox);
