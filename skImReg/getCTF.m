@@ -1,7 +1,7 @@
 
-cd('C:\Users\Anthony\Dropbox\Shared_MFM\Data\Nanostructures\fp553_nanostructures\180408-3_fp553_1b_d2_2um_n4k-p1370\analysis');
-AFMfilename='180408-3_fp553_1b_d3_2um_p';
-pulseID=fliplr([1:13,13]);
+cd('C:\Users\Anthony\Dropbox\Shared_MFM\Data\Nanostructures\fp553_nanostructures\180411-1a_fp553_1b_d2_2um_n4k-p1050\analysis_1050');
+AFMfilename='180411_fp553_1b_d2_2um_p';
+pulseID=fliplr([31:32]);
 tf1=0;%local tf
 tf2=affine2d();%compounding tf
 for i= 2:length(pulseID)

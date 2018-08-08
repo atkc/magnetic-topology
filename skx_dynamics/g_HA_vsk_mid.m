@@ -1,8 +1,10 @@
 %Speed vs Hall angle plot
 %only process skyrmions 1um away from the edges
+[fullstat2_fil,r_cor_fil,theta_cor_fil]=minDist_filter(fullstat2,r_cor,theta_cor);
+Nlim=5;%plot points with at # of sk > Nlim
 col_plot=0;%0:off, 1:on
-xpos=fullstat2(:,6);
-ypos=fullstat2(:,7);
+xpos=fullstat2_fil(:,6);
+ypos=fullstat2_fil(:,7);
 xmin=min(xpos);
 xmax=max(xpos);
 xmid=mean([xmin,xmax]);
@@ -20,15 +22,15 @@ hold on
 plot(xpos(~fil_index),ypos(~fil_index),'.b')
 axis equal
 
-for nedge=24
+for nedge=17
 HAedge=-92.5:5:92.5; 
 HAaxis=-90:5:90;
 im=zeros(length(HAaxis),nedge);
 im_norm=zeros(length(HAaxis),nedge);
 im_norm_norm=zeros(length(HAaxis),nedge);
 figure;
-r=r_cor(fil_index);%(pID<p_lim)
-theta=theta_cor(fil_index);%(pID<p_lim);
+r=r_cor_fil(fil_index);%(pID<p_lim)
+theta=theta_cor_fil(fil_index);%(pID<p_lim);
 [N,edges] = histcounts(r,nedge);
 avg_v=zeros(1,length(N));
 avg_theta=zeros(1,length(N));
@@ -38,7 +40,7 @@ for el=1:length(edges)-1
     hold_theta=(180/pi)*theta(hold_i);
     hold_theta=hold_theta+(hold_theta<-90)*180;
     hold_theta=hold_theta-(hold_theta>90)*180;
-    avg_theta(el)= (mean(hold_theta))
+    avg_theta(el)= (mean(hold_theta));
     std_theta(el)= (std(hold_theta));
     avg_v(el)=(edges(el)+edges(el+1))/2;
     for HAi=1:length(HAaxis)
@@ -49,9 +51,9 @@ for el=1:length(edges)-1
     im_norm_norm(:,el)=im_norm(:,el)/max(im_norm(:,el));
 end
 
-errorbar(avg_v,avg_theta,std_theta);
+errorbar(avg_v(N>Nlim),avg_theta(N>Nlim),std_theta(N>Nlim));
 data=[avg_v;N;avg_theta;std_theta]';
-ylim([-50 50])
+ylim([0 30])
 xlabel('speed(|m/s^2|)')
 ylabel('Theta(o)')
 
