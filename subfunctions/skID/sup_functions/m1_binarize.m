@@ -1,4 +1,4 @@
-function [dgrayIm, filIm, binIm1, binIm2 ,binIm3, centroids,threshVal]= m1_binarize (im,threshmode,threshlevel,adaptThreshArea,erodeSize,filterRepeat,filterArea,minSize,maxSize,c_th,e_th,imageSize,conn,chop_i)
+function [dgrayIm, filIm, binIm1, binIm2 ,binIm3, centroids,threshVal]= m1_binarize (im,threshmode,threshlevel,adaptThreshArea,erodeSize,filterRepeat,filterArea,minSize,maxSize,c_th,e_th,imageSize,conn)
 
 %Description:
 
@@ -121,9 +121,7 @@ function [dgrayIm, filIm, binIm1, binIm2 ,binIm3, centroids,threshVal]= m1_binar
 %*************************************************************************
     binIm = imfill(binIm,'holes');
     %%****segregate the patches*************
-    if chop_i
-        binIm=chopIT(binIm);
-    end
+    %binIm=chopIT(binIm);
     cc=bwconncomp(binIm,conn);
     graindata = regionprops(cc,'centroid','Area','PerimeterOld','MajorAxisLength','MinorAxisLength');
     

@@ -22,7 +22,7 @@ function varargout = skID_gui(varargin)
 
 % Edit the above text to modify the response to help skID_gui
 
-% Last Modified by GUIDE v2.5 10-Apr-2019 23:20:44
+% Last Modified by GUIDE v2.5 25-Jan-2018 23:22:04
 
 % Begin initialization code - DO NOT EDIT
 %clear global;
@@ -99,7 +99,6 @@ maxSize=str2double(get(handles.maxSize,'String'));
 c_th=str2double(get(handles.c_th,'String'));
 e_th=str2double(get(handles.e_th,'String'));
 imageSize = str2double(get(handles.size_text,'string'));
-chop = get(handles.chop_box,'value');
 % threshVal
 % adaptArea
 % erodeSize
@@ -107,34 +106,23 @@ chop = get(handles.chop_box,'value');
 connect=4;%8
 [threshOpt,threshVal,adaptArea,erodeSize,filRpt,filSize,minSize,maxSize,c_th,e_th,imageSize,connect]
 %[threshOpt,threshVal,adaptArea,erodeSize,filRpt,filSize,minSize,maxSize]'
-[dgrayIm, filIm, binIm1, binIm2, binIm3, centroids,threshVal]=m1_binarize(rawIm,threshOpt,threshVal,adaptArea,erodeSize,filRpt,filSize,minSize,maxSize,c_th,e_th,imageSize,connect,chop);
+[dgrayIm, filIm, binIm1, binIm2, binIm3, centroids,threshVal]=m1_binarize(rawIm,threshOpt,threshVal,adaptArea,erodeSize,filRpt,filSize,minSize,maxSize,c_th,e_th,imageSize,connect);
 
 
 radius=mean(centroids(:,3));
 cla(handles.figBox,'reset');
 axes(handles.figBox);
-imshow(filIm,[0,255]);
+imshow(dgrayIm,[0,255]);
 
 
 binIm1_fil= filIT( binIm1,minSize,maxSize,c_th,e_th,imageSize,connect,1);
+drawBoundaries(handles,binIm1_fil,'r',1,connect);
 
-
-binIm2_chop=chopIT(binIm2);%chop option available in m1_binarized
+binIm2_chop=chopIT(binIm2);
 binIm2_fil= filIT( binIm2_chop,minSize,maxSize,c_th,e_th,imageSize,connect,2);
+%drawBoundaries(handles,binIm2_fil,'r',1,connect);
 
-
-countDomains = get(handles.domainBox,'value');
-
-if countDomains
-    binIm_total=binIm2_chop + binIm1 + binIm3;
-    drawBoundaries(handles,binIm_total,'r',1,connect);
-else
-    binIm_total=binIm2_fil + binIm1_fil;
-    drawBoundaries(handles,binIm1_fil,'r',1,connect);
-    drawBoundaries(handles,binIm2_fil,'b',1,connect);
-end
-
-binIm=binIm_total;
+binIm=binIm2_fil + binIm1_fil;
 cc=bwconncomp(binIm,connect);
 graindata = regionprops(cc,'centroid','Area','PerimeterOld','MajorAxisLength','MinorAxisLength');
 centroids=zeros(length(graindata),5);
@@ -160,7 +148,6 @@ assignin('base','binIm2',binIm2);
 assignin('base','binIm3',binIm3);
 assignin('base','binIm1_fil',binIm1_fil);
 assignin('base','binIm2_fil',binIm2_fil);
-assignin('base','binIm2_chop',binIm2_chop);
 % c=figure;imshow(dgrayIm(479-70:(479+307-70),454+20:(454+307+20)),[0,255]);
 % 
 % a=figure;imshow(dgrayIm(479-70:(479+307-70),454+20:(454+307+20)),[0,255]);
@@ -175,7 +162,7 @@ assignin('base','binIm2_chop',binIm2_chop);
 % bd=figure;imshow(binIm_temp(479-70:(479+307-70),454+20:(454+20+307)));
 % bd=figure;imshow(binIm2(479-70:(479+307-70),454+20:(454+20+307)));
 % bd=figure;imshow(binIm1_fil(479-70:(479+307-70),454+20:(454+20+307)));
-param=[threshOpt,threshVal,adaptArea,erodeSize,filRpt,filSize,minSize,maxSize,c_th,e_th,connect,chop];
+param=[threshOpt,threshVal,adaptArea,erodeSize,filRpt,filSize,minSize,maxSize,c_th,e_th,connect];
 set(handles.figBox, 'ButtonDownFcn', @figBox_ButtonDownFcn); 
 
 % --- Executes on button press in filBtn.
@@ -267,7 +254,7 @@ function loadBtn_Callback(hObject, eventdata, handles)
 % hObject    handle to loadBtn (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-global rawIm filename filepath InvertInd;
+global rawIm filename filepath;
 %clearvars rawIm filIm binIm centroids;
 [filename,filepath]=uigetfile({'*.*','All Files'},...
   'Select Data File 1')
@@ -280,7 +267,6 @@ if InvertInd
 end
 rawIm = imresize(rawIm,1024/length(rawIm),'bicubic');
 %rawIm=imcomplement(rawIm);
-axes(handles.figBox);
 imshow(rawIm);
 
 
@@ -492,14 +478,10 @@ function outputBtn_Callback(hObject, eventdata, handles)
 % hObject    handle to outputBtn (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-global centroids xyfit isofit filepath filename param imageSize InvertInd;
+global centroids xyfit isofit filepath filename param imageSize;
 cd(filepath);
 [~,name,ext] = fileparts(filename) ;
-InvertInd_text='';
-if InvertInd
-    InvertInd_text='_invert';
-end
-fileID = fopen(strcat(name,InvertInd_text,'_skyrmion_xy.txt'),'wt');
+fileID = fopen(strcat(name,'_skyrmion_xy.txt'),'wt');
 % isofit;
 % print a title, followed by a blank line
 %parameters
@@ -512,11 +494,11 @@ if ~isempty(centroids)
     fprintf(fileID,'\n%2.2f %2.2f',skno,skno/(imageSize)^2);
 end
     
-fprintf(fileID, '\n\n%s %s %s %s %s %s %s %s %s %s %s %s %s','threshOpt(#)','threshVal(#)','adaptArea(px)','erodeSize(px)','filRpt(#)','filSize(px^2)','minSize(px^2)','maxSize(px^2)','c_th(#)','e_th(#)','connect(px)','watershed?','image length(um)');
+fprintf(fileID, '\n\n%s %s %s %s %s %s %s %s %s %s %s %s','threshOpt(#)','threshVal(#)','adaptArea(px)','erodeSize(px)','filRpt(#)','filSize(px^2)','minSize(px^2)','maxSize(px^2)','c_th(#)','e_th(#)','connect(px)','image length(um)');
 if ~isempty(param) 
-    fprintf(fileID, '\n%2.2f %2.2f %2.2f %2.2f %2.2f %2.2f %2.2f %2.2f %2.2f %2.2f %2.2f %i %2.2f',param,imageSize);
+    fprintf(fileID, '\n%2.2f %2.2f %2.2f %2.2f %2.2f %2.2f %2.2f %2.2f %2.2f %2.2f %2.2f %2.2f',param,imageSize);
 else
-    fprintf(fileID, '\n%2.2f %2.2f %2.2f %2.2f %2.2f %2.2f %2.2f %2.2f %2.2f %2.2f %2.2f %i %2.2f',zeros(1,13));
+    fprintf(fileID, '\n%2.2f %2.2f %2.2f %2.2f %2.2f %2.2f %2.2f %2.2f %2.2f %2.2f %2.2f %2.2f',zeros(1,12));
 end
 
 fprintf(fileID, '\n\n%s %s %s %s %s\n\n','x (px)','y (px)','sigma (px)','fwhm (px)');
@@ -579,15 +561,14 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
 end
 % --- Executes on button press in invert_box.
 function invert_checkbox_Callback(hObject, eventdata, handles)
-global rawIm InvertInd
+global rawIm
 % hObject    handle to invert_box (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-InvertInd = get(handles.invert_box,'value');
 rawIm = imcomplement(rawIm);
 cla(handles.figBox,'reset');
 axes(handles.figBox);
-imshow(rawIm);
+imshow(rawIm,[0,255]);
 % Hint: get(hObject,'Value') returns toggle state of invert_box
 
 
@@ -621,21 +602,3 @@ function e_th_CreateFcn(hObject, eventdata, handles)
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
-
-
-% --- Executes on button press in chop_box.
-function chop_box_Callback(hObject, eventdata, handles)
-% hObject    handle to chop_box (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hint: get(hObject,'Value') returns toggle state of chop_box
-
-
-% --- Executes on button press in domainBox.
-function domainBox_Callback(hObject, eventdata, handles)
-% hObject    handle to domainBox (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hint: get(hObject,'Value') returns toggle state of domainBox

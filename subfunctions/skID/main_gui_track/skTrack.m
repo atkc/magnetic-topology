@@ -131,7 +131,7 @@ imageSize = 13;
 connect=4;%8
 rawIm=imtranslate(reshape(im_bank(im_i,:,:),1080,1080),im_pos(im_i,:));
 %[threshOpt,threshVal,adaptArea,erodeSize,filRpt,filSize,minSize,maxSize]'
-[~, ~, binIm1, ~, ~, centroids,threshVal]=m1_binarize(rawIm,threshOpt,threshVal,adaptArea,erodeSize,filRpt,filSize,minSize,maxSize,c_th,e_th,imageSize,connect,0);
+[~, ~, binIm1, ~, ~, centroids,threshVal]=m1_binarize(rawIm,threshOpt,threshVal,adaptArea,erodeSize,filRpt,filSize,minSize,maxSize,c_th,e_th,imageSize,connect);
 set(handles.tresh_btn,'String',num2str(threshVal));
 approx_r=mean(centroids(:,3));
 updateIm(handles,reshape(im_bank(im_i,:,:),1080,1080),im_pos(im_i,:),zmode)
@@ -550,16 +550,7 @@ for sk_i=1:sk_l
     if (~all(centroids_fit(sk_i,:)==0))    
     saveInd = get(handles.saveInd_box,'value');  
     % if fitOpt==1
-    [isofit,~]=m2_fit2d(approx_r*fit_resize, centroids_fit(sk_i,:),im_fit,fileList{p_i(im_i)},maxr,saveInd,imageSize,0);
-%     approx_r=80*(1080/13000);
-%     %Fitting algorithm
-%     %1. Estimating the window size (weighted fit)
-%     %disp('Estimate');
-%     [estfit,~,ex1,~]=m2_fit2d((approx_r/fit_resize), [xy(sk_i,1)+xcor,xy(sk_i,2)],dgrayIm,fullfilename,1.5,0,imageSize,0);        
-%     new_xy=(estfit(1:2));
-%     %2. Actual Fit (weighted fit)
-%     %disp('Final Fit');
-%     [isofit,~,fitstatus,res1]=m2_fit2d(estfit(4)/2, new_xy-1,dgrayIm,fullfilename,maxr,saveInd,imageSize,0);    
+        [isofit,~]=m2_fit2d(approx_r*fit_resize, centroids_fit(sk_i,:),im_fit,fileList{p_i(im_i)},maxr,saveInd,imageSize);
     % elseif fitOpt==2
     %     [xyfit,unfitno]=m2_fit2d_aniso(radius, centroids,dgrayIm,name,maxr,saveInd,imageSize);
     %     centroids=xyfit;

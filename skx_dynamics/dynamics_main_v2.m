@@ -329,8 +329,8 @@ for i=1:length(frame_list)/2
     hold_theta=(180/pi)*theta_cor(logical((fullstat2(:,2)==frame_list(i*2))+(fullstat2(:,2)==frame_list(i*2-1))));
     hold_theta=hold_theta+(hold_theta<-90)*180;
     hold_theta=hold_theta-(hold_theta>90)*180;
-    hold_i=(hold_theta>-90).*(hold_theta<90)
-    hold_theta1=hold_theta(hold_i==1)
+    hold_i=(hold_theta>-90).*(hold_theta<90);
+    hold_theta1=hold_theta(hold_i==1);
     avg_theta(i)= (mean(hold_theta1));
     std_theta(i)= (std(hold_theta1));
 end
@@ -339,7 +339,7 @@ if abs(i1(end))<abs(i1(1))
 else
     i2=unique(abs(i1));
 end
-errorbar(i2(1:length(avg_theta)),avg_theta,std_theta)
+errorbar(i2(1:length(avg_theta)),avg_theta,std_theta,'-o')
 xlabel('j(|A/m^2|)')
 ylabel('Theta(o)')
 

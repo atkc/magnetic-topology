@@ -11,7 +11,7 @@ i1_fil=i1(ia);
 
 index=fwbw_filter(i1_fil,fullstat2_fil,op);%1:neg current, 2: pos current
 col_plot=1;%0:off, 1:on
-for nedge=24
+for nedge=23
 HAedge=-92.5:5:92.5; 
 HAaxis=-90:5:90;
 im=zeros(length(HAaxis),nedge);

@@ -22,7 +22,7 @@ hold on
 plot(xpos(~fil_index),ypos(~fil_index),'.b')
 axis equal
 
-for nedge=17
+for nedge=20
 HAedge=-92.5:5:92.5; 
 HAaxis=-90:5:90;
 im=zeros(length(HAaxis),nedge);
@@ -53,7 +53,7 @@ end
 
 errorbar(avg_v(N>Nlim),avg_theta(N>Nlim),std_theta(N>Nlim));
 data=[avg_v;N;avg_theta;std_theta]';
-ylim([0 30])
+ylim([0 35])
 xlabel('speed(|m/s^2|)')
 ylabel('Theta(o)')
 

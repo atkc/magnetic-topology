@@ -3,6 +3,9 @@ p_width=20;
 c1=conv*10^-9/(p_width*10^-9);
 col_map=jet(max(unique(fullstat2(:,2))));
 frame_list=unique(fullstat2(:,2));
+% fullstat2_fil=fullstat2;
+% r_cor_fil=r_cor;
+% theta_cor_fil=theta_cor;
 [fullstat2_fil,r_cor_fil,theta_cor_fil]=minDist_filter(fullstat2,r_cor,theta_cor);
 
 %Hall Angle vs J plot
@@ -62,7 +65,7 @@ ylabel('speed(|m/s^2|)')
 
 %Speed vs Hall angle plot
 
-for nedge=23
+for nedge=22
 figure;
 r=r_cor_fil%(pID<p_lim);
 theta=theta_cor_fil%(pID<p_lim);
@@ -93,7 +96,7 @@ x2=max(fullstat2_fil(:,6));
 p_sub=unique(fullstat2_fil(:,2));
 %pid=p_sub(logical(i1<(-5.5*1e11)));
 for p1=7
-pid=[27 30]
+pid=[6 40]
 vlim=5.46
 %for vlim = 0;%[10.06,7.76,5.46,3.16]
 fil_para=ismember(fullstat2_fil(:,2),pid);
@@ -101,7 +104,7 @@ fil_para=ismember(fullstat2_fil(:,2),pid);
 theta_cor_edge=theta_cor_fil(fil_para);
 x_coor=fullstat2_fil(:,6);
 x_coor=x_coor(fil_para);
-for binN=[22];
+for binN=20:30
 figure
 binE=linspace(x1,x2,binN);
 avg_binE=zeros(1,length(binE)-1);
@@ -110,8 +113,10 @@ avg_theta=zeros(1,length(binE)-1);
 for el=1:length(binE)-1
     hold_i=logical((x_coor>=binE(el)).*(x_coor<binE(el+1)));
     hold_theta=(180/pi)*theta_cor_edge(hold_i);
-    hold_theta=hold_theta+(hold_theta<-90)*180;
-    hold_theta=hold_theta-(hold_theta>90)*180;
+    hold_theta_i=logical((hold_theta>=-90).*(hold_theta<90));
+    hold_theta=hold_theta(hold_theta_i);
+    %hold_theta=hold_theta+(hold_theta<-90)*180;
+    %hold_theta=hold_theta-(hold_theta>90)*180;
     avg_theta(el)= (mean(hold_theta));
     std_theta(el)= (std(hold_theta));
     avg_binE(el)=(binE(el)+binE(el+1))/2;
@@ -124,7 +129,7 @@ end
 [N,~]=histcounts(x_coor,binE)
 [(avg_binE-x1)*13000/(1000*1080);N;avg_theta;std_theta]';
 end
-
+%[(avg_binE-x1)*13000/(1000*1080);N;avg_theta;std_theta]';
 
 %sk speed vs X plot
 x1=min(fullstat2_fil(:,6));
