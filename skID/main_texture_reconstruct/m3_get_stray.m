@@ -1,14 +1,15 @@
 [mx,my,mz]=fovf('m000000.ovf');
 [bx,by,bz]=fovf('B_demag000000.ovf');
 
-tf_ll=3;%last layer how many thinfilm layers? %32:26aa
+tf_ll=28;%last layer of magnetic material, first layer is 1
+%how many thinfilm layers? %32:26aa
 
 step_z=1;
-cell_size=1;%nm
+cell_size=10;%nm
 %**********Check Magnetization********************
-checkM=0;
+checkM=1;
 if checkM
-    for al=[1]
+    for al=[1:9]
     mlayer=al;
     figure
     subplot(2,2,1);
@@ -30,7 +31,7 @@ if checkM
 end
 %**********Check Magnetization********************
 
-writefile=0;
+writefile=1;
 saveStray=0;
 plotim=0;
 fx=figure;
@@ -53,7 +54,7 @@ title('Bnv_x');xlabel('nm');ylabel('T');
 xrange=126:386;%126:386;
 yrange=16;
 cm = colormap(autumn(tf_ll+60));
-for al=[33:(tf_ll+60)]
+for al=[tf_ll+10:10:128]%first layer is 1
 
     filename=strcat('Bfield_',num2str((al-tf_ll)*step_z));
     blayer=al;
@@ -69,14 +70,14 @@ for al=[33:(tf_ll+60)]
     else
         cm_now=cm(al,:);
     end
-    figure(fx);hold on;plot(cell_size*xrange,bx_l(xrange,yrange),'Color', cm_now,'LineWidth',lw);
-    figure(fy);hold on;plot(cell_size*xrange,by_l(xrange,yrange),'Color', cm_now,'LineWidth',lw);
-    figure(fz);hold on;plot(cell_size*xrange,bz_l(xrange,yrange),'Color', cm_now,'LineWidth',lw);
-    
-    bnv_x=bx_l(xrange,yrange)*sin(54.7*pi/180)+bz_l(xrange,yrange)*cos(54.7*pi/180);
-    figure(fnv_x);hold on;plot(cell_size*xrange,bnv_x,'Color', cm_now,'LineWidth',lw);
-    bnv_y=by_l(xrange,yrange)*sin(54.7*pi/180)+bz_l(xrange,yrange)*cos(54.7*pi/180);
-    figure(fnv_y);hold on;plot(cell_size*xrange,bnv_y,'Color', cm_now,'LineWidth',lw);
+%     figure(fx);hold on;plot(cell_size*xrange,bx_l(xrange,yrange),'Color', cm_now,'LineWidth',lw);
+%     figure(fy);hold on;plot(cell_size*xrange,by_l(xrange,yrange),'Color', cm_now,'LineWidth',lw);
+%     figure(fz);hold on;plot(cell_size*xrange,bz_l(xrange,yrange),'Color', cm_now,'LineWidth',lw);
+%     
+%     bnv_x=bx_l(xrange,yrange)*sin(54.7*pi/180)+bz_l(xrange,yrange)*cos(54.7*pi/180);
+%     figure(fnv_x);hold on;plot(cell_size*xrange,bnv_x,'Color', cm_now,'LineWidth',lw);
+%     bnv_y=by_l(xrange,yrange)*sin(54.7*pi/180)+bz_l(xrange,yrange)*cos(54.7*pi/180);
+%     figure(fnv_y);hold on;plot(cell_size*xrange,bnv_y,'Color', cm_now,'LineWidth',lw);
     
     if plotim
         figure

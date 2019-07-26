@@ -1,7 +1,11 @@
-helicity=0;%0: neel, pi/2:bloch
-filename='26aa_n4k-0.tiff';
-filepath='C:\Users\Anthony\Documents\MATLAB\NV_fits\';
+helicity=pi;%helicity_y: 0 (right neel),pi (left neel), pi/2 (bloch CW),-pi/2 (bloch (CCW)
+filename='34e_0mT_2x2_raw.tiff';
+filepath='C:\Users\Anthony\OneDrive\Research Projects\NV_skyrmion\film_34e\';
 rawIm=imread([filepath filename]);
+
+domainWallSize=22;%px
+domainSize=5;%px
+profile_size=domainWallSize+domainSize;%px
 
 InvertInd = 0;
 if InvertInd
@@ -36,9 +40,9 @@ binIm_hole=imfill(binIm_hole,'holes');
 
 
 figure;
-imshow(binIm1);
+imshow(flipud(binIm1));
 figure; 
-imshow(binIm_hole);
+imshow(flipud(binIm_hole));
 
 binIm1=binIm_hole;
 
@@ -50,7 +54,7 @@ prun_length=25;
 brPts =  bwmorph(im_skel,'branchpoints');
 [enPti,enPtj] = find(bwmorph(im_skel,'endpoints'));
 distgeo = bwdistgeodesic(im_skel,find(brPts),'quasi');
-imshow(im_skel);
+imshow(flipud(im_skel));
 for n = 1:numel(enPti)
     text(enPtj(n),enPti(n),[num2str(distgeo(enPti(n),enPtj(n)))],'color','g');
 end
@@ -66,19 +70,17 @@ end
 
 figure;
 subplot(2,1,1)
-imshow(im_skel);
+imshow(flipud(im_skel));
 title('before pruning')
 subplot(2,1,2)
-imshow(im_skel2);
+imshow(flipud(im_skel2));
 title('after pruning')
 im_skel=im_skel2;
 %******Skeleton pruning *********************
 
 
 im_weight=zeros(size(dgrayIm));
-profile_size=61;
-domain_size=31;
-[p_x,p_y,p_z,p_weight]=s1_gen_basic_profile(0,helicity,domain_size,profile_size);
+[p_x,p_y,p_z,p_weight]=s1_gen_basic_profile(0,helicity,domainSize,profile_size);
 plot_rgb_vec(p_x,p_y,p_z);
 
 figure;
@@ -100,7 +102,7 @@ im_phi = atan2(imy,imx);%can try to average the gradient
 
 im_dist = bwdist(im_skel,'Euclidean');
 [Gmag,Gdir] = imgradient(im_dist);
-[imx2,imy2,imz2,im_weight]=s3_recon_profile_2(0,pi,5,21,im_dist,Gdir);
+[imx2,imy2,imz2,im_weight]=s3_recon_profile_2(0,pi,domainSize,domainWallSize,im_dist,Gdir);
 plot_rgb_vec(imx2,imy2,imz2);
 
 % imx3=imgaussfilt(imx2,1);
@@ -112,12 +114,12 @@ tempx=imgaussfilt(tempx,2);
 tempy=imgaussfilt(tempy,2);
 [Gdir2,~] = cart2pol(tempx,tempy);
 im_dist2=imgaussfilt(double(im_dist),2);
-[imx3,imy3,imz3,im_weight]=s3_recon_profile_2(0,pi,5,21,im_dist2,Gdir2*180/pi);
+[imx3,imy3,imz3,im_weight]=s3_recon_profile_2(0,pi,domainSize,domainWallSize,im_dist2,Gdir2*180/pi);
 
 plot_rgb_vec(imx3,imy3,imz3);
 [Gmag,Gdir] = imgradient(imx,imy);
 
-[imx,imy,imz]=s2_recon_profile(im_dist,im_phi,profile_size);
+[imx,imy,imz]=s2_recon_profile(im_dist,im_phi,profile_size,domainWallSize);
 
 figure;imshow(imz,[min(imz(:)),max(imz(:))]);
 title('mz');

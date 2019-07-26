@@ -21,6 +21,7 @@ for yi=1:m
             imy_sum(yi-r:yi+r,xi-r:xi+r)=imy_sum(yi-r:yi+r,xi-r:xi+r)+profiley;
             imz_sum(yi-r:yi+r,xi-r:xi+r)=imz_sum(yi-r:yi+r,xi-r:xi+r)+profilez+1;
             im_counts(yi-r:yi+r,xi-r:xi+r)=im_counts(yi-r:yi+r,xi-r:xi+r)+counts;
+            catch
             end
         end
     end

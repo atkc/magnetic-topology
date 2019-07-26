@@ -1,4 +1,9 @@
-function [im_rgb] = plot_rgb_vec(imx,imy,imz)
+function [im_rgb] = plot_rgb_vec(imx,imy,imz,varargin)
+if length(varargin)==1
+    l_scale=varargin{1};
+else
+    l_scale=1;
+end
 matx=imx;
 maty=imy;
 matz=imz;
@@ -7,7 +12,9 @@ sizemat=size(matx);
 %maxr=max([max(matx(:)),max(maty(:)),max(matz(:))]);
 maxr=max([max(max(matx(:,:,layer))),max(max(maty(:,:,layer))),max(max(matz(:,:,layer)))]);
 %minr=min(min(matx(:)),min(maty(:)),min(matz(:)));
-[X,Y]=meshgrid(1:sizemat(2),1:sizemat(1));
+[X,Y]=meshgrid(0:sizemat(2)-1,0:sizemat(1)-1);
+X=X*l_scale;
+Y=Y*l_scale;
 angle=wrapTo360((atan2(maty(:,:,layer),matx(:,:,layer)))*180/pi);
 nom=(maty(:,:,layer).^2+matx(:,:,layer).^2).^0.5;
 % r=(matx(:,:,layer)/maxr)*0.4999+0.4999;
