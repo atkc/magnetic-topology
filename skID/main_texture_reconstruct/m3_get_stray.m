@@ -9,7 +9,7 @@ cell_size=10;%nm
 %**********Check Magnetization********************
 checkM=0;
 if checkM
-    for al=[1:100]
+    for al=[1:3:100]
     mlayer=al;
     figure
     subplot(2,2,1);
@@ -33,7 +33,7 @@ end
 
 writefile=0;
 saveStray=0;
-plotim=1;
+plotim=0;
 fx=figure;
 set(fx, 'Units', 'Normalized', 'OuterPosition', [0.1, 0.1, 0.7, 0.5]);
 title('Bx');xlabel('nm');ylabel('T');
@@ -54,7 +54,7 @@ title('Bnv_x');xlabel('nm');ylabel('T');
 xrange=126:386;%126:386;
 yrange=16;
 cm = colormap(autumn(tf_ll+60));
-for al=[tf_ll+10:10:100]%first layer is 1
+for al=[tf_ll+10:10:200]%first layer is 1
 
     filename=strcat('Bfield_',num2str((al-tf_ll)*step_z));
     blayer=al;
@@ -95,8 +95,21 @@ for al=[tf_ll+10:10:100]%first layer is 1
         subplot(2,2,4);
         %figure;
         plot_rgb_vec(bx_l,by_l,bz_l);
-        title(strcat('demag layer:',num2str(al-1)));
+        title(strcat('demag layer:',num2str(al-1),'height:',num2str(al-tf_ll),'nm'));
+        
+       
     end
+        h=figure;
+        surf((bx_l*sin((54*pi)/180)+bz_l*cos((54*pi)/180)));
+        view(2)
+        shading interp
+        title(strcat('stray field height:',num2str(al-tf_ll),'nm'))
+        axis equal
+        colorbar;
+        xlim([0,256])
+        ylim([0,256])
+        saveas(h,strcat('stray_height_',num2str(al-tf_ll),'nm.png'))     
+    
     if writefile
         dlmwrite(strcat(filename,'_Bz.txt'),bz_l,',')
         dlmwrite(strcat(filename,'_Bx.txt'),bx_l,',')
@@ -120,10 +133,7 @@ end
 % saveas(fx,strcat('strayfieldx_30-60nm_lift','.png'))
 % saveas(fy,strcat('strayfieldy_30-60nm_lift','.png'))
 % saveas(fz,strcat('strayfieldz_30-60nm_lift','.png'))
-figure
-surf((bx_l*sin((54*pi)/180)+bz_l*cos((54*pi)/180)));
-view(2)
-shading interp
+
 
 
 saveas(fnv_y,strcat('strayfieldnv_y_30-60nm_lift','.png'))
