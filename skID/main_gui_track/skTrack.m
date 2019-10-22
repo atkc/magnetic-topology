@@ -81,22 +81,43 @@ function loadIm_btn_Callback(hObject, eventdata, handles)
 %Main data output:
 %1. %fullstat2(i,:)=[i,imageInd(pulse no),minDist,minDist_x,minDist_y,coor_x,coor_y,skID_min,size];
 %2. %masterList(skID,ImageInd(pulse no),:)=[skID_min,coor_x,coor_y,size];
-global im_i p_i p_no fileList im_i_last im_bank im_pos sk_col MasterList mouse_mode zmode
+global im_i p_i p_no fileList im_i_last im_bank im_pos sk_col MasterList mouse_mode zmode fit_resize im_lx im_ly
 
-fileList = dir('*.tiff');
+format_h=get(handles.filetype_rBtn_grp,'SelectedObject');
+format_mode_tag=get(format_h,'Tag');
+
+if strcmp(format_mode_tag,'tiff_btn')
+    filetype='*.tiff';
+elseif strcmp(format_mode_tag,'png_btn')
+    filetype='*.png';
+end
+
+fileList = dir(filetype);
 fileList={fileList.name};
 p_no=zeros(1,length(fileList));
 for file_i=1:length(fileList)
     filename1=fileList{file_i};
-    p_no(file_i)= str2double(regexp(filename1, '(?<=_p)\d+', 'match'));
+    p_no(file_i)= str2double(regexp(filename1, '((?<=_p)\d+)|((?<=_p..)\d+)', 'match'));
 end
 [~,p_i]=sort(p_no);
 
+%***pre-reading of file to determine var size***
+im=imread(fileList{p_i(1)});
+[im_lx,im_ly]=size(im(:,:,1));
+if im_ly==im_lx
+    fit_resize=im_ly/1080;%square image
+    im_ly=1080;
+    im_lx=1080;
+else
+    fit_resize=1; %rectangle image
+end
+%***********************************************
+
 im_pos=zeros(length(fileList),2);%up/down, left/right
-im_bank=zeros(length(fileList),1080,1080);
+im_bank=zeros(length(fileList),im_lx,im_ly);
 for p_ii=1:length(p_i)
     im=imread(fileList{p_i(p_ii)});
-    im_bank(p_ii,:,:) = imresize(im(:,:,1),1080/length(im(:,:,1)),'bicubic');
+    im_bank(p_ii,:,:) = imresize(im(:,:,1),max([im_ly im_lx])/length(im(:,:,1)),'bicubic');
     display(strcat(fileList{p_i(p_ii)},' loaded\n'));
 end
 MasterList=zeros(300,50,4);%[#sk]; [frame/pulse no]; [sk-id, x, y, size]
@@ -105,7 +126,7 @@ im_i=1;
 im_i_last=length(p_i);
 mouse_mode=0;
 zmode=1;
-updateIm(handles,reshape(im_bank(1,:,:),1080,1080),im_pos(1,:),zmode)
+updateIm(handles,reshape(im_bank(1,:,:),im_lx,im_ly),im_pos(1,:),zmode)
 updateStatus(handles,2,fileList{p_i(1)});
 updateStatus(handles,1,strcat(num2str(length(p_i)),' Images Loaded'));
 
@@ -116,7 +137,7 @@ function idSk_btn_Callback(hObject, eventdata, handles)
 % hObject    handle to idSk_btn (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-global im_i p_i p_no binIm1 centroids approx_r imageSize im_bank sk_col MasterList mouse_mode im_pos zmode
+global im_i p_i p_no binIm1 centroids approx_r imageSize im_bank sk_col MasterList mouse_mode im_pos zmode im_lx im_ly
 threshOpt=1;
 threshVal=str2double(get(handles.tresh_btn,'String'));
 adaptArea=15;
@@ -129,12 +150,12 @@ c_th=0.6;
 e_th=1.75;
 imageSize = 13;
 connect=4;%8
-rawIm=imtranslate(reshape(im_bank(im_i,:,:),1080,1080),im_pos(im_i,:));
+rawIm=imtranslate(reshape(im_bank(im_i,:,:),im_lx,im_ly),im_pos(im_i,:));
 %[threshOpt,threshVal,adaptArea,erodeSize,filRpt,filSize,minSize,maxSize]'
 [~, ~, binIm1, ~, ~, centroids,threshVal]=m1_binarize(rawIm,threshOpt,threshVal,adaptArea,erodeSize,filRpt,filSize,minSize,maxSize,c_th,e_th,imageSize,connect,0);
 set(handles.tresh_btn,'String',num2str(threshVal));
 approx_r=mean(centroids(:,3));
-updateIm(handles,reshape(im_bank(im_i,:,:),1080,1080),im_pos(im_i,:),zmode)
+updateIm(handles,reshape(im_bank(im_i,:,:),im_lx,im_ly),im_pos(im_i,:),zmode)
 sk_col=plot_col_centers( handles, centroids,sk_col,1,0,zmode);
 [noSk,~]=size(centroids);
 MasterList=zeros(300,50,4);
@@ -147,11 +168,11 @@ function prevIm_btn_Callback(hObject, eventdata, handles)
 % hObject    handle to prevIm_btn (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-global im_i p_i p_no fileList im_i_last im_bank im_pos sk_col MasterList mouse_mode zmode
+global im_i p_i p_no fileList im_i_last im_bank im_pos sk_col MasterList mouse_mode zmode im_lx im_ly
 
 if (im_i>1)
     im_i=im_i-1;
-    updateIm(handles,reshape(im_bank(im_i,:,:),1080,1080),im_pos(im_i,:),zmode)
+    updateIm(handles,reshape(im_bank(im_i,:,:),im_lx,im_ly),im_pos(im_i,:),zmode)
     centroids=reshape(MasterList(:,p_no(p_i(im_i)),2:3),[300,2]);
     sk_col=plot_col_centers( handles, centroids,sk_col,2,0,zmode);
     updateStatus(handles,2,sprintf(fileList{p_i(im_i)},' displayed'));
@@ -165,11 +186,11 @@ function nextIm_btn_Callback(hObject, eventdata, handles)
 % hObject    handle to nextIm_btn (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-global im_i p_i p_no fileList im_i_last im_bank im_pos sk_col MasterList mouse_mode zmode
+global im_i p_i p_no fileList im_i_last im_bank im_pos sk_col MasterList mouse_mode zmode im_lx im_ly
 
 if (im_i<im_i_last)
     im_i=im_i+1;
-    updateIm(handles,reshape(im_bank(im_i,:,:),1080,1080),im_pos(im_i,:),zmode)
+    updateIm(handles,reshape(im_bank(im_i,:,:),im_lx,im_ly),im_pos(im_i,:),zmode)
     centroids=reshape(MasterList(:,p_no(p_i(im_i)),2:3),[300,2]);
     sk_col=plot_col_centers( handles, centroids,sk_col,2,0,zmode);
     updateStatus(handles,2,sprintf(fileList{p_i(im_i)},' displayed'));
@@ -194,10 +215,10 @@ function LoadSk_pos_btn_Callback(hObject, eventdata, handles)
 % hObject    handle to LoadSk_pos_btn (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-global im_i p_i p_no fileList im_i_last im_bank im_pos sk_col MasterList mouse_mode zmode
+global im_i p_i p_no fileList im_i_last im_bank im_pos sk_col MasterList mouse_mode zmode im_lx im_ly
 load('MasterList.mat')
 load('sk_col.mat')
-updateIm(handles,reshape(im_bank(im_i,:,:),1080,1080),im_pos(im_i,:),zmode)
+updateIm(handles,reshape(im_bank(im_i,:,:),im_lx,im_ly),im_pos(im_i,:),zmode)
 centroids=reshape(MasterList(:,p_no(p_i(im_i)),2:3),[300,2]);
 sk_col=plot_col_centers( handles, centroids,sk_col,2,0,zmode);
 
@@ -206,9 +227,9 @@ function imLeft_btn_Callback(hObject, eventdata, handles)
 % hObject    handle to imLeft_btn (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-global im_i p_i p_no fileList im_i_last im_bank im_pos sk_col MasterList mouse_mode zmode
+global im_i p_i p_no fileList im_i_last im_bank im_pos sk_col MasterList mouse_mode zmode im_lx im_ly
 im_pos(im_i,1)=im_pos(im_i,1)-1;
-updateIm(handles,reshape(im_bank(im_i,:,:),1080,1080),im_pos(im_i,:),zmode)
+updateIm(handles,reshape(im_bank(im_i,:,:),im_lx,im_ly),im_pos(im_i,:),zmode)
 centroids=reshape(MasterList(:,p_no(p_i(im_i)),2:3),[300,2]);
 sk_col=plot_col_centers( handles, centroids,sk_col,2,0,zmode);
 
@@ -217,9 +238,9 @@ function imRight_btn_Callback(hObject, eventdata, handles)
 % hObject    handle to imRight_btn (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-global im_i p_i p_no fileList im_i_last im_bank im_pos sk_col MasterList mouse_mode zmode
+global im_i p_i p_no fileList im_i_last im_bank im_pos sk_col MasterList mouse_mode zmode im_lx im_ly
 im_pos(im_i,1)=im_pos(im_i,1)+1;
-updateIm(handles,reshape(im_bank(im_i,:,:),1080,1080),im_pos(im_i,:),zmode)
+updateIm(handles,reshape(im_bank(im_i,:,:),im_lx,im_ly),im_pos(im_i,:),zmode)
 centroids=reshape(MasterList(:,p_no(p_i(im_i)),2:3),[300,2]);
 sk_col=plot_col_centers( handles, centroids,sk_col,2,0,zmode);
 
@@ -228,9 +249,9 @@ function imUp_btn_Callback(hObject, eventdata, handles)
 % hObject    handle to imUp_btn (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-global im_i p_i p_no fileList im_i_last im_bank im_pos sk_col MasterList mouse_mode zmode
+global im_i p_i p_no fileList im_i_last im_bank im_pos sk_col MasterList mouse_mode zmode im_lx im_ly
 im_pos(im_i,2)=im_pos(im_i,2)-1;
-updateIm(handles,reshape(im_bank(im_i,:,:),1080,1080),im_pos(im_i,:),zmode)
+updateIm(handles,reshape(im_bank(im_i,:,:),im_lx,im_ly),im_pos(im_i,:),zmode)
 centroids=reshape(MasterList(:,p_no(p_i(im_i)),2:3),[300,2]);
 sk_col=plot_col_centers( handles, centroids,sk_col,2,0,zmode);
 
@@ -239,9 +260,9 @@ function down_Callback(hObject, eventdata, handles)
 % hObject    handle to down (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-global im_i p_i p_no fileList im_i_last im_bank im_pos sk_col MasterList mouse_mode zmode
+global im_i p_i p_no fileList im_i_last im_bank im_pos sk_col MasterList mouse_mode zmode im_lx im_ly
 im_pos(im_i,2)=im_pos(im_i,2)+1;
-updateIm(handles,reshape(im_bank(im_i,:,:),1080,1080),im_pos(im_i,:),zmode)
+updateIm(handles,reshape(im_bank(im_i,:,:),im_lx,im_ly),im_pos(im_i,:),zmode)
 centroids=reshape(MasterList(:,p_no(p_i(im_i)),2:3),[300,2]);
 sk_col=plot_col_centers( handles, centroids,sk_col,2,0,zmode);
 
@@ -250,9 +271,9 @@ function resetIm_btn_Callback(hObject, eventdata, handles)
 % hObject    handle to resetIm_btn (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-global im_i p_i p_no fileList im_i_last im_bank im_pos sk_col MasterList mouse_mode zmode
+global im_i p_i p_no fileList im_i_last im_bank im_pos sk_col MasterList mouse_mode zmode im_lx im_ly
 im_pos(im_i,:)=[0,0]
-updateIm(handles,reshape(im_bank(im_i,:,:),1080,1080),im_pos(im_i,:),zmode)
+updateIm(handles,reshape(im_bank(im_i,:,:),im_lx,im_ly),im_pos(im_i,:),zmode)
 centroids=reshape(MasterList(:,p_no(p_i(im_i))+1,2:3),[300,2]);
 sk_col=plot_col_centers( handles, centroids,sk_col,2,0,zmode);
 
@@ -262,10 +283,10 @@ function putPrevPos_btn_Callback(hObject, eventdata, handles)
 % hObject    handle to putPrevPos_btn (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-global im_i p_i p_no fileList im_i_last im_bank im_pos sk_col MasterList mouse_mode zmode
+global im_i p_i p_no fileList im_i_last im_bank im_pos sk_col MasterList mouse_mode zmode im_lx im_ly
 
 if (im_i>1)
-    updateIm(handles,reshape(im_bank(im_i,:,:),1080,1080),im_pos(im_i,:),zmode)
+    updateIm(handles,reshape(im_bank(im_i,:,:),im_lx,im_ly),im_pos(im_i,:),zmode)
     MasterList(:,p_no(p_i(im_i)),:)=MasterList(:,p_no(p_i(im_i-1)),:);
     centroids=reshape(MasterList(:,p_no(p_i(im_i)),2:3),[300,2]);
     sk_col=plot_col_centers( handles, centroids,sk_col,2,0,zmode);
@@ -279,11 +300,11 @@ function putPrevSelSk_pos_btn_Callback(hObject, eventdata, handles)
 % hObject    handle to putPrevSelSk_pos_btn (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-global im_i p_i p_no fileList im_i_last im_bank im_pos sk_col MasterList mouse_mode skN zmode
+global im_i p_i p_no fileList im_i_last im_bank im_pos sk_col MasterList mouse_mode skN zmode im_lx im_ly
 if (mouse_mode==1)
     if im_i>1
         mouse_mode=0;
-        updateIm(handles,reshape(im_bank(im_i,:,:),1080,1080),im_pos(im_i,:),zmode)
+        updateIm(handles,reshape(im_bank(im_i,:,:),im_lx,im_ly),im_pos(im_i,:),zmode)
         MasterList(skN,p_no(p_i(im_i)),2:3)=MasterList(skN,p_no(p_i(im_i-1)),2:3);
         centroids=reshape(MasterList(:,p_no(p_i(im_i)),2:3),[300,2]);
         sk_col=plot_col_centers( handles, centroids,sk_col,2,0,zmode);
@@ -309,11 +330,11 @@ function putNextSelSk_pos_btn_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 % Hint: get(hObject,'Value') returns toggle state of putNextSelSk_pos_btn
-global im_i p_i p_no fileList im_i_last im_bank im_pos sk_col MasterList mouse_mode skN zmode
+global im_i p_i p_no fileList im_i_last im_bank im_pos sk_col MasterList mouse_mode skN zmode im_lx im_ly
 if (mouse_mode==1)
     if im_i<im_i_last
         mouse_mode=0;
-        updateIm(handles,reshape(im_bank(im_i,:,:),1080,1080),im_pos(im_i,:),zmode)
+        updateIm(handles,reshape(im_bank(im_i,:,:),im_lx,im_ly),im_pos(im_i,:),zmode)
         MasterList(skN,p_no(p_i(im_i+1)),:)=MasterList(skN,p_no(p_i(im_i)),:);
         centroids=reshape(MasterList(:,p_no(p_i(im_i)),2:3),[300,2]);
         sk_col=plot_col_centers( handles, centroids,sk_col,2,0,zmode);
@@ -368,7 +389,7 @@ function figure1_WindowButtonDownFcn(hObject, eventdata, handles)
 % hObject    handle to figure1 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-global im_i p_i p_no approx_r im_bank sk_col MasterList mouse_mode skN im_pos zmode
+global im_i p_i p_no approx_r im_bank sk_col MasterList mouse_mode skN im_pos zmode im_lx im_ly
 F = get(handles.figBox,'currentpoint');
 x=F(1);
 y=F(3);
@@ -381,7 +402,7 @@ if (x>xlim(1))&&(x<xlim(2))&&(y>ylim(1))&&(y<ylim(2));
     
     h=get(handles.mouse_rBtn_grp,'SelectedObject');
     mouse_mode_tag=get(h,'Tag');
-    updateIm(handles,reshape(im_bank(im_i,:,:),1080,1080),im_pos(im_i,:),zmode)
+    updateIm(handles,reshape(im_bank(im_i,:,:),im_lx,im_ly),im_pos(im_i,:),zmode)
     if (mouse_mode==0)%fresh mouse event
         if strcmp(mouse_mode_tag,'moveSk_rBtn')
             skN=idSk(centroids,x,y);
@@ -462,9 +483,9 @@ function zoomAll_btn_Callback(hObject, eventdata, handles)
 % hObject    handle to zoomAll_btn (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-global im_i p_i p_no im_bank sk_col MasterList im_pos zmode
+global im_i p_i p_no im_bank sk_col MasterList im_pos zmode im_lx im_ly
 zmode=1;
-updateIm(handles,reshape(im_bank(im_i,:,:),1080,1080),im_pos(im_i,:),zmode)
+updateIm(handles,reshape(im_bank(im_i,:,:),im_lx,im_ly),im_pos(im_i,:),zmode)
 centroids=reshape(MasterList(:,p_no(p_i(im_i)),2:3),[300,2]);
 sk_col=plot_col_centers( handles, centroids,sk_col,2,0,zmode);
 
@@ -474,9 +495,9 @@ function zoomTop_btn_Callback(hObject, eventdata, handles)
 % hObject    handle to zoomTop_btn (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-global im_i p_i p_no im_bank sk_col MasterList im_pos zmode
+global im_i p_i p_no im_bank sk_col MasterList im_pos zmode im_lx im_ly
 zmode=2;
-updateIm(handles,reshape(im_bank(im_i,:,:),1080,1080),im_pos(im_i,:),zmode)
+updateIm(handles,reshape(im_bank(im_i,:,:),im_lx,im_ly),im_pos(im_i,:),zmode)
 centroids=reshape(MasterList(:,p_no(p_i(im_i)),2:3),[300,2]);
 sk_col=plot_col_centers( handles, centroids,sk_col,2,0,zmode);
 
@@ -485,9 +506,9 @@ function zoomMid_btn_Callback(hObject, eventdata, handles)
 % hObject    handle to zoomMid_btn (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-global im_i p_i p_no im_bank sk_col MasterList im_pos zmode
+global im_i p_i p_no im_bank sk_col MasterList im_pos zmode im_lx im_ly
 zmode=3;
-updateIm(handles,reshape(im_bank(im_i,:,:),1080,1080),im_pos(im_i,:),zmode)
+updateIm(handles,reshape(im_bank(im_i,:,:),im_lx,im_ly),im_pos(im_i,:),zmode)
 centroids=reshape(MasterList(:,p_no(p_i(im_i)),2:3),[300,2]);
 sk_col=plot_col_centers( handles, centroids,sk_col,2,0,zmode);
 
@@ -496,9 +517,9 @@ function zoomBtm_btn_Callback(hObject, eventdata, handles)
 % hObject    handle to zoomBtm_btn (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-global im_i p_i p_no im_bank sk_col MasterList im_pos zmode
+global im_i p_i p_no im_bank sk_col MasterList im_pos zmode im_lx im_ly
 zmode=4;
-updateIm(handles,reshape(im_bank(im_i,:,:),1080,1080),im_pos(im_i,:),zmode)
+updateIm(handles,reshape(im_bank(im_i,:,:),im_lx,im_ly),im_pos(im_i,:),zmode)
 centroids=reshape(MasterList(:,p_no(p_i(im_i)),2:3),[300,2]);
 sk_col=plot_col_centers( handles, centroids,sk_col,2,0,zmode);
 
@@ -532,12 +553,12 @@ function fitSize_Callback(hObject, eventdata, handles)
 % hObject    handle to fitSize (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-global fileList im_i p_i p_no im_bank sk_col MasterList im_pos approx_r zmode centroids_temp
+global fileList im_i p_i p_no im_bank sk_col MasterList im_pos approx_r zmode centroids_temp fit_resize im_lx im_ly
 display('ininnn');
 im_fit=imread(fileList{p_i(im_i)});
 im_fit=double(im_fit);%imresize(im_fit,4,'nearest');
-[im_fit_size,~]=size(im_fit);
-fit_resize=im_fit_size/1080;
+%[im_fit_size,~]=size(im_fit);
+%fit_resize=im_fit_size/1080;
 im_fit_pos=im_pos(im_i,:)*fit_resize;
 im_fit=imtranslate(im_fit,im_fit_pos);
 
@@ -570,7 +591,7 @@ for sk_i=1:sk_l
     centroids_temp(sk_i,1:3)=[new_xy-1,FWHM];    
     end
 end
-updateIm(handles,reshape(im_bank(im_i,:,:),1080,1080),im_pos(im_i,:),zmode);
+updateIm(handles,reshape(im_bank(im_i,:,:),im_lx,im_ly),im_pos(im_i,:),zmode);
 sk_col=plot_col_centers( handles, centroids_temp(:,1:2),sk_col,2,0,zmode);
 
 % --- Executes on button press in fitSizeAll.

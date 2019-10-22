@@ -9,12 +9,15 @@ else
     imshow(im,[0,255]);
 end
 
+[sub_lx,sub_ly]=size(im);
 if zmode_sub>1
-    dl=256;
-    xlim([256,768]);
-    ylim([dl*(zmode_sub-2),dl*(zmode_sub-2)+512]);
+    dlx=sub_lx/4;
+    dly=sub_ly/4;
+    
+    xlim([dly,3*dly]);
+    ylim([dlx*(zmode_sub-2),dlx*(zmode_sub)]);
 else
-    ylim([0,1024]);
-    xlim([0,1024]);
+    ylim([0,sub_lx]);
+    xlim([0,sub_ly]);
 end
 

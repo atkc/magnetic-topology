@@ -40,12 +40,4 @@ for i = 1:noOfCentriods
     end
 end
 
-
-end
-
-[m,n]=size(M_grid);
-for i=1:(m*n)
-    if abs(M_grid(i))==0
-        M_grid(i)= NaN;
-    end
 end
