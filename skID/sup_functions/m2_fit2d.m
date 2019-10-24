@@ -178,7 +178,7 @@ im=dgrayIm; %original image to fit on
 
 if (checkInd)
     %%*****Reconstructing of fitted image**********
-    indSk_prop=[xo yo sigma b a imageSize/m];
+    indSk_prop=[xo yo sigma b a imageSize/max([m,n])];
     save('indSk_prop.mat','indSk_prop');
 
     rawIm2=portion;

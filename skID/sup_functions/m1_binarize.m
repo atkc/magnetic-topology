@@ -1,5 +1,5 @@
 function [dgrayIm, filIm, binIm1, binIm2 ,binIm3, centroids,threshVal]= m1_binarize (im,threshmode,threshlevel,adaptThreshArea,erodeSize,filterRepeat,filterArea,minSize,maxSize,c_th,e_th,imageSize,conn,chop_i)
-
+[m,n]=size(im);
 %Description:
 
 %This program produces a binarized image of a MFM image. There are 2 ways
@@ -147,8 +147,8 @@ function [dgrayIm, filIm, binIm1, binIm2 ,binIm3, centroids,threshVal]= m1_binar
 %*************************************************************************
 
     %%******1: remove small/big areas *********
-    minArea=pi*(length(im)*minSize/(imageSize*1000))^2;
-    maxArea=pi*(length(im)*maxSize/(imageSize*1000))^2;
+    minArea=pi*(max([m,n])*minSize/(imageSize*1000))^2;
+    maxArea=pi*(max([m,n])*maxSize/(imageSize*1000))^2;
     index1=([graindata.Area]>minArea);%minSize*avgArea);
     index2=([graindata.Area]<maxArea);%maxSize*avgArea);
     %index3=(roundness>c_th_1);
@@ -212,10 +212,10 @@ function [dgrayIm, filIm, binIm1, binIm2 ,binIm3, centroids,threshVal]= m1_binar
     
     
     
-    if (length(graindata)>1)
+    if (~isempty(graindata))
         
         centroids(:,1:2)=cat(1,graindata1.Centroid);
-        centroids(:,3)=sqrt([graindata1.Area]/pi());
+        centroids(:,3)=sqrt([graindata1.Area]/pi());%radius
         centroids(:,4)=[graindata1.PerimeterOld];
 
         area=[graindata1.Area];

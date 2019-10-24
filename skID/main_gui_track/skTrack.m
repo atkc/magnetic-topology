@@ -22,7 +22,7 @@ function varargout = skTrack(varargin)
 
 % Edit the above text to modify the response to help skTrack
 
-% Last Modified by GUIDE v2.5 19-Aug-2018 21:13:56
+% Last Modified by GUIDE v2.5 23-Oct-2019 10:12:16
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -115,12 +115,17 @@ end
 
 im_pos=zeros(length(fileList),2);%up/down, left/right
 im_bank=zeros(length(fileList),im_lx,im_ly);
+InvertInd = get(handles.invert_box,'value');
 for p_ii=1:length(p_i)
-    im=imread(fileList{p_i(p_ii)});
+    if InvertInd
+        im=imcomplement(imread(fileList{p_i(p_ii)}));
+    else
+        im=(imread(fileList{p_i(p_ii)}));
+    end
     im_bank(p_ii,:,:) = imresize(im(:,:,1),max([im_ly im_lx])/length(im(:,:,1)),'bicubic');
     display(strcat(fileList{p_i(p_ii)},' loaded\n'));
 end
-MasterList=zeros(300,50,4);%[#sk]; [frame/pulse no]; [sk-id, x, y, size]
+MasterList=zeros(300,50,4);%[#sk]; [frame/pulse no]; [sk-id, x, y, radius]
 sk_col=zeros(300,3);
 im_i=1;
 im_i_last=length(p_i);
@@ -144,11 +149,11 @@ adaptArea=15;
 erodeSize=0;
 filRpt=0;
 filSize=0;
-minSize=60;
-maxSize=150;
+minSize=40;
+maxSize=300;
 c_th=0.6;
 e_th=1.75;
-imageSize = 13;
+imageSize = str2double(get(handles.imSize_btn,'String'));;
 connect=4;%8
 rawIm=imtranslate(reshape(im_bank(im_i,:,:),im_lx,im_ly),im_pos(im_i,:));
 %[threshOpt,threshVal,adaptArea,erodeSize,filRpt,filSize,minSize,maxSize]'
@@ -454,6 +459,17 @@ function saveResults_btn_Callback(hObject, eventdata, handles)
 % hObject    handle to saveResults_btn (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+global im_i p_i p_no binIm1 centroids approx_r imageSize im_bank sk_col MasterList mouse_mode im_pos zmode im_lx im_ly
+conv=imageSize/max([im_lx im_ly]);
+imageSize
+flip_n=0;
+p_width=1e9;%ns
+[ fullstat2,theta_cor,r_cor ]= processML_nn( MasterList, p_no, conv,p_width,flip_n);
+save(strcat('r_cor','.mat'),'r_cor');
+save(strcat('theta_cor','.mat'),'theta_cor');
+save(strcat('fullstat2','.mat'),'fullstat2');
+
+
 
 
 function pulseW_btn_Callback(hObject, eventdata, handles)
@@ -599,3 +615,49 @@ function fitSizeAll_Callback(hObject, eventdata, handles)
 % hObject    handle to fitSizeAll (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+
+
+% --- Executes on button press in invert_box.
+function invert_box_Callback(hObject, eventdata, handles)
+% hObject    handle to invert_box (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of invert_box
+
+
+% --- Executes on button press in idSkAll_btn.
+function idSkAll_btn_Callback(hObject, eventdata, handles)
+% hObject    handle to idSkAll_btn (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+global p_i p_no binIm1 centroids approx_r imageSize im_bank sk_col MasterList mouse_mode im_pos zmode im_lx im_ly im_i_last im_i
+threshOpt=1;
+threshVal=str2double(get(handles.tresh_btn,'String'));
+adaptArea=15;
+erodeSize=0;
+filRpt=0;
+filSize=0;
+minSize=40;
+maxSize=300;
+c_th=0.6;
+e_th=1.75;
+imageSize = str2double(get(handles.imSize_btn,'String'));
+connect=4;%8
+MasterList=zeros(300,50,4);
+for im_i_id_all=1:im_i_last
+    rawIm=imtranslate(reshape(im_bank(im_i_id_all,:,:),im_lx,im_ly),im_pos(im_i_id_all,:));
+    %[threshOpt,threshVal,adaptArea,erodeSize,filRpt,filSize,minSize,maxSize]'
+    [~, ~, binIm1, ~, ~, centroids,threshVal]=m1_binarize(rawIm,threshOpt,threshVal,adaptArea,erodeSize,filRpt,filSize,minSize,maxSize,c_th,e_th,imageSize,connect,0);
+    set(handles.tresh_btn,'String',num2str(threshVal));
+    approx_r=mean(centroids(:,3));
+    %updateIm(handles,reshape(im_bank(im_i_id_all,:,:),im_lx,im_ly),im_pos(im_i_id_all,:),zmode)
+    sk_col=plot_col_centers( handles, centroids,sk_col,1,0,zmode);
+    [noSk,~]=size(centroids);
+    MasterList(1:noSk,p_no(p_i(im_i_id_all)),2:4)=centroids(:,1:3);
+    MasterList(1:noSk,p_no(p_i(im_i_id_all)),1)=1:noSk;
+end
+updateIm(handles,reshape(im_bank(im_i,:,:),im_lx,im_ly),im_pos(im_i,:),zmode)
+updateStatus(handles,1,sprintf(strcat(num2str(noSk),' Skyrmions Located')));
+centroids=reshape(MasterList(:,p_no(p_i(im_i))+1,2:3),[300,2]);
+sk_col=plot_col_centers( handles, centroids,sk_col,1,0,zmode);
