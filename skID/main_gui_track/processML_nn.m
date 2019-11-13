@@ -1,4 +1,4 @@
-function [ fullstat2,theta_cor,r_cor ]= processML_nn( MasterList, p_no, conv,p_width,flip_n)
+function [ fullstat2,theta_cor,r_cor, MasterList ]= processML_nn( MasterList, p_no, conv,p_width,flip_n)
 %PROCESSML_NN Summary of this function goes here
 %   Detailed explanation goes here
 %Processes MasterList based on nearest neighbours
@@ -40,12 +40,13 @@ for p=p_no
             xy_before=centroids_before(min_i,:);
             sel_index=((dist1>0)&&~ismember(xy_now,[0,0],'rows')&&~ismember(xy_before,[0,0],'rows'));
             if sel_index
-                
-                data=[fs_i,p,dist1,dx,dy,xy_before,skID_before(skN_i),radius_now];
+                MasterList(skN_i,p,1)=skID_before(min_i);
+                data=[fs_i,p,dist1,dx,dy,xy_before,skID_before(min_i),radius_now];
                 fullstat2(fs_i,:)=data;
                 fs_i=fs_i+1;
             end
             centroids_before(min_i,:)=[];
+            skID_before(min_i,:)=[];
         end
         
     end
@@ -56,27 +57,32 @@ fullstat2=sortrows(fullstat2,[2,8]);
 skID=fullstat2(:,8);
 
 c1=conv*10^-6/(p_width*10^-9);
-
+c2=conv*10^-6;
 %rough cart plot % get vx_cor and vy_cor
 col_map1=jet(max(unique(fullstat2(:,2)))-p_no(1)+2);
 vx_cor=zeros(1,length(fullstat2));
 vy_cor=zeros(1,length(fullstat2));
 v_cor=zeros(1,length(fullstat2));
+distx_cor=zeros(1,length(fullstat2));
+disty_cor=zeros(1,length(fullstat2));
 f1=figure;
 hold on
 f2=figure;
 hold on
 col_map1=jet(skN_max);
 col_map2=jet(skN_max*max(p_no));
+
 for ski=1:length(skID)
     if flip_n==0        
         figure(f1);
-        col_map1=jet(skN_max);
+        
         plot(fullstat2(ski,4),-fullstat2(ski,5),'o','color',col_map1(fullstat2(ski,8),:),'MarkerSize', 10)
         figure(f2);
         plot(fullstat2(ski,6),-fullstat2(ski,7),'o','color',col_map2((fullstat2(ski,8)-1)*max(p_no)+fullstat2(ski,2),:),'MarkerSize', 10)
         vx_cor(ski)=fullstat2(ski,4)*c1;
         vy_cor(ski)=-fullstat2(ski,5)*c1;
+        distx_cor(ski)=fullstat2(ski,4)*c2;
+        disty_cor(ski)=-fullstat2(ski,5)*c2;
     elseif mod(fullstat2(ski,2),2)==0 %this code is the potential fkup
         plot(flip_n*fullstat2(ski,4)*c1,-flip_n*fullstat2(ski,5)*c1,'o','color',col_map1(fullstat2(ski,2)-p_no(1)+2,:),'MarkerSize', 10)
         vx_cor(ski)=flip_n*fullstat2(ski,4)*c1;
@@ -110,6 +116,10 @@ f4=figure;
 hold on
 f5=figure;
 hold on
+f6=figure;
+hold on
+
+ski_stats=zeros([length(unique(skID)'),2]);%size, mean deflection (^o)
 for ski=unique(skID)'
     figure(f3);
     title('Deflection Angle (^o) Summary')
@@ -130,6 +140,14 @@ for ski=unique(skID)'
     plot(pp,2*ss*conv*10^3);
     xlabel('frame(#)');
     ylabel('size(nm)');
+    
+    [dist_theta_cor,dist_r_cor]=cart2pol(sum(disty_cor(skID==ski)),-sum(distx_cor(skID==ski)));
+    figure(f6);
+    title('Size vs Deflection Angle Summary (End - Start position)')
+    plot(2*mean(ss)*conv*10^3,dist_theta_cor*180/pi,'o')
+    xlabel('size(nm)');
+    ylabel('Deflection Angle(^o)');
+    ski_stats(ski,:)=[2*mean(ss)*conv*10^3,dist_theta_cor*180/pi];
 end
 
 saveas(figure(f1),'Sk_velocity_components.png')
@@ -137,6 +155,7 @@ saveas(figure(f2),'Sk_position.png')
 saveas(figure(f3),'Sk_deflection.png')
 saveas(figure(f4),'Sk_speed.png')
 saveas(figure(f5),'Sk_size.png')
-
+saveas(figure(f6),'Sk_size_deflection.png')
+ dlmwrite('Sk_size_deflection.txt',ski_stats);
 end
 

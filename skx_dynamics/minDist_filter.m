@@ -3,7 +3,7 @@ function [ fs2,r,theta ] = minDist_filter( fs2,r,theta,fs_old )
 %   Detailed explanation goes here
 minDist=1080/256;
 
-if nargin<3
+if nargin<=3
     fil_index=(fs2(:,3)>minDist);
 else
     fil_index=(fs_old(:,3)>minDist);

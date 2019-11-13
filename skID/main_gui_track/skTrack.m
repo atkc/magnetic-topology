@@ -464,7 +464,8 @@ conv=imageSize/max([im_lx im_ly]);
 imageSize
 flip_n=0;
 p_width=1e9;%ns
-[ fullstat2,theta_cor,r_cor ]= processML_nn( MasterList, p_no, conv,p_width,flip_n);
+[ fullstat2,theta_cor,r_cor,MasterList ]= processML_nn( MasterList, p_no, conv,p_width,flip_n);
+save('MasterList.mat','MasterList');
 save(strcat('r_cor','.mat'),'r_cor');
 save(strcat('theta_cor','.mat'),'theta_cor');
 save(strcat('fullstat2','.mat'),'fullstat2');
