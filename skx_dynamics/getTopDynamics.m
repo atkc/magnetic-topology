@@ -1,16 +1,17 @@
 %masterList(skID,ImageInd(pulse no),:)=[skID_min,coor_x,coor_y,size];
 %fullstat2_fil(i,:)=[i,imageInd(pulse no),minDist,minDist_x,minDist_y,coor_x,coor_y,skID_min,size];
 conv=13000/1080; %estimated nm/px
-pulse_range=[6 7 39 40]%[6 8 10 28 30 32 34]%[5 7 9 27 29 31 33]%[6 8 10 28 30 32 34];%;
+pulse_range=[6 7 39 40]%[6 8 10 28 30 32 34];%[6 7 39 40]%[6 8 10 28 30 32 34]%[5 7 9 27 29 31 33]%[6 8 10 28 30 32 34];%;
 storage=zeros(1000,6);
 store_i=1;
 sk_hall=-20;
-divide=0;%1: count the assymetries of the flow based on sk_hall
+divide=1;%1: count the assymetries of the flow based on sk_hall
 before=0;%capture before or after pulse position
 [fullstat2_fil,~,~]=minDist_filter(fullstat2);
 staticsk_no=0;
 NN_staticsk_size=zeros([1000,2]);
 NNdist=zeros([1000,2]);
+
 for pulse_i=1:length(pulse_range)
     skN=MasterList(:,pulse_range(pulse_i)-1,1);
     skN_max= max(skN);
@@ -61,10 +62,10 @@ for pulse_i=1:length(pulse_range)
                 dy_after=y_after(skj)-y(sk_id_temp);
                 if before==1
                     NNdist(store_i,:)=[dx,dy];
-                    NN_staticsk_size(store_i,:)=[dsk(sk_id_temp),dsk(skj)];   
+                    NN_staticsk_size(store_i,:)=[dsk(sk_id_temp),dsk(skj)];%[pinned dsk, moving dsk]?   
                 else
                     NNdist(store_i,:)=[dx_after,dy_after];
-                    NN_staticsk_size(store_i,:)=[dsk_after(sk_id_temp),dsk_after(skj)];                    
+                    NN_staticsk_size(store_i,:)=[dsk_after(sk_id_temp),dsk_after(skj)];%[pinned dsk, moving dsk]?                    
                 end
                 if ((dx==0)&&(dy==0))
                     display('asdas');
@@ -163,6 +164,13 @@ end
 figure;errorbar(theta_mid,avg_theta_v,std_theta_v,'-o')
 
 %*************************static sk size as a function of NN dist*********
+title_name='';
+if before
+    title_name='Skyrmion Size Before Pulse';
+else
+    title_name='Skyrmion Size After Pulse';
+end
+
 NNdist=NNdist(1:store_i-1,:);
 NN_staticsk_size=NN_staticsk_size(1:store_i-1,:);
 figure;
@@ -199,11 +207,12 @@ xlabel('dist_{NN}/d_{sk-pinned}')
 ylabel('d_{sk-move}/d_{sk-pinned}')
 xlim([min(binE),max(binE)])
 ylim([0,2])
+title(title_name);
 
 figure;
-
 plot(NNdist_n_fil,NN_staticsk_size_fil(:,1),'o');
 set(gca,'FontSize',18)
 xlabel('dist_{NN}')
 ylabel('d_{sk-pinned}')
 ylim([60,200])
+title(title_name);

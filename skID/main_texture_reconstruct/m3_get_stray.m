@@ -1,15 +1,15 @@
 [mx,my,mz]=fovf('m000000.ovf');
 [bx,by,bz]=fovf('B_demag000000.ovf');
 
-tf_ll=7;%last layer of magnetic material, first layer is 1
+tf_ll=2;%last layer of magnetic material, first layer is 1
 %how many thinfilm layers? %32:26aa
 
-step_z=1;
-cell_size=10;%nm
+step_z=20;
+cell_size=20;%nm
 %**********Check Magnetization********************
-checkM=0;
+checkM=1;
 if checkM
-    for al=[1:3:100]
+    for al=[1:5]
     mlayer=al;
     figure
     subplot(2,2,1);
@@ -31,9 +31,9 @@ if checkM
 end
 %**********Check Magnetization********************
 
-writefile=0;
+writefile=1;
 saveStray=0;
-plotim=0;
+plotim=1;
 fx=figure;
 set(fx, 'Units', 'Normalized', 'OuterPosition', [0.1, 0.1, 0.7, 0.5]);
 title('Bx');xlabel('nm');ylabel('T');
@@ -51,25 +51,34 @@ fnv_x=figure;
 set(fnv_x, 'Units', 'Normalized', 'OuterPosition', [0.1, 0.1, 0.7, 0.5]);
 title('Bnv_x');xlabel('nm');ylabel('T');
 
-xrange=126:386;%126:386;
-yrange=16;
+xrange=1:1024;%126:386;
+yrange=1:1024;%256:768;
 cm = colormap(autumn(tf_ll+60));
-for al=[tf_ll+10:10:200]%first layer is 1
 
-    filename=strcat('Bfield_',num2str((al-tf_ll)*step_z));
+gh=figure;
+gh_c=jet(20);
+for al=[tf_ll+(10)]%first layer is 1
+
+    filename=strcat('Bfield_',num2str((al-tf_ll)*step_z),'nm');
     blayer=al;
     bx_l=bx(:,:,blayer);
     by_l=by(:,:,blayer);
     bz_l=bz(:,:,blayer);
-    lw=0.5;
-    if al==tf_ll+30
-        cm_now=[0 0 0];
-        lw=2;
-    elseif (rem( al-tf_ll, 10 )==0)
-        cm_now=[0.3 0.3 0.3];
-    else
-        cm_now=cm(al,:);
-    end
+    
+    bx_l=bx_l(xrange,yrange);
+    by_l=by_l(xrange,yrange);
+    bz_l=bz_l(xrange,yrange);
+    
+    
+%     lw=0.5;
+%     if al==tf_ll+30
+%         cm_now=[0 0 0];
+%         lw=2;
+%     elseif (rem( al-tf_ll, 10 )==0)
+%         cm_now=[0.3 0.3 0.3];
+%     else
+%         cm_now=cm(al,:);
+%     end
 %     figure(fx);hold on;plot(cell_size*xrange,bx_l(xrange,yrange),'Color', cm_now,'LineWidth',lw);
 %     figure(fy);hold on;plot(cell_size*xrange,by_l(xrange,yrange),'Color', cm_now,'LineWidth',lw);
 %     figure(fz);hold on;plot(cell_size*xrange,bz_l(xrange,yrange),'Color', cm_now,'LineWidth',lw);
@@ -96,19 +105,24 @@ for al=[tf_ll+10:10:200]%first layer is 1
         %figure;
         plot_rgb_vec(bx_l,by_l,bz_l);
         title(strcat('demag layer:',num2str(al-1),'height:',num2str(al-tf_ll),'nm'));
-        
-       
+   
     end
-        h=figure;
-        surf((bx_l*sin((54*pi)/180)+bz_l*cos((54*pi)/180)));
-        view(2)
-        shading interp
-        title(strcat('stray field height:',num2str(al-tf_ll),'nm'))
-        axis equal
-        colorbar;
-        xlim([0,256])
-        ylim([0,256])
-        saveas(h,strcat('stray_height_',num2str(al-tf_ll),'nm.png'))     
+    nv_im=(bx_l*sin((54*pi)/180)+bz_l*cos((54*pi)/180));
+    h=figure;
+    
+    surf(abs(nv_im));
+    view(2)
+    shading flat
+    title(strcat('stray field height:',num2str((al-tf_ll)*cell_size),'nm'))
+    axis equal
+    colormap(flipud(parula))
+    colorbar;
+    xlim([0,length(bx_l)])
+    ylim([0,length(bx_l)])
+    %saveas(h,strcat('stray_height_',num2str(al-tf_ll)*cell_size,'nm.png'))     
+    figure(gh)
+    hold on
+    plot(nv_im(512,:)*10^3,'color',gh_c(al,:));
     
     if writefile
         dlmwrite(strcat(filename,'_Bz.txt'),bz_l,',')
@@ -119,9 +133,9 @@ for al=[tf_ll+10:10:200]%first layer is 1
         im_rgb=plot_rgb_vec(bx_l,by_l,bz_l);
         imwrite(flipud(im_rgb),strcat('strayfield_',num2str((al-28)*step_z),'.png'))
         f1=figure;
-        subplot(1,3,1);plot(bx_l(:,64),'LineWidth',3);title('Bx @ 30nm');
-        subplot(1,3,2);plot(by_l(:,64),'LineWidth',3);title('By @ 30nm');
-        subplot(1,3,3);plot(bz_l(:,64),'LineWidth',3);title('Bz @ 30nm');
+        subplot(1,3,1);plot(bx_l(:,128),'LineWidth',3);title('Bx @ 30nm');
+        subplot(1,3,2);plot(by_l(:,128),'LineWidth',3);title('By @ 30nm');
+        subplot(1,3,3);plot(bz_l(:,128),'LineWidth',3);title('Bz @ 30nm');
         set(f1, 'Units', 'Normalized', 'OuterPosition', [0.1, 0.1, 0.7, 0.5]);
         saveas(f1,strcat('strayfieldxyz_',num2str((al-28)*step_z),'.png'))
         close(f1);
@@ -130,14 +144,23 @@ for al=[tf_ll+10:10:200]%first layer is 1
     end
     
 end
+pos =[ 0.4794    0.0882    1.2016    0.4856]*1e3;
+figure(gh)
+title('100-300nm above sample, stray field across skyrmion, along nv axis')
+ylabel('mT')
+xlabel('nm')
+set(gh, 'Position',pos)
+%saveas(gh,'stray_field_nvaxis.png')
+
+
 % saveas(fx,strcat('strayfieldx_30-60nm_lift','.png'))
 % saveas(fy,strcat('strayfieldy_30-60nm_lift','.png'))
 % saveas(fz,strcat('strayfieldz_30-60nm_lift','.png'))
 
 
 
-saveas(fnv_y,strcat('strayfieldnv_y_30-60nm_lift','.png'))
-saveas(fnv_x,strcat('strayfieldnv_x_30-60nm_lift','.png'))
+% saveas(fnv_y,strcat('strayfieldnv_y_30-60nm_lift','.png'))
+% saveas(fnv_x,strcat('strayfieldnv_x_30-60nm_lift','.png'))
 % bz_l=bx(:,:,68);
 % max(bz_l(:))
 % for al=[9:1:20]
