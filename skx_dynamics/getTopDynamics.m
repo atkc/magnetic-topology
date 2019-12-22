@@ -6,11 +6,16 @@ storage=zeros(1000,6);
 store_i=1;
 sk_hall=-20;
 divide=1;%1: count the assymetries of the flow based on sk_hall
-before=0;%capture before or after pulse position
+% before=1;%capture before or after pulse position
 [fullstat2_fil,~,~]=minDist_filter(fullstat2);
 staticsk_no=0;
 NN_staticsk_size=zeros([1000,2]);
 NNdist=zeros([1000,2]);
+
+NN_staticsk_size_before=zeros([1000,2]);
+NNdist_before=zeros([1000,2]);
+NN_staticsk_size_after=zeros([1000,2]);
+NNdist_after=zeros([1000,2]);
 
 for pulse_i=1:length(pulse_range)
     skN=MasterList(:,pulse_range(pulse_i)-1,1);
@@ -60,13 +65,18 @@ for pulse_i=1:length(pulse_range)
 
                 dx_after=x_after(skj)-x(sk_id_temp);
                 dy_after=y_after(skj)-y(sk_id_temp);
-                if before==1
-                    NNdist(store_i,:)=[dx,dy];
-                    NN_staticsk_size(store_i,:)=[dsk(sk_id_temp),dsk(skj)];%[pinned dsk, moving dsk]?   
-                else
-                    NNdist(store_i,:)=[dx_after,dy_after];
-                    NN_staticsk_size(store_i,:)=[dsk_after(sk_id_temp),dsk_after(skj)];%[pinned dsk, moving dsk]?                    
-                end
+%                 if before==1
+%                     NNdist(store_i,:)=[dx,dy];
+%                     NN_staticsk_size(store_i,:)=[dsk(sk_id_temp),dsk(skj)];%[pinned dsk, moving dsk]?   
+%                 elseif before ==0
+%                     NNdist(store_i,:)=[dx_after,dy_after];
+%                     NN_staticsk_size(store_i,:)=[dsk_after(sk_id_temp),dsk_after(skj)];%[pinned dsk, moving dsk]?                    
+%                 end
+                NNdist_before(store_i,:)=[dx,dy];
+                NN_staticsk_size_before(store_i,:)=[dsk(sk_id_temp),dsk(skj)];%[pinned dsk, moving dsk]?   
+                NNdist_after(store_i,:)=[dx_after,dy_after];
+                NN_staticsk_size_after(store_i,:)=[dsk_after(sk_id_temp),dsk_after(skj)];%[pinned dsk, moving dsk]? 
+                
                 if ((dx==0)&&(dy==0))
                     display('asdas');
                 end
@@ -164,23 +174,25 @@ end
 figure;errorbar(theta_mid,avg_theta_v,std_theta_v,'-o')
 
 %*************************static sk size as a function of NN dist*********
-title_name='';
-if before
-    title_name='Skyrmion Size Before Pulse';
-else
-    title_name='Skyrmion Size After Pulse';
-end
 
-NNdist=NNdist(1:store_i-1,:);
-NN_staticsk_size=NN_staticsk_size(1:store_i-1,:);
+NNdist_after=NNdist_after(1:store_i-1,:);
+NN_staticsk_size_after=NN_staticsk_size_after(1:store_i-1,:);
+NNdist_before=NNdist_before(1:store_i-1,:);
+NN_staticsk_size_before=NN_staticsk_size_before(1:store_i-1,:);
+
+%*********Analysis before pulse***************
+%*********************************************
+title_name='Skyrmion Size Before Pulse';
 figure;
+NNdist=NNdist_before(1:store_i-1,:);
+NN_staticsk_size=NN_staticsk_size_before(1:store_i-1,:);
 NNdist_n=sqrt(NNdist(:,1).^2+NNdist(:,2).^2).*conv;
 NN_staticsk_size_fil=NN_staticsk_size(NNdist_n<400,:).*conv;
 NNdist_n_fil=NNdist_n(NNdist_n<400);
-
 plot(NNdist_n_fil,NN_staticsk_size_fil,'o');
 xlabel('NN distance (nm)')
 ylabel('stationary d_{sk} (nm)')
+title(title_name);
 
 figure;
 set(gca,'FontSize',18)
@@ -216,3 +228,67 @@ xlabel('dist_{NN}')
 ylabel('d_{sk-pinned}')
 ylim([60,200])
 title(title_name);
+
+%*********Analysis before pulse***************
+%*********************END*********************
+
+%*********Analysis after pulse***************
+%*********************************************
+title_name='Skyrmion Size After Pulse';
+figure;
+NNdist=NNdist_after(1:store_i-1,:);
+NN_staticsk_size=NN_staticsk_size_after(1:store_i-1,:);
+NNdist_n=sqrt(NNdist(:,1).^2+NNdist(:,2).^2).*conv;
+NN_staticsk_size_fil=NN_staticsk_size(NNdist_n<400,:).*conv;
+NNdist_n_fil=NNdist_n(NNdist_n<400);
+plot(NNdist_n_fil,NN_staticsk_size_fil,'o');
+xlabel('NN distance (nm)')
+ylabel('stationary d_{sk} (nm)')
+title(title_name);
+
+figure;
+set(gca,'FontSize',18)
+values_staticsk=NN_staticsk_size_fil(:,1);
+values_NNsk=NN_staticsk_size_fil(:,2);
+binN=6;
+
+%x=NNdist_n_fil;
+x=NNdist_n_fil./values_staticsk;
+y=values_NNsk./values_staticsk;
+
+binE=linspace(1.6,3.4,binN);%linspace(min(x),max(x),binN);
+avg_y=zeros(1,length(binE)-1);
+avg_x=zeros(1,length(binE)-1);
+for el=1:length(binE)-1
+    hold_i=logical((x>=binE(el)).*(x<binE(el+1)));
+    avg_y(el)= mean(y(hold_i));
+    avg_x(el)=(binE(el)+binE(el+1))/2;
+end
+hold on 
+plot(avg_x,avg_y,'-*')
+plot(x,y,'o')
+xlabel('dist_{NN}/d_{sk-pinned}')
+ylabel('d_{sk-move}/d_{sk-pinned}')
+xlim([min(binE),max(binE)])
+ylim([0,2])
+title(title_name);
+
+figure;
+plot(NNdist_n_fil,NN_staticsk_size_fil(:,1),'o');
+set(gca,'FontSize',18)
+xlabel('dist_{NN}')
+ylabel('d_{sk-pinned}')
+ylim([60,200])
+title(title_name);
+
+%*********Analysis after pulse***************
+%*********************END*********************
+
+%*********Before + After pulse analysis*******
+%*********************************************
+
+NNdist=NNdist_after(1:store_i-1,:);
+NN_staticsk_size=NN_staticsk_size_after(1:store_i-1,:);
+NNdist_n=sqrt(NNdist(:,1).^2+NNdist(:,2).^2).*conv;
+NN_staticsk_size_fil=NN_staticsk_size(NNdist_n<400,:).*conv;
+NNdist_n_fil=NNdist_n(NNdist_n<400);

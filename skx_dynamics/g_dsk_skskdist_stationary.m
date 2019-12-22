@@ -17,9 +17,9 @@ for pulse_i=1:length(pulse_range)
         
     tri = delaunayTriangulation(xycoor(:,1),xycoor(:,2));
     clist=tri.ConnectivityList;%based on skN (temp)
-%     triplot(tri)
-%     hold on
-%     plot(xycoor(:,1),xycoor(:,2),'*')
+    triplot(tri)
+    hold on
+    plot(xycoor(:,1),xycoor(:,2),'*')
     E= edges(tri);
     for ei=1:length(E)
       vertex_id1=E(ei,1);
@@ -34,6 +34,8 @@ for pulse_i=1:length(pulse_range)
     end
 
 end
+edge_remove=(edgeDat(:,1)==0);
+edgeDat(edge_remove,:)=[];
 %edgeDat=edgeDat(1:edgeDati-1,:);
 figure;
 plot(edgeDat(:,1),edgeDat(:,2),'o');
@@ -71,11 +73,27 @@ title('(dsk_1 x dsk_2)_{avg}');
 ylabel('sk-sk_{NN} distance (nm)')
 xlabel('(dsk_1 x dsk_2)_{avg} (nm^2)');
 
-
-
 edgeDat_4=[avg_binE;avg_values];
-save('edgeDat.mat','edgeDat')
-save('edgeDat_4.mat','edgeDat_4')
+% save('edgeDat.mat','edgeDat')
+% save('edgeDat_4.mat','edgeDat_4')
+
+binN=10;
+binE=linspace(min(edgeDat(:,1)),max(edgeDat(:,1)),binN);
+values=edgeDat(:,4);
+avg_values=zeros(1,length(binE)-1);
+avg_binE=zeros(1,length(binE)-1);
+for el=1:length(binE)-1
+    hold_i=logical((edgeDat(:,1)>=binE(el)).*(edgeDat(:,1)<binE(el+1)));
+    avg_values(el)= mean(values(hold_i));
+    avg_binE(el)=(binE(el)+binE(el+1))/2;
+end
+figure;
+hold on
+plot(edgeDat(:,1),edgeDat(:,4),'o');
+plot(avg_binE,avg_values,'-*')
+title('(d_{sk1} x d_{sk2})_{avg} vs sk-sk_{NN}');
+xlabel('sk-sk_{NN} distance (nm)')
+ylabel('(d_{sk1} x d_{sk2}) (nm^2)');
 
 figure;
 plot(edgeDat(:,1),edgeDat(:,5),'o');
