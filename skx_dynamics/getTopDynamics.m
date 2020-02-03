@@ -1,5 +1,14 @@
 %masterList(skID,ImageInd(pulse no),:)=[skID_min,coor_x,coor_y,size];
 %fullstat2_fil(i,:)=[i,imageInd(pulse no),minDist,minDist_x,minDist_y,coor_x,coor_y,skID_min,size];
+load('fullstat2-combine.mat')
+load('MasterList.mat')
+load('fullstat2-size-combine.mat')
+load('newMasterList.mat')
+load('i1-combine.mat')
+load('theta_cor-combine.mat')
+load('r_cor-combine.mat')
+
+
 conv=13000/1080; %estimated nm/px
 pulse_range=[6 7 39 40]%[6 8 10 28 30 32 34];%[6 7 39 40]%[6 8 10 28 30 32 34]%[5 7 9 27 29 31 33]%[6 8 10 28 30 32 34];%;
 storage=zeros(1000,6);
@@ -51,9 +60,9 @@ for pulse_i=1:length(pulse_range)
     staticsk_no=staticsk_no+length(checkSkList);
     sk_temp=1:length(skN);
     for sk_id=checkSkList
-        sk_id_temp=sk_temp(skN==sk_id);
+        sk_id_temp=sk_temp(skN==sk_id);%static Sk id
         if ~isempty(sk_id_temp)
-        [r,c] = find(clist==sk_id_temp);%based on skN (temp)
+        [r,c] = find(clist==sk_id_temp);%find triangulations based on skN (temp) i.e. involving chosen static sk
         nn_id_temp=unique(reshape(clist(r,:),1,[]));%based on skN (temp)
         sum(nn_id_temp==sk_id_temp);%must be truel
         nn_id_temp(nn_id_temp==sk_id_temp)=[];%based on skN (temp)
@@ -67,18 +76,19 @@ for pulse_i=1:length(pulse_range)
                 dy_after=y_after(skj)-y(sk_id_temp);
 %                 if before==1
 %                     NNdist(store_i,:)=[dx,dy];
-%                     NN_staticsk_size(store_i,:)=[dsk(sk_id_temp),dsk(skj)];%[pinned dsk, moving dsk]?   
+%                     NN_staticsk_size(store_i,:)=[dsk(sk_id_temp),dsk(skj)];%[pinned dsk, moving dsk]   
 %                 elseif before ==0
 %                     NNdist(store_i,:)=[dx_after,dy_after];
-%                     NN_staticsk_size(store_i,:)=[dsk_after(sk_id_temp),dsk_after(skj)];%[pinned dsk, moving dsk]?                    
+%                     NN_staticsk_size(store_i,:)=[dsk_after(sk_id_temp),dsk_after(skj)];%[pinned dsk, moving dsk]                   
 %                 end
-                NNdist_before(store_i,:)=[dx,dy];
-                NN_staticsk_size_before(store_i,:)=[dsk(sk_id_temp),dsk(skj)];%[pinned dsk, moving dsk]?   
-                NNdist_after(store_i,:)=[dx_after,dy_after];
-                NN_staticsk_size_after(store_i,:)=[dsk_after(sk_id_temp),dsk_after(skj)];%[pinned dsk, moving dsk]? 
+
+                %[NNx_before, NNy_before,NNx_after,NNy_after]
+                NNdist_all(store_i,:)=[dx,dy,dx_after,dy_after];
+                %[pinned dsk_before, moving dsk_before,pinned dsk_after, moving dsk_after]
+                NN_staticsk_size_all(store_i,:)=[dsk(sk_id_temp),dsk(skj),dsk_after(sk_id_temp),dsk_after(skj)];
                 
-                if ((dx==0)&&(dy==0))
-                    display('asdas');
+                if ((dx==0)&&(dy==0))||((dx_after==0)&&(dy_after==0))
+                    display('Algo is fucked');
                 end
                 vx=m_vx(find(movingSkList==skj,1));
                 vy=m_vy(find(movingSkList==skj,1));
@@ -175,17 +185,15 @@ figure;errorbar(theta_mid,avg_theta_v,std_theta_v,'-o')
 
 %*************************static sk size as a function of NN dist*********
 
-NNdist_after=NNdist_after(1:store_i-1,:);
-NN_staticsk_size_after=NN_staticsk_size_after(1:store_i-1,:);
-NNdist_before=NNdist_before(1:store_i-1,:);
-NN_staticsk_size_before=NN_staticsk_size_before(1:store_i-1,:);
+NNdist_all=NNdist_all(1:store_i-1,:);
+NN_staticsk_size_all=NN_staticsk_size_all(1:store_i-1,:);
 
 %*********Analysis before pulse***************
 %*********************************************
 title_name='Skyrmion Size Before Pulse';
 figure;
-NNdist=NNdist_before(1:store_i-1,:);
-NN_staticsk_size=NN_staticsk_size_before(1:store_i-1,:);
+NNdist=NNdist_all(1:store_i-1,1:2);
+NN_staticsk_size=NN_staticsk_size_all(1:store_i-1,1:2);
 NNdist_n=sqrt(NNdist(:,1).^2+NNdist(:,2).^2).*conv;
 NN_staticsk_size_fil=NN_staticsk_size(NNdist_n<400,:).*conv;
 NNdist_n_fil=NNdist_n(NNdist_n<400);
@@ -236,8 +244,8 @@ title(title_name);
 %*********************************************
 title_name='Skyrmion Size After Pulse';
 figure;
-NNdist=NNdist_after(1:store_i-1,:);
-NN_staticsk_size=NN_staticsk_size_after(1:store_i-1,:);
+NNdist=NNdist_all(1:store_i-1,3:4);
+NN_staticsk_size=NN_staticsk_size_all(1:store_i-1,3:4);
 NNdist_n=sqrt(NNdist(:,1).^2+NNdist(:,2).^2).*conv;
 NN_staticsk_size_fil=NN_staticsk_size(NNdist_n<400,:).*conv;
 NNdist_n_fil=NNdist_n(NNdist_n<400);
@@ -286,9 +294,59 @@ title(title_name);
 
 %*********Before + After pulse analysis*******
 %*********************************************
+NN_staticsk_size=[NN_staticsk_size_all(:,1),NN_staticsk_size_all(:,3)]*conv;
+NN_staticsk_size=unique(NN_staticsk_size,'rows');
+ratio_pinned=NN_staticsk_size(:,2)./NN_staticsk_size(:,1);
+r_mean=mean(ratio_pinned);
+r_std=std(ratio_pinned);
 
-NNdist=NNdist_after(1:store_i-1,:);
-NN_staticsk_size=NN_staticsk_size_after(1:store_i-1,:);
-NNdist_n=sqrt(NNdist(:,1).^2+NNdist(:,2).^2).*conv;
-NN_staticsk_size_fil=NN_staticsk_size(NNdist_n<400,:).*conv;
-NNdist_n_fil=NNdist_n(NNdist_n<400);
+figure;
+title_name='Pinned Skyrmion Size Before/After Pulse';
+plot(NN_staticsk_size(:,1),ratio_pinned,'ro')
+set(gca,'FontSize',18)
+xlabel('d_{sk-pin}^{before} (nm)')
+ylabel('r_{pin} = d_{sk-pin}^{after}/d_{sk-pin}^{before}')
+txt=strcat('r_{mean}=',num2str(r_mean,'%.1f'),'\pm',num2str(r_std,'%.1f'));
+text(130,1.6,txt)
+h1=refline([0 1]);
+h1.LineStyle='--'; 
+title(title_name);
+
+figure;
+title_name='Pinned Skyrmion Size Before/After Pulse';
+plot(NN_staticsk_size(:,1),NN_staticsk_size(:,2),'ro')
+set(gca,'FontSize',18)
+xlabel('d_{sk-pin}^{before} (nm)')
+ylabel('d_{sk-pin}^{after} (nm)')
+title(title_name);
+ylim([100,200]);
+xlim([100,200]);
+
+
+NN_staticsk_size=[NN_staticsk_size_all(:,2),NN_staticsk_size_all(:,4)]*conv;
+ratio_move=NN_staticsk_size(:,2)./NN_staticsk_size(:,1);
+r_mean=mean(ratio_move);
+r_std=std(ratio_move);
+
+figure;
+title_name='Moving Skyrmion Size Before/After Pulse';
+plot(NN_staticsk_size(:,1),ratio_move,'ro')
+set(gca,'FontSize',18)
+xlabel('d_{sk-move}^{before} (nm)')
+ylabel('r_{move} = d_{sk-move}^{after}/d_{sk-move}^{before}')
+txt=strcat('r_{mean}=',num2str(r_mean,'%.1f'),'\pm',num2str(r_std,'%.1f'));
+text(130,2,txt)
+ylim([0,3]);
+xlim([50,inf]);
+h1=refline([0 1]);
+h1.LineStyle='--'; 
+title(title_name);
+
+figure;
+title_name='Moving Skyrmion Size Before/After Pulse';
+plot(NN_staticsk_size(:,1),NN_staticsk_size(:,2),'ro')
+set(gca,'FontSize',18)
+xlabel('d_{sk-move}^{before} (nm)')
+ylabel('d_{sk-move}^{after} (nm)')
+title(title_name);
+xlim([50,inf]);
