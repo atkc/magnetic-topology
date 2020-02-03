@@ -1,35 +1,55 @@
 helicity=pi;%helicity_y: 0 (right neel),pi (left neel), pi/2 (bloch CW),-pi/2 (bloch (CCW)
-domain=32;
-domainWall=4;
+domain=4;
+domainWall=96;
 
-sim_size_x=128;
-sim_size_y=128;
-sim_height=150;
+sim_size_x=1024;
+sim_size_y=1024;
+sim_height=32;
 
 im_skel=zeros(sim_size_y,sim_size_x);
-im_skel(64,64)=1;
+im_skel(512,512)=1;
+im_skel(256,512)=1;
+im_skel(768,512)=1;
+im_skel(384,256)=1;
+im_skel(640,256)=1;
+im_skel(384,768)=1;
+im_skel(640,768)=1;
 
 
 im_dist = bwdist(im_skel,'Euclidean');
 [Gmag,Gdir] = imgradient(im_dist);
 
 [imx,imy,imz,im_weight]=s3_recon_profile_2(0,helicity,domain,domainWall,im_dist,Gdir);
-plot_rgb_vec(imx,imy,imz)
+plot_rgb_vec(imx,imy,imz);
 
 magx = double(imx);
 magy = double(imy);
 magz = double(imz);
 
-ovf_filename='simpleSK_leftneel_640nm_80nm.ovf';
+afmagx = -double(imx);
+afmagy = -double(imy);
+afmagz = -double(imz);
+
+ovf_filename='SAFSK_leftneel_1024nm_100nm_up_down.ovf';
 mag_mat=zeros([sim_size_x*sim_size_y*sim_height,3]);
 
 act_mat=[reshape(rot90(fliplr(magx)),sim_size_x*sim_size_y,1),reshape(rot90(fliplr(magy)),sim_size_x*sim_size_y,1),reshape(rot90(fliplr(magz)),sim_size_x*sim_size_y,1)];
+act_mat_af=[reshape(rot90(fliplr(afmagx)),sim_size_x*sim_size_y,1),reshape(rot90(fliplr(afmagy)),sim_size_x*sim_size_y,1),reshape(rot90(fliplr(afmagz)),sim_size_x*sim_size_y,1)];
+
 act_mat_l=sim_size_x*sim_size_y;
-for coli=0:3:28
+for coli=1
+    sum(abs(act_mat_af)~=1)
+    mag_mat((coli)*act_mat_l+1:((coli)*act_mat_l+act_mat_l),:)=act_mat_af;
+    sum(abs(mag_mat((coli)*act_mat_l+1:((coli)*act_mat_l+act_mat_l),:))~=1)
+end
+
+%for AF skyrmion
+for coli=0
     sum(abs(act_mat)~=1)
     mag_mat((coli)*act_mat_l+1:((coli)*act_mat_l+act_mat_l),:)=act_mat;
     sum(abs(mag_mat((coli)*act_mat_l+1:((coli)*act_mat_l+act_mat_l),:))~=1)
 end
+
 
 %dlmwrite('mag_mat.txt',mag_mat,' ')
 
@@ -44,18 +64,18 @@ ovfhead=["#"    "OOMMF:"               "rectangular"               "mesh"    "v1
     "#"    "xbase:"               "5e-09"                     ""        ""        "" ...
     "#"    "ybase:"               "5e-09"                     ""        ""        "" ...
     "#"    "zbase:"               "5e-10"                     ""        ""        "" ...
-    "#"    "xstepsize:"           "4e-09"                     ""        ""        "" ...
-    "#"    "ystepsize:"           "4e-09"                     ""        ""        "" ...
-    "#"    "zstepsize:"           "1e-09"                     ""        ""        "" ...
+    "#"    "xstepsize:"           "1e-09"                     ""        ""        "" ...
+    "#"    "ystepsize:"           "1e-09"                     ""        ""        "" ...
+    "#"    "zstepsize:"           "20e-09"                     ""        ""        "" ...
     "#"    "xmin:"                "0"                         ""        ""        "" ...
     "#"    "ymin:"                "0"                         ""        ""        "" ...
     "#"    "zmin:"                "0"                         ""        ""        "" ...
-    "#"    "xmax:"                "1.280e-06"                 ""        ""        "" ...
-    "#"    "ymax:"                "1.280e-06"                 ""        ""        "" ...
-    "#"    "zmax:"                "1.280e-07"                 ""        ""        "" ...
-    "#"    "xnodes:"              "128"                       ""        ""        "" ...
-    "#"    "ynodes:"              "128"                       ""        ""        "" ...
-    "#"    "znodes:"              "150"                       ""        ""        "" ...
+    "#"    "xmax:"                "10.240e-06"                 ""        ""        "" ...
+    "#"    "ymax:"                "10.240e-06"                 ""        ""        "" ...
+    "#"    "zmax:"                "6.400e-07"                 ""        ""        "" ...
+    "#"    "xnodes:"              "1024"                       ""        ""        "" ...
+    "#"    "ynodes:"              "1024"                       ""        ""        "" ...
+    "#"    "znodes:"              "32"                       ""        ""        "" ...
     "#"    "ValueRangeMinMag:"    "1e-08"                     ""        ""        "" ...
     "#"    "ValueRangeMaxMag:"    "1"                         ""        ""        "" ...
     "#"    "valueunit:"           ""                          ""        ""        "" ...

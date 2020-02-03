@@ -1,22 +1,28 @@
 helicity=pi;%helicity_y: 0 (right neel),pi (left neel), pi/2 (bloch CW),-pi/2 (bloch (CCW)
-filename='34e_0mT_2x2_raw.tiff';
-filepath='C:\Users\Anthony\OneDrive\Research Projects\NV_skyrmion\film_34e\';
-rawIm=imread([filepath filename]);
+filename='Image0011_10x10_btm_right';
+ext='.png';
+filepath='C:\Users\ant_t\OneDrive\scanning_magnetometry\SG_skyrmion_collab\26t2\200129_26t2\';
+rawIm=imread([filepath filename ext]);
 
-domainWallSize=22;%px
-domainSize=5;%px
+domainWallSize=55;%px (use odd please)
+domainSize=4;%px (use even please)
 profile_size=domainWallSize+domainSize;%px
+grid_xy_size=256;
+grd_z_size=128;
+eff_z=14;
 
 InvertInd = 0;
 if InvertInd
     rawIm = imcomplement(rawIm);
 end
-
-im_length=1024;
+figure
+imshow(rawIm)
+im_length=grid_xy_size;
 rawIm = imresize(rawIm,im_length/length(rawIm),'bicubic');
+figure
 imshow(rawIm);
 threshOpt=1; %1:global 2: adaptive
-threshVal=0; %0 if otsu method
+threshVal=0.57; %0 if otsu method
 adaptArea=0; % only for adaptive threshold mode
 erodeSize=0; %erosion size (px)
 filRpt=0; %filter repetition
@@ -28,14 +34,14 @@ e_th=0; %filter centroids based on eccentricity
 imageSize=10; %for gauging size filter (um)
 connect=8; %connectivity for bwconncomp (4 or 8 for 2d)
 chop=0; %1: watershed method to dislocate misIDed blobs
-rawIm = imgaussfilt(rawIm,4);
+%rawIm = imgaussfilt(rawIm,4);
 
 [dgrayIm, filIm, binIm1, binIm2, binIm3, centroids,threshVal]=m1_binarize(rawIm,threshOpt,threshVal,adaptArea,erodeSize,filRpt,filSize,minSize,maxSize,c_th,e_th,imageSize,connect,chop);
-se = strel('disk',5,0);
+se = strel('square',1);
 binIm_hole =imdilate(binIm1,se);
 binIm_hole =imerode(binIm_hole,se);
 binIm_hole=imcomplement(binIm_hole);
-binIm_hole=imfill(binIm_hole,'holes');
+%binIm_hole=imfill(binIm_hole,'holes');
 %binIm_hole=imcomplement(binIm_hole);
 
 
@@ -121,6 +127,10 @@ plot_rgb_vec(imx3,imy3,imz3);
 
 [imx,imy,imz]=s2_recon_profile(im_dist,im_phi,profile_size,domainWallSize);
 
+imzBi=double(binIm_hole)*2-1;
+imxBi=zeros(size(imzBi));
+imyBi=zeros(size(imzBi));
+
 figure;imshow(imz,[min(imz(:)),max(imz(:))]);
 title('mz');
 colormap(redblue);
@@ -135,6 +145,10 @@ colormap(redblue);
 colorbar;
 
 plot_rgb_vec(imx,imy,imz);
+plot_rgb_vec(imxBi,imyBi,imzBi);
+
+ovf_filename=strcat(filename,'.ovf');
+m2_convet2mumax(ovf_filename,grid_xy_size,grd_z_size,eff_z,imxBi,imyBi,imzBi,0,0,0)
 % imy_avg=imgaussfilt(imy,5);
 % imx_avg=imgaussfilt(imx,5);
 % imz_avg=imgaussfilt(imx,5);

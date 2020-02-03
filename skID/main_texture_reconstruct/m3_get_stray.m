@@ -1,15 +1,20 @@
+% folder='C:\Users\ant_t\Desktop\mumax3.9c\mfm_mag_circle\isocircle\';
+% for filei=[1000]
+%  %cd(strcat(folder,'circle_',num2str(filei),'_',num2str(1000),'.out'));
+%  cd(strcat(folder,'isocircle_',num2str(filei),'.out'));
 [mx,my,mz]=fovf('m000000.ovf');
 [bx,by,bz]=fovf('B_demag000000.ovf');
 
-tf_ll=2;%last layer of magnetic material, first layer is 1
+tf_ll=14;%last layer of magnetic material, first layer is 1
 %how many thinfilm layers? %32:26aa
 
-step_z=20;
-cell_size=20;%nm
+step_z=3;%nm
+cell_size=10000/256;%nm
 %**********Check Magnetization********************
-checkM=1;
+checkM=0;
+
 if checkM
-    for al=[1:5]
+    for al=[1:15]
     mlayer=al;
     figure
     subplot(2,2,1);
@@ -29,11 +34,14 @@ if checkM
     title(strcat('m layer:',num2str(al-1)));
     end
 end
+imwrite((mx(:,:,1))/2,strcat('Mx_',num2str(1*step_z),'.png'))
+imwrite((my(:,:,1))/2,strcat('My_',num2str(1*step_z),'.png'))
+imwrite((mz(:,:,1)+1)/2,strcat('Mz_',num2str(1*step_z),'.png'))
 %**********Check Magnetization********************
 
 writefile=1;
 saveStray=0;
-plotim=1;
+plotim=0;
 fx=figure;
 set(fx, 'Units', 'Normalized', 'OuterPosition', [0.1, 0.1, 0.7, 0.5]);
 title('Bx');xlabel('nm');ylabel('T');
@@ -51,14 +59,14 @@ fnv_x=figure;
 set(fnv_x, 'Units', 'Normalized', 'OuterPosition', [0.1, 0.1, 0.7, 0.5]);
 title('Bnv_x');xlabel('nm');ylabel('T');
 
-xrange=1:1024;%126:386;
-yrange=1:1024;%256:768;
+xrange=1:256;%126:386;
+yrange=1:256;%256:768;
 cm = colormap(autumn(tf_ll+60));
 
 gh=figure;
 gh_c=jet(20);
-for al=[tf_ll+(10)]%first layer is 1
-
+for al=[24 27 34    45    63    85    96   128]%33%(85-12)%[(tf_ll+1):10:128]%first layer is 1
+al
     filename=strcat('Bfield_',num2str((al-tf_ll)*step_z),'nm');
     blayer=al;
     bx_l=bx(:,:,blayer);
@@ -91,7 +99,7 @@ for al=[tf_ll+(10)]%first layer is 1
     if plotim
         figure
         subplot(2,2,3);
-        imshow(flipud(bz_l),[min(bz_l(:)),max(bz_l(:))]);
+        imshow((bz_l),[min(bz_l(:)),max(bz_l(:))]);
         title('Bz')
         subplot(2,2,4);
         title(strcat('demag layer:',num2str(al-1)));
@@ -104,25 +112,25 @@ for al=[tf_ll+(10)]%first layer is 1
         subplot(2,2,4);
         %figure;
         plot_rgb_vec(bx_l,by_l,bz_l);
-        title(strcat('demag layer:',num2str(al-1),'height:',num2str(al-tf_ll),'nm'));
+        title(strcat('demag layer:',num2str(al-tf_ll),'height:',num2str((al-tf_ll)*step_z),'nm'));
    
     end
     nv_im=(bx_l*sin((54*pi)/180)+bz_l*cos((54*pi)/180));
     h=figure;
     
-    surf(abs(nv_im));
+    surf(abs(flipud(nv_im)));
     view(2)
     shading flat
-    title(strcat('stray field height:',num2str((al-tf_ll)*cell_size),'nm'))
+    title(strcat('stray field height:',num2str((al-tf_ll)*step_z),'nm'))
     axis equal
     colormap(flipud(parula))
     colorbar;
     xlim([0,length(bx_l)])
     ylim([0,length(bx_l)])
     %saveas(h,strcat('stray_height_',num2str(al-tf_ll)*cell_size,'nm.png'))     
-    figure(gh)
-    hold on
-    plot(nv_im(512,:)*10^3,'color',gh_c(al,:));
+%     figure(gh)
+%     hold on
+%     plot(nv_im(512,:)*10^3,'color',gh_c(al,:));
     
     if writefile
         dlmwrite(strcat(filename,'_Bz.txt'),bz_l,',')
@@ -144,13 +152,15 @@ for al=[tf_ll+(10)]%first layer is 1
     end
     
 end
-pos =[ 0.4794    0.0882    1.2016    0.4856]*1e3;
-figure(gh)
-title('100-300nm above sample, stray field across skyrmion, along nv axis')
-ylabel('mT')
-xlabel('nm')
-set(gh, 'Position',pos)
-%saveas(gh,'stray_field_nvaxis.png')
+% end
+
+% pos =[ 0.4794    0.0882    1.2016    0.4856]*1e3;
+% figure(gh)
+% title('100-300nm above sample, stray field across skyrmion, along nv axis')
+% ylabel('mT')
+% xlabel('nm')
+% set(gh, 'Position',pos)
+% %saveas(gh,'stray_field_nvaxis.png')
 
 
 % saveas(fx,strcat('strayfieldx_30-60nm_lift','.png'))
