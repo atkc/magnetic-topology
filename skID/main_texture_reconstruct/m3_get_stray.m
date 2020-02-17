@@ -39,7 +39,7 @@ imwrite((my(:,:,1))/2,strcat('My_',num2str(1*step_z),'.png'))
 imwrite((mz(:,:,1)+1)/2,strcat('Mz_',num2str(1*step_z),'.png'))
 %**********Check Magnetization********************
 
-writefile=1;
+writefile=0;
 saveStray=0;
 plotim=0;
 fx=figure;
@@ -59,13 +59,33 @@ fnv_x=figure;
 set(fnv_x, 'Units', 'Normalized', 'OuterPosition', [0.1, 0.1, 0.7, 0.5]);
 title('Bnv_x');xlabel('nm');ylabel('T');
 
-xrange=1:256;%126:386;
-yrange=1:256;%256:768;
+
 cm = colormap(autumn(tf_ll+60));
 
 gh=figure;
 gh_c=jet(20);
-for al=[24 27 34    45    63    85    96   128]%33%(85-12)%[(tf_ll+1):10:128]%first layer is 1
+
+xrange=50:80;%126:386;
+yrange=40:70;%256:768;
+for al=[tf_ll+1:tf_ll+30]
+    blayer=al;
+    bx_l=bx(:,:,blayer);
+    by_l=by(:,:,blayer);
+    bz_l=bz(:,:,blayer);
+    bx_l=bx_l(xrange,yrange);
+    by_l=by_l(xrange,yrange);
+    bz_l=bz_l(xrange,yrange);
+
+    bnorm=(bx_l.^2+by_l.^2+bz_l.^2).^0.5;
+    nv_im=(bx_l*sin((54*pi)/180)+bz_l*cos((54*pi)/180));
+    figure
+    imshow((bnorm),[prctile(bnorm(:),50),prctile(bnorm(:),90)]);
+    view(2)
+    axis equal
+    shading flat
+end
+
+for al=[31 64 80]%33%(85-12)%[(tf_ll+1):10:128]%first layer is 1
 al
     filename=strcat('Bfield_',num2str((al-tf_ll)*step_z),'nm');
     blayer=al;
@@ -115,8 +135,17 @@ al
         title(strcat('demag layer:',num2str(al-tf_ll),'height:',num2str((al-tf_ll)*step_z),'nm'));
    
     end
+    bnorm=(bx_l.^2+by_l.^2+bz_l.^2).^0.5;
     nv_im=(bx_l*sin((54*pi)/180)+bz_l*cos((54*pi)/180));
-    h=figure;
+    bangle=acos(abs(nv_im./bnorm));
+%     h1=figure;
+%     [histy,histx]=hist(bnorm(:),100);
+%     dlmwrite(strcat('hist_bnorm_',num2str((al-tf_ll)*step_z),'.txt'),[histx',histy'/length(histy)]);
+%     h2=figure;
+%     histogram(bangle(:));
+%     [histy,histx]=hist(bangle(:),100);
+%     dlmwrite(strcat('hist_bangle_',num2str((al-tf_ll)*step_z),'.txt'),[histx',histy'/length(histy)]);
+%     h=figure;
     
     surf(abs(flipud(nv_im)));
     view(2)

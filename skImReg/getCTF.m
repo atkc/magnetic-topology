@@ -1,7 +1,7 @@
 
-cd('C:\Users\Anthony\Dropbox\Shared_MFM\Data\Nanostructures\fp553_nanostructures\180411-1a_fp553_1b_d2_2um_n4k-p1050\analysis_1050');
-AFMfilename='180411_fp553_1b_d2_2um_p';
-pulseID=fliplr([31:32]);
+cd('C:\Users\ant_t\Dropbox\shared_mfm\Data\Nanostructures\fp553_nanostructures\180408-3_fp553_1b_d2_2um_n4k-p1370\analysis\SOM create sk');
+AFMfilename='180408-3_fp553_1b_d3_2um_p';
+pulseID=fliplr([0:13]);
 tf1=0;%local tf
 tf2=affine2d();%compounding tf
 for i= 2:length(pulseID)
@@ -47,7 +47,7 @@ for i= 2:length(pulseID)
     %% imregister uses imregtform to retrive the geometric transformation 
     %% Please use imregtform to retrieve the information
     %tformEstimate = imregcorr(mbinary, fbinary);
-    tf1=imregtform(mbinary, fbinary, 'affine', optimizer, metric)%,'InitialTransformation',tformEstimate);
+    tf1=imregtform(mbinary, fbinary, 'affine', optimizer, metric);%,'InitialTransformation',tformEstimate);
     %tf=imregtform(moving, fixed, 'affine', optimizer, metric);
     tf2.T=tf1.T*tf2.T;
     movingReg=imwarp(moving,tf2,'OutputView',imref2d(size(fixed)));

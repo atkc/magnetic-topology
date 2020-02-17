@@ -82,7 +82,7 @@ ylabel(c,'Sk Counts');
 % 
 H = fspecial('average',2);
 %imfil = imfilter(im,H);
-imfil = imgaussfilt(im,0.7);
+imfil = imgaussfilt(im,1);
 figure;
 surf(avg_v, HAaxis, imfil, 'EdgeColor', 'interp')
 colormap('jet');

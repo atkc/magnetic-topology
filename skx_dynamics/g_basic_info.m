@@ -6,7 +6,8 @@ frame_list=unique(fullstat2(:,2));
 % fullstat2_fil=fullstat2;
 % r_cor_fil=r_cor;
 % theta_cor_fil=theta_cor;
-[fullstat2_fil,r_cor_fil,theta_cor_fil]=minDist_filter(fullstat2,r_cor,theta_cor);
+minDist=1080/256;
+[fullstat2_fil,r_cor_fil,theta_cor_fil]=minDist_filter(fullstat2,r_cor,theta_cor,minDist);
 
 %Hall Angle vs J plot
 f2=figure;

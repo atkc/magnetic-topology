@@ -1,7 +1,7 @@
-function [ fs2,r,theta ] = minDist_filter( fs2,r,theta,fs_old )
+function [ fs2,r,theta ] = minDist_filter( fs2,r,theta,fs_old,minDist )
 %FIL Summary of this function goes here
 %   Detailed explanation goes here
-minDist=1080/256;
+
 
 if nargin<=3
     fil_index=(fs2(:,3)>minDist);

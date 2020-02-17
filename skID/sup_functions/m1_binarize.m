@@ -119,7 +119,7 @@ function [dgrayIm, filIm, binIm1, binIm2 ,binIm3, centroids,threshVal]= m1_binar
 %*************************************************************************
 %*****************************Segregate Area******************************
 %*************************************************************************
-    binIm = imfill(binIm,'holes');
+    %binIm = imfill(binIm,'holes');
     %%****segregate the patches*************
     if chop_i
         binIm=chopIT(binIm);
