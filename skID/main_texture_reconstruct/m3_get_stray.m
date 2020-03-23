@@ -5,16 +5,16 @@
 [mx,my,mz]=fovf('m000000.ovf');
 [bx,by,bz]=fovf('B_demag000000.ovf');
 
-tf_ll=14;%last layer of magnetic material, first layer is 1
+tf_ll=42;%last layer of magnetic material, first layer is 1
 %how many thinfilm layers? %32:26aa
 
-step_z=3;%nm
+step_z=1;%nm
 cell_size=10000/256;%nm
 %**********Check Magnetization********************
 checkM=0;
 
 if checkM
-    for al=[1:15]
+    for al=[1:50]
     mlayer=al;
     figure
     subplot(2,2,1);
@@ -39,9 +39,9 @@ imwrite((my(:,:,1))/2,strcat('My_',num2str(1*step_z),'.png'))
 imwrite((mz(:,:,1)+1)/2,strcat('Mz_',num2str(1*step_z),'.png'))
 %**********Check Magnetization********************
 
-writefile=0;
+writefile=1;
 saveStray=0;
-plotim=0;
+plotim=1;
 fx=figure;
 set(fx, 'Units', 'Normalized', 'OuterPosition', [0.1, 0.1, 0.7, 0.5]);
 title('Bx');xlabel('nm');ylabel('T');
@@ -64,28 +64,30 @@ cm = colormap(autumn(tf_ll+60));
 
 gh=figure;
 gh_c=jet(20);
+% xrange=50:80;%126:386;
+% yrange=40:70;%256:768;
+xrange=1:256;
+yrange=1:256;
 
-xrange=50:80;%126:386;
-yrange=40:70;%256:768;
-for al=[tf_ll+1:tf_ll+30]
-    blayer=al;
-    bx_l=bx(:,:,blayer);
-    by_l=by(:,:,blayer);
-    bz_l=bz(:,:,blayer);
-    bx_l=bx_l(xrange,yrange);
-    by_l=by_l(xrange,yrange);
-    bz_l=bz_l(xrange,yrange);
+% for al=[tf_ll+1:tf_ll+30]
+%     blayer=al;
+%     bx_l=bx(:,:,blayer);
+%     by_l=by(:,:,blayer);
+%     bz_l=bz(:,:,blayer);
+%     bx_l=bx_l(xrange,yrange);
+%     by_l=by_l(xrange,yrange);
+%     bz_l=bz_l(xrange,yrange);
+% 
+%     bnorm=(bx_l.^2+by_l.^2+bz_l.^2).^0.5;
+%     nv_im=(bx_l*sin((54*pi)/180)+bz_l*cos((54*pi)/180));
+%     figure
+%     imshow((bnorm),[prctile(bnorm(:),50),prctile(bnorm(:),90)]);
+%     view(2)
+%     axis equal
+%     shading flat
+% end
 
-    bnorm=(bx_l.^2+by_l.^2+bz_l.^2).^0.5;
-    nv_im=(bx_l*sin((54*pi)/180)+bz_l*cos((54*pi)/180));
-    figure
-    imshow((bnorm),[prctile(bnorm(:),50),prctile(bnorm(:),90)]);
-    view(2)
-    axis equal
-    shading flat
-end
-
-for al=[31 64 80]%33%(85-12)%[(tf_ll+1):10:128]%first layer is 1
+for al=[(tf_ll+5):5:128]%33%(85-12)%[(tf_ll+1):10:128]%first layer is 1
 al
     filename=strcat('Bfield_',num2str((al-tf_ll)*step_z),'nm');
     blayer=al;
@@ -147,13 +149,13 @@ al
 %     dlmwrite(strcat('hist_bangle_',num2str((al-tf_ll)*step_z),'.txt'),[histx',histy'/length(histy)]);
 %     h=figure;
     
-    surf(abs(flipud(nv_im)));
-    view(2)
-    shading flat
-    title(strcat('stray field height:',num2str((al-tf_ll)*step_z),'nm'))
-    axis equal
-    colormap(flipud(parula))
-    colorbar;
+%     surf(abs(flipud(nv_im)));
+%     view(2)
+%     shading flat
+%     title(strcat('stray field height:',num2str((al-tf_ll)*step_z),'nm'))
+%     axis equal
+%     colormap(flipud(parula))
+%     colorbar;
     xlim([0,length(bx_l)])
     ylim([0,length(bx_l)])
     %saveas(h,strcat('stray_height_',num2str(al-tf_ll)*cell_size,'nm.png'))     
@@ -168,7 +170,7 @@ al
     end
     if saveStray&&((al-tf_ll)*step_z==30)
         im_rgb=plot_rgb_vec(bx_l,by_l,bz_l);
-        imwrite(flipud(im_rgb),strcat('strayfield_',num2str((al-28)*step_z),'.png'))
+        imwrite(flipud(im_rgb),strcat('strayfield_',num2str((al-tf_ll)*step_z),'.png'))
         f1=figure;
         subplot(1,3,1);plot(bx_l(:,128),'LineWidth',3);title('Bx @ 30nm');
         subplot(1,3,2);plot(by_l(:,128),'LineWidth',3);title('By @ 30nm');

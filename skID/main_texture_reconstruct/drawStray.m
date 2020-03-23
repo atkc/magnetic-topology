@@ -103,10 +103,12 @@ surf(imgaussfilt((imbin_upres*2)-1,1)*-mag_mag,'FaceLighting','gouraud','FaceCol
       'AmbientStrength',1); axis equal;shading interp
 material dull
 %surf(imgaussfilt((imbin_upres*2)-1,1)*0.1);axis equal;shading interp
-cmap=[ones([900,1]),zeros([900,1]),zeros([900,1])];
-cmap(1:100,:)=redblue(100);
+cmap=[ones([900,1]),ones([900,1]),ones([900,1])].*[1,1,50/255];
+yellowblue=[255,255,50;255,200,240;255,255,255;44,127,184;37,52,148];
+cmap(1:100,:)=colormixer(flipud(yellowblue),100);
+%cmap(1:100,:)=redblue(100);
 colormap(cmap)
-xyoffset=6;
+xyoffset=5.5;
 ai=1;
 for ni=1:1:length(xx)
     hold on
@@ -121,21 +123,21 @@ for ni=1:1:length(xx)
     Gdir_sel=Gdir((yy(ni)-1)*1+1,(xx(ni)-1)*1+1);%sum(Gdir_range.*Gmag_range)/sum(Gmag_range);
     xtemp=(rho*(cos(Gdir_sel*pi/180))+(xx(ni)-1)*1+1);
     ytemp=(rho*(sin(Gdir_sel*pi/180))+(yy(ni)-1)*1+1);
-    p=plot3(xtemp,ytemp,strayz*1.5,'w','linewidth',2);
+    p=plot3(xtemp,ytemp,strayz*1.5,'Color',[1 0.3 0.3]*0.8,'linewidth',2);
     p.Color(4)=1;
     
     
     xq(ai)=xtemp(round(length(rho)/2))-cos(Gdir_sel*pi/180)*xyoffset;
     yq(ai)=ytemp(round(length(rho)/2))-sin(Gdir_sel*pi/180)*xyoffset;
-    zq(ai)=max(strayz)*1.39;
+    zq(ai)=max(strayz)*1.5;
     vq(ai)=cos(Gdir_sel*pi/180);
     uq(ai)=sin(Gdir_sel*pi/180);
     wq(ai)=0;
     ai=ai+1;
     %q.Color(4)=0.5;
 end
-q=quiver3d(xq,yq,zq,vq,uq,wq,[1 1 1],0.4,10);
+q=quiver3d(xq,yq,zq,vq,uq,wq,[1 0.3 0.3]*1,0.4,20);
 q.FaceAlpha = 1;
-l=light('Position',[0 0 1],'Style','infinite')
+l=light('Position',[0 1 0.5],'Style','infinite')
 l.Position=[0.7 0.3 1.2]
 axis off

@@ -1,9 +1,11 @@
 helicity=pi;%helicity_y: 0 (right neel),pi (left neel), pi/2 (bloch CW),-pi/2 (bloch (CCW)
-filename='200207_x26t2_mfm0001_rot180custom';
+filename='x26t2_mfm0001_crop_10x10um_gray';
 ext='.png';
-filepath='C:\Users\ant_t\Desktop\mumax3.9c\mfm_mag_26t2\200207_26t2_recon\';
+filepath='C:\Users\ant_t\OneDrive\scanning_magnetometry\SG_skyrmion_collab\26t2\200224_26t2\';
 rawIm=imread([filepath filename ext]);
-portion=16;%always input 2^x
+
+%rawIm=im1_n;
+portion=1;%always input 2^x
 
 [sizex,sizey]=size(rawIm);
 dx=sizex/sqrt(portion);
@@ -25,8 +27,8 @@ domainWallSize=55;%px (use odd please)
 domainSize=4;%px (use even please)
 profile_size=domainWallSize+domainSize;%px
 grid_xy_size=256;
-grd_z_size=128;
-eff_z=14;
+grd_z_size=256;
+eff_z=42;
 InvertInd = 0;
 
 for portioni=1:portion
