@@ -1,10 +1,10 @@
-test_stats=[NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,50442,53595,61352, 66976,72818];
-cases_stats=[2,2,3,3,4,8,8,9,9,13,13,19,23,35,40,52,85,114,160,206,271,321,373,456,590,798,1140,1372,1950,2626,3269,3983,5018];
+test_stats=[NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,50442,53595,61352, 66976,72818,78340,83945,90436];
+cases_stats=[2,2,3,3,4,8,8,9,9,13,13,19,23,35,40,52,85,114,160,206,271,321,373,456,590,798,1140,1372,1950,2626,3269,3983,5018,5683,6650,8077,9529];
 days=1:length(cases_stats);
 
 ext_days=1:(1*length(cases_stats)+10);
 
-p=polyfit(days(10:end),log(cases_stats(10:end)),1);
+p=polyfit(days(15:end),log(cases_stats(15:end)),1);
 ext_stats=exp(polyval(p,ext_days));
 
 figure;
@@ -27,7 +27,7 @@ title('# of Covid 19 cases in the UK (Log)')
 startd=10;
 logfun=@(x,xdata)x(1)./(1+exp((-x(2)*(xdata-x(3)))));
 
-x0=[10000, 0.26,37];
+x0=[20000, 0.26,37];
 xdata=days(startd:end);
 ydata=cases_stats(startd:end);
 [x,resnorm,resid,exitflag,output,lambda,J]=lsqcurvefit(logfun,x0,xdata,ydata);
