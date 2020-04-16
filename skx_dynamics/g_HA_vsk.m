@@ -1,8 +1,8 @@
 %Speed vs Hall angle plot
 op=0;%op: 0(all currents),1(negative j),2(positive j)
 Nlim=5;%plot points with at # of sk > Nlim
-
-[fullstat2_fil,r_cor_fil,theta_cor_fil]=minDist_filter(fullstat2,r_cor,theta_cor);
+minDist=1080/256;%min pixel size
+[fullstat2_fil,r_cor_fil,theta_cor_fil]=minDist_filter(fullstat2,r_cor,theta_cor,minDist);
 pID1=unique(fullstat2(:,2));
 pID2=unique(fullstat2_fil(:,2));
 
@@ -11,7 +11,7 @@ i1_fil=i1(ia);
 
 index=fwbw_filter(i1_fil,fullstat2_fil,op);%1:neg current, 2: pos current
 col_plot=1;%0:off, 1:on
-for nedge=23
+for nedge=22
 HAedge=-92.5:5:92.5; 
 HAaxis=-90:5:90;
 im=zeros(length(HAaxis),nedge);

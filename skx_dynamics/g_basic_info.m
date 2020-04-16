@@ -8,7 +8,7 @@ frame_list=unique(fullstat2(:,2));
 % theta_cor_fil=theta_cor;
 minDist=1080/256;
 [fullstat2_fil,r_cor_fil,theta_cor_fil]=minDist_filter(fullstat2,r_cor,theta_cor,minDist);
-
+%%
 %Hall Angle vs J plot
 f2=figure;
 avg_theta=zeros(length(frame_list),1);
@@ -31,6 +31,7 @@ errorbar(abs(i1(1:length(avg_theta))),avg_theta,std_theta,'o')
 xlabel('j(|A/m^2|)')
 ylabel('Theta(o)')
 
+%%
 %Speed (only sk in motion) vs J plot
 f4=figure;
 %[theta_cor,r_cor]=cart2pol(vy_cor,-vx_cor);
@@ -47,6 +48,7 @@ errorbar(i2(1:length(avg_v)),avg_v,std_v,'*r')
 xlabel('j(|A/m^2|)')
 ylabel('speed(|m/s^2|)')
 
+%%
 %Speed (all sk (inc ones not moving)) vs J plot
 f5=figure;
 %[theta_cor,r_cor]=cart2pol(vy_cor,-vx_cor);
@@ -64,6 +66,7 @@ errorbar(i2(1:length(avg_v)),avg_v,std_v,'*r')
 xlabel('j(|A/m^2|)')
 ylabel('speed(|m/s^2|)')
 
+%%
 %Speed vs Hall angle plot
 
 for nedge=22
@@ -90,7 +93,7 @@ xlabel('speed(|m/s^2|)')
 ylabel('Theta(o)')
 end
 
-
+%%
 %Hall angle plot vs X plot
 x1=min(fullstat2_fil(:,6));
 x2=max(fullstat2_fil(:,6));
@@ -132,6 +135,7 @@ end
 end
 %[(avg_binE-x1)*13000/(1000*1080);N;avg_theta;std_theta]';
 
+%%
 %sk speed vs X plot
 x1=min(fullstat2_fil(:,6));
 x2=max(fullstat2_fil(:,6));
@@ -166,6 +170,7 @@ pax = gca;
 pax.ThetaZeroLocation = 'top';
 pax.RAxisLocation=90;
 
+%%
 %population graph
 total_sk=max(fullstat2_fil(:,8));
 id_1=[3:8];

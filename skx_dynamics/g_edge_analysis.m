@@ -1,14 +1,16 @@
-noBins=22; % number of bins
+noBins=18; % number of bins
 op=1; %flow criteria 1: flow current, 2: flow speed, 3: both
-flowi=-5.5e11;%get flow current(polarity matters!)
+flowi=5.6e11;%get flow current(polarity matters!)
 flow_pol=1;%polarity mode: 1: single, 2 : both
 flowv=0;
 mode=1;%1: flow dynamics, -1: creep+stochastic
 conv=13000/1080;
-[fullstat2_fil,r_cor_fil,theta_cor_fil]=minDist_filter(fullstat2,r_cor,theta_cor);
+minDist=1080/256;%min pixel size
+
+[fullstat2_fil,r_cor_fil,theta_cor_fil]=minDist_filter(fullstat2,r_cor,theta_cor,minDist);
 pID1=unique(fullstat2(:,2));
 pID2=unique(fullstat2_fil(:,2));
-
+pID=pID2;
 [~,ia,~]=intersect(pID1,pID2);
 i1_fil=i1(ia);
 
@@ -62,15 +64,25 @@ for binN=noBins
         %angular deflection analysis
         hold_i=logical((x_coor>=binE(el)).*(x_coor<binE(el+1)));
         hold_theta=(180/pi)*theta_cor_fil_edge(hold_i);
-        hold_theta=hold_theta+(hold_theta<-90)*180;
-        hold_theta=hold_theta-(hold_theta>90)*180;
+        
+        %%%This should nto be applicable for edge analysis because the
+        %%%deflection (both ways) on the edge will be seen as one
+        %%%deflection and antoher attraction but both are deflection
+        %%%hold_theta=hold_theta+(hold_theta<-90)*180;
+        %%%hold_theta=hold_theta-(hold_theta>90)*180;
+        %%%Should use below instead
+        hold_theta(hold_theta<-90)=-180-hold_theta(hold_theta<-90);
+        hold_theta(hold_theta>90)=180-hold_theta(hold_theta>90);
+        
+        hold_i2=(hold_theta>-90).*(hold_theta<90);
+        hold_theta1=abs(hold_theta(hold_i2==1));
         avg_theta(el)= (mean(hold_theta));
         std_theta(el)= (std(hold_theta));
         avg_binE(el)=(binE(el)+binE(el+1))/2;
         %Speed velocity
         hold_v=r_cor_fil_edge(hold_i);
-        avg_v(el)=mean(hold_v);
-        std_v(el)=std(hold_v);
+        avg_v(el)=mean(hold_v(hold_i2==1));
+        std_v(el)=std(hold_v(hold_i2==1));
     end
     figure
     subplot(2,1,1)
@@ -101,8 +113,9 @@ for binN=noBins
     xlabel('edge(um)')
     ylabel('No of Skyrmions (#)')
 end
-data2=[(avg_binE-x1)*13000/(1000*1080);N;avg_v;std_v]';
-data1=[(avg_binE-x1)*13000/(1000*1080);N;avg_theta;std_theta]';
+data1=[(avg_binE-x1)*13000/(1000*1080);N;avg_theta;std_theta]';%Deflection
+data2=[(avg_binE-x1)*13000/(1000*1080);N;avg_v;std_v]';%Velocity
+
 
 
     figure

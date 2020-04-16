@@ -1,6 +1,7 @@
 
 i2=abs(i1);
 i_u=unique(i2);
+minDist=1080/256;%min pixel size
 for nedge=30
 [~,edges] = histcounts(r_cor,nedge);
 for i_check=i_u'%(end); %current to probe
