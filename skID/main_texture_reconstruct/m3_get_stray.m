@@ -87,7 +87,7 @@ yrange=1:256;
 %     shading flat
 % end
 
-for al=[(tf_ll+5):5:128]%33%(85-12)%[(tf_ll+1):10:128]%first layer is 1
+for al=119%[(tf_ll+5):5:128]%33%(85-12)%[(tf_ll+1):10:128]%first layer is 1
 al
     filename=strcat('Bfield_',num2str((al-tf_ll)*step_z),'nm');
     blayer=al;

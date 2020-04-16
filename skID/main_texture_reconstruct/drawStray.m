@@ -43,8 +43,8 @@ figure;surf(imskel*1);view(2);axis equal;shading flat
 %[Gmag,Gdir]=imgradient(double(~imskel));
 
 
-stray_w=8;
-stray_r=4;
+stray_w=6;
+stray_r=3;
 rho=(-stray_w/2:0.1:stray_w/2);
 strayz=(stray_r^2-(rho).^2).^0.5;
 rho=rho+1
@@ -61,7 +61,7 @@ imskel(:,length(imskel))=false;
 imskel(:,1)=false;
 
 [yy_hold,xx_hold]=find(bwperim(imbin_upres));
-search_r=8;
+search_r=3;
 
 searchi=1;
 while ~isempty(yy_hold)
@@ -85,7 +85,7 @@ figure;
 surf(imskel*1);view(2);axis equal;shading flat
 colormap('gray')
 
-removetol=0.2;
+removetol=0.05;
 removedist1=removetol*length(imbin_upres);
 removedist2=(1-removetol)*length(imbin_upres);
 
@@ -110,6 +110,8 @@ cmap(1:100,:)=colormixer(flipud(yellowblue),100);
 colormap(cmap)
 xyoffset=5.5;
 ai=1;
+axis off
+%%
 for ni=1:1:length(xx)
     hold on
     yrange=(yy(ni)-1)*1+1:(yy(ni))*1;
@@ -135,6 +137,12 @@ for ni=1:1:length(xx)
     wq(ai)=0;
     ai=ai+1;
     %q.Color(4)=0.5;
+    
+    %save data
+    
+    bdata=[xtemp',ytemp',strayz'];
+    bfile=strcat('bline',num2str(ni),'.txt');
+    dlmwrite(bfile,bdata,'delimiter',' ');
 end
 q=quiver3d(xq,yq,zq,vq,uq,wq,[1 0.3 0.3]*1,0.4,20);
 q.FaceAlpha = 1;
