@@ -67,9 +67,9 @@ xlabel('x speed(|m/s|)')
 ylabel('y speed(|m/s|)')
 
 [theta_cor,r_cor]=cart2pol(vy_cor,-vx_cor);
-save(strcat('r_cor-',num2str(fileno),'.mat'),'r_cor');
-save(strcat('theta_cor-',num2str(fileno),'.mat'),'theta_cor');
-save(strcat('fullstat2-',num2str(fileno),'.mat'),'fullstat2');
+% save(strcat('r_cor-',num2str(fileno),'.mat'),'r_cor');
+% save(strcat('theta_cor-',num2str(fileno),'.mat'),'theta_cor');
+% save(strcat('fullstat2-',num2str(fileno),'.mat'),'fullstat2');
 
 end
 

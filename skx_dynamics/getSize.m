@@ -1,5 +1,5 @@
-foldername='C:\Users\Anthony\Dropbox\Shared_MFM\Data\Nanostructures\fp553_nanostructures\180412-1_fp553_1b_d2_2um_n4k-p750\analysis_750\CTF';
-filename='Reg_180412_fp553_1b_d2_2um_p';
+foldername='C:\Users\ant_t\Dropbox\shared_mfm\Data\Nanostructures\fp553_nanostructures\180504-1_fp553_1b_d3_2um_n4k-p1050\analysis\Registered';
+filename='Reg_180504_fp553_1b_d3_2um_p';
 
 mode=1;%1:xy from fullstat2 2:xy from masterlist
 if mode ==1
@@ -12,8 +12,8 @@ saveInd = 0;
 %maxr=1.25:0.25:1.75;
 approx_r_real=80;%nm
 maxr=1.5;%fit std
-
-pid_list=[36:40]%[1:24,27:40];%[5 6 7 38 39 40]%unique(p_sub);
+p_sub=fullstat2(:,2);
+pid_list=unique(p_sub);
 
 fileList = dir('*.tiff');
 fileList={fileList.name};
@@ -28,6 +28,9 @@ xcor=0%-415.5-4.2539; %depends if analysis was done on ppt or on matlab
 for p_i=1:length(pid_list)
     %****Load image*****
     if mode ==1
+        %fullstat2 xy is based on p -1
+        %fullstat2 xy is based on p -1
+        %fullstat2 xy is based on p -1
         fullfilename=strcat(filename,int2str(pid_list(p_i)-1),'_MFM.tiff')%fullstat2 xy is based on p -1
     else
         fullfilename=strcat(filename,int2str(pid_list(p_i)),'_MFM.tiff')%ML xy is based on p
@@ -62,7 +65,7 @@ for p_i=1:length(pid_list)
     
 
     figure;
-    imshow(im_fit,[min(min(im_fit)),max(max(im_fit))]);
+    imshow(im_fit,[min(im_fit(:)),max(im_fit(:))]);
     hold on;
     plot((xy(:,1))+xcor,xy(:,2),'g*')
     %plot((xy(:,1)),xy(:,2),'g*')
@@ -70,7 +73,7 @@ for p_i=1:length(pid_list)
     sksize_hold=zeros(sk_l,2);
     newxy_hold=zeros(sk_l,2);
     dgrayIm=double(im_fit);
-    dgrayIm=dgrayIm*255/max(max(dgrayIm));
+    dgrayIm=dgrayIm*255/max(dgrayIm(:));
     for sk_i=1:sk_l
 %         figure;
 %         imshow(im_fit,[min(min(im_fit)),max(max(im_fit))]);
@@ -117,7 +120,7 @@ sksize=newfullstat2(:,9)*conv;
 
 %p_id=[5 7 9 27 29 31 33]
 %p_id=[6 8 10 8 30 32 34]
-p_id=[6,7,39,40]
+p_id=[18:27]
 %p_id=[5 6 7 8 9 10 27 28 29 30 31 32 33 34];
 %vlim=5.46
 %for vlim = 0;%[10.06,7.76,5.46,3.16]
@@ -174,7 +177,7 @@ end
 %%
 %*****2.Vsk vs Theta (for each sksize bin)*****
 %**********************************************
-p_id=[6,7,39,40];
+p_id=[18:27];
 %p_id=[5 6 7 8 9 10 27 28 29 30 31 32 33 34];
 %p_id=18:27;
 %vlim=5.46
@@ -234,7 +237,7 @@ end
 %*****3c.Dsk vs Theta (for each j, using current magnitute to group)*****
 %******3d.Dsk vs Vsk (for each j, using current magnitute to group)******
 
-p_id=[6,7,8,9,39,40];%18:19%:27;
+p_id=[18:27];%18:19%:27;
 %p_id=[5 6 7 8 9 10 27 28 29 30 31 32 33 34];
 
 p2i=unique(fullstat2(:,2));
@@ -323,7 +326,7 @@ legend show
 %*****4a.Dsk vs Theta (for each j, using current magnitute to group)*****
 %******4b.Dsk vs Vsk (for each j, using current magnitute to group)******
 
-p_id=[6,7,8,9,39,40];%18:19%:27;
+p_id=[18:27];%18:19%:27;
 %p_id=[5 6 7 8 9 10 27 28 29 30 31 32 33 34];
 
 p2i=unique(newfullstat2(:,2));

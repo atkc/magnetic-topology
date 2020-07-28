@@ -7,6 +7,16 @@ frame_list=unique(fullstat2(:,2));
 % r_cor_fil=r_cor;
 % theta_cor_fil=theta_cor;
 minDist=1080/256;
+
+p_all=fullstat2(:,2);
+p_unique=unique(p_all);
+p_remove_i=p_all<28;
+fullstat2=fullstat2(p_remove_i,:);
+r_cor=r_cor(p_remove_i);
+theta_cor=theta_cor(p_remove_i);
+i1=i1(p_unique<28);
+frame_list=frame_list(p_unique<28);
+
 [fullstat2_fil,r_cor_fil,theta_cor_fil]=minDist_filter(fullstat2,r_cor,theta_cor,minDist);
 %%
 %Hall Angle vs J plot
@@ -58,7 +68,7 @@ avg_v=zeros(length(frame_list),1);%zeros(floor(size(frame_list)/2));
 std_v=zeros(length(frame_list),1);%zeros(floor(size(frame_list)/2));
 for i=1:length(frame_list)
     hold_v=r_cor_fil(logical((fullstat2_fil(:,2)==frame_list(i))));
-    avg_v(i)= (mean([hold_v,zeros(1,total_sk-length(hold_v))]));
+    avg_v(i)= (mean([hold_v;zeros(1,total_sk-length(hold_v))']));
     std_v(i)= (std(hold_v));
 end
 i2=(abs(i1));
@@ -69,7 +79,7 @@ ylabel('speed(|m/s^2|)')
 %%
 %Speed vs Hall angle plot
 
-for nedge=22
+for nedge=10:25
 figure;
 r=r_cor_fil%(pID<p_lim);
 theta=theta_cor_fil%(pID<p_lim);

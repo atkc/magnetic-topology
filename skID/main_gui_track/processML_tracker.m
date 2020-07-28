@@ -1,0 +1,172 @@
+function [ fullstat2,theta_cor,r_cor, MasterList ]= processML_nn( MasterList, p_no, conv,p_width,i1,pol)
+%PROCESSML_NN Summary of this function goes here
+%   Detailed explanation goes here
+%Processes MasterList based on nearest neighbours
+%only recommended for simulations or in-situ imaging techniques where
+%frames are quasi continuous
+%masterList(skID,ImageInd(pulse no),:)=[skID_min,coor_x,coor_y,size];
+%conv=13000/1080; %estimated nm/px
+%p_width:pulse width in ns
+%flipn: to account for flipping of current in experiments
+%flipn=1: +V-V+V... | -1: -V+V-V... | 0: nothign alternating flips
+
+
+p_no=sort(p_no);
+fullstat2=zeros(10000,9);%[i,imageInd(pulse no),minDist,minDist_x,minDist_y,coor_x,coor_y,skID_min,radius];
+fs_i=1;
+skN_max=max(max(max(MasterList(:,:,1))));
+
+%skN=(1:skN_max)';
+
+for p=p_no
+    p_before=p-1;
+    if ismember(p_before,p_no)
+        ml_now=reshape(MasterList(1:skN_max,p,:),[skN_max,4]);
+        ml_before=reshape(MasterList(1:skN_max,p_before,:),[skN_max,4]);
+        ml_now=sortrows(ml_now,1);
+        ml_before=sortrows(ml_before,1);
+        
+        radius_list_now=ml_now(:,4);
+        centroids_now=ml_now(:,2:3);
+        centroids_before=ml_before(:,2:3);
+        skID_now=ml_now(:,1);
+        skID_before=ml_before(:,1);
+        
+        dx=centroids_now(:,1)-centroids_before(:,1);
+        dy=centroids_now(:,2)-centroids_before(:,2);
+        dist1=sqrt(dx.^2+dy.^2);
+        data_centroids_before=centroids_before;
+        data_skID_before=skID_before;
+        radius_now=radius_list_now;
+        
+        empty_now=(((centroids_now(:,1)==0).*(centroids_now(:,2)==0))==1);
+        empty_before=(((centroids_before(:,1)==0).*(centroids_before(:,2)==0))==1);
+        same_pos=dist1==0;
+        
+        remove_ind=(empty_now|empty_before)|same_pos;
+        dx(remove_ind)=[];
+        dy(remove_ind)=[];
+        dist1(remove_ind)=[];
+        data_centroids_before(remove_ind,:)=[];
+        data_skID_before(remove_ind)=[];
+        radius_now(remove_ind)=[];
+        
+        fs_iend=fs_i+length(dx)-1;
+        data=[(fs_i:fs_iend)',p*ones(size(dx)),dist1,dx,dy,data_centroids_before,data_skID_before,radius_now];
+        fullstat2(fs_i:fs_iend,:)=data;
+        fs_i=fs_iend+1;
+        
+    end
+end
+fullstat2=fullstat2(1:fs_i-1,:);
+skID=fullstat2(:,8);
+
+c1=conv*10^-9/(p_width*10^-9);
+c2=conv*10^-9;
+%rough cart plot % get vx_cor and vy_cor
+col_map1=jet(max(unique(fullstat2(:,2)))-p_no(1)+2);
+vx_cor=zeros(1,length(fullstat2));
+vy_cor=zeros(1,length(fullstat2));
+v_cor=zeros(1,length(fullstat2));
+distx_cor=zeros(1,length(fullstat2));
+disty_cor=zeros(1,length(fullstat2));
+f1=figure;
+hold on
+f2=figure;
+hold on
+col_map1=jet(length(skID));
+col_map2=jet(skN_max*max(p_no));
+
+neg_pol_p=p_no((pol*i1)<0);
+pos_pol_p=p_no((pol*i1)>0);
+neg_i = ismember(fullstat2(:,2),neg_pol_p);
+pos_i = ismember(fullstat2(:,2),pos_pol_p);
+pol_sk=-1*neg_i+1*pos_i;
+%[i,imageInd(pulse no),minDist,minDist_x,minDist_y,coor_x,coor_y,skID_min,radius];
+   
+    figure(f1);
+    scatter(pol_sk.*fullstat2(:,4), -pol_sk.*fullstat2(:,5), 10, col_map1, 'filled')    
+    figure(f2);
+    scatter(fullstat2(:,6), -fullstat2(:,7), 10, col_map1, 'filled') 
+    
+    vx_cor=pol_sk.*fullstat2(:,4)*c1;
+    vy_cor=-pol_sk.*fullstat2(:,5)*c1;
+    distx_cor=fullstat2(:,4)*c2;
+    disty_cor=-fullstat2(:,5)*c2;
+    %%this section is for pulse expt similar to FP226 (ie. up up down down
+    %%pulses)
+    % elseif mod(fullstat2(ski,2),2)==0 %this code is the potential fkup
+    % %     plot(flip_n*fullstat2(ski,4)*c1,-flip_n*fullstat2(ski,5)*c1,'o','color',col_map1(fullstat2(ski,2)-p_no(1)+2,:),'MarkerSize', 10)
+    % %     vx_cor(ski)=flip_n*fullstat2(ski,4)*c1;
+    % %     vy_cor(ski)=-flip_n*fullstat2(ski,5)*c1;
+    % else
+    % %     plot(-flip_n*fullstat2(ski,4)*c1,flip_n*fullstat2(ski,5)*c1,'o','color',col_map1(fullstat2(ski,2)-p_no(1)+2,:),'MarkerSize', 10)
+    % %     vx_cor(ski)=-flip_n*fullstat2(ski,4)*c1;
+    % %     vy_cor(ski)=flip_n*fullstat2(ski,5)*c1;
+
+
+figure(f1);
+title('Velocity Components')
+axis equal;
+xlabel('dx(px/frame)');
+ylabel('dy(px/frame)');
+figure(f2);
+title('Position')
+axis equal;
+xlabel('x pos(px)');
+ylabel('y pos(px)');
+
+
+[theta_cor,r_cor]=cart2pol(vy_cor,-vx_cor);
+
+size_cor=fullstat2(:,9);
+
+f3=figure;
+hold on
+f4=figure;
+hold on
+f5=figure;
+hold on
+f6=figure;
+hold on
+
+ski_stats=zeros([length(unique(skID)'),2]);%size, mean deflection (^o)
+for ski=unique(skID)'
+    figure(f3);
+    title('Deflection Angle (^o) Summary')
+    pp=fullstat2(skID==ski,2);
+    tt=theta_cor(skID==ski)*180/pi;
+    plot(pp,tt);
+    xlabel('frame(#)');
+    ylabel('theta (^o)');
+    figure(f4);
+    title('Speed Summary')
+    vv=r_cor(skID==ski);
+    plot(pp,vv/c1);
+    xlabel('frame(#)');
+    ylabel('speed(px/frame)');
+    figure(f5);
+    title('Size (diameter) Summary')
+    ss=size_cor(skID==ski);
+    plot(pp,2*ss*conv*10^3);
+    xlabel('frame(#)');
+    ylabel('size(nm)');
+    
+    [dist_theta_cor,dist_r_cor]=cart2pol(sum(disty_cor(skID==ski)),-sum(distx_cor(skID==ski)));
+    figure(f6);
+    title('Size vs Deflection Angle Summary (End - Start position)')
+    plot(2*mean(ss)*conv*10^3,dist_theta_cor*180/pi,'o')
+    xlabel('size(nm)');
+    ylabel('Deflection Angle(^o)');
+    ski_stats(ski,:)=[2*mean(ss)*conv*10^3,dist_theta_cor*180/pi];
+end
+
+saveas(figure(f1),'Sk_velocity_components.png')
+saveas(figure(f2),'Sk_position.png')
+saveas(figure(f3),'Sk_deflection.png')
+saveas(figure(f4),'Sk_speed.png')
+saveas(figure(f5),'Sk_size.png')
+saveas(figure(f6),'Sk_size_deflection.png')
+ dlmwrite('Sk_size_deflection.txt',ski_stats);
+end
+

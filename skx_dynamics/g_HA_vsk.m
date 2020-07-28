@@ -11,16 +11,17 @@ i1_fil=i1(ia);
 
 index=fwbw_filter(i1_fil,fullstat2_fil,op);%1:neg current, 2: pos current
 col_plot=1;%0:off, 1:on
-for nedge=22
+for nedge=23
 HAedge=-92.5:5:92.5; 
 HAaxis=-90:5:90;
+redges=linspace(min(r(:)),max(r(:)),nedge+1);
 im=zeros(length(HAaxis),nedge);
 im_norm=zeros(length(HAaxis),nedge);
 im_norm_norm=zeros(length(HAaxis),nedge);
 figure;
 r=r_cor_fil(index)%(pID<p_lim);
 theta=theta_cor_fil(index)%(pID<p_lim);
-[N,edges] = histcounts(r,nedge);
+[N,edges] = histcounts(r,redges);
 avg_v=zeros(1,length(N));
 avg_theta=zeros(1,length(N));
 std_theta=zeros(1,length(N));
@@ -52,7 +53,7 @@ im_norm(isnan(im_norm)) = 0;
 im_norm_norm(isnan(im_norm_norm)) = 0;
 
 figure
-surf(avg_v, HAaxis, im, 'EdgeColor', 'interp')
+surf(avg_v, HAaxis, im_norm_norm, 'EdgeColor', 'interp')
 colormap('jet');
 view([0,90]);
 xlabel('V_sk (m/s)')
@@ -80,8 +81,25 @@ ylabel(c,'Sk Counts');
 % c = colorbar;
 % ylabel(c,'Normalized Sk counts amplified to 1');
 % 
-H = fspecial('average',2);
+%H = fspecial('average',2);
 %imfil = imfilter(im,H);
+
+hsize=7;
+h = fspecial('gaussian',hsize,2);
+h(:,[1,2,3,5,6,7])=0;
+
+im_norm_fil = imfilter(im_norm_norm,h);%filter in one dimension only
+%im_norm_fil=imgaussfilt(im_norm,1.5);
+
+figure;
+surf(avg_v, HAaxis, im_norm_fil, 'EdgeColor', 'interp')
+colormap('jet');
+view([0,90]);
+xlabel('V_sk (m/s)')
+ylabel('Hall Angle (^o)')
+c = colorbar;
+ylabel(c,'Sk Counts');
+
 imfil = imgaussfilt(im,1);
 figure;
 surf(avg_v, HAaxis, imfil, 'EdgeColor', 'interp')

@@ -22,7 +22,7 @@ function varargout = skTrack(varargin)
 
 % Edit the above text to modify the response to help skTrack
 
-% Last Modified by GUIDE v2.5 23-Oct-2019 10:12:16
+% Last Modified by GUIDE v2.5 29-Jun-2020 02:57:27
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -181,6 +181,10 @@ if (im_i>1)
     centroids=reshape(MasterList(:,p_no(p_i(im_i)),2:3),[300,2]);
     sk_col=plot_col_centers( handles, centroids,sk_col,2,0,zmode);
     updateStatus(handles,2,sprintf(fileList{p_i(im_i)},' displayed'));
+    if (mouse_mode==1)
+        mouse_mode=0;
+        updateStatus(handles,1,'Mouse mode exited');
+    end
 else
     updateStatus(handles,1,sprintf('Reached first image, unable to go previous'));
 end
@@ -459,12 +463,17 @@ function saveResults_btn_Callback(hObject, eventdata, handles)
 % hObject    handle to saveResults_btn (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-global im_i p_i p_no binIm1 centroids approx_r imageSize im_bank sk_col MasterList mouse_mode im_pos zmode im_lx im_ly
-conv=imageSize/max([im_lx im_ly]);
-imageSize
-flip_n=0;
-p_width=1e9;%ns
-[ fullstat2,theta_cor,r_cor,MasterList ]= processML_nn( MasterList, p_no, conv,p_width,flip_n);
+global im_i p_i p_no binIm1 centroids approx_r imageSize im_bank sk_col MasterList mouse_mode im_pos zmode im_lx im_ly i1
+imageSize=str2double(get(handles.imSize_btn,'String'));
+%conv=13000/1080; %estimated nm/px
+conv=imageSize*1000/max([im_lx im_ly]);%nm/px
+p_width=str2double(get(handles.pulseW_btn,'String'));%ns
+pol = get(handles.pol_box,'value');%change polarity of current
+if pol==0
+    pol=-1;
+end
+
+[ fullstat2,theta_cor,r_cor,MasterList ]= processML_tracker( MasterList, p_no, conv,p_width,i1,pol);
 save('MasterList.mat','MasterList');
 save(strcat('r_cor','.mat'),'r_cor');
 save(strcat('theta_cor','.mat'),'theta_cor');
@@ -662,3 +671,20 @@ updateIm(handles,reshape(im_bank(im_i,:,:),im_lx,im_ly),im_pos(im_i,:),zmode)
 updateStatus(handles,1,sprintf(strcat(num2str(noSk),' Skyrmions Located')));
 centroids=reshape(MasterList(:,p_no(p_i(im_i))+1,2:3),[300,2]);
 sk_col=plot_col_centers( handles, centroids,sk_col,1,0,zmode);
+
+
+% --- Executes on button press in load_i_btn.
+function load_i_btn_Callback(hObject, eventdata, handles)
+% hObject    handle to load_i_btn (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+global i1
+load('i1.mat')
+
+% --- Executes on button press in pol_box.
+function pol_box_Callback(hObject, eventdata, handles)
+% hObject    handle to pol_box (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of pol_box

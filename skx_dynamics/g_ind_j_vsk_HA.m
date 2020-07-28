@@ -30,7 +30,7 @@ end
 
 fig=subplot(2,1,1);
 errorbar(avg_v,avg_theta,std_theta);
-ylim([-50 30])
+ylim([-50 50])
 xlabel('speed(|m/s^2|)')
 ylabel('Theta(o)')
 title(strcat('j=',num2str(round(i_check*1e-11,2,'decimal')),'E11','| No of Bins: ',num2str(nedge)));

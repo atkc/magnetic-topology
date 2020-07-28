@@ -5,10 +5,10 @@
 [mx,my,mz]=fovf('m000000.ovf');
 [bx,by,bz]=fovf('B_demag000000.ovf');
 
-tf_ll=42;%last layer of magnetic material, first layer is 1
+tf_ll=14;%last layer of magnetic material, first layer is 1
 %how many thinfilm layers? %32:26aa
 
-step_z=1;%nm
+step_z=3;%nm
 cell_size=10000/256;%nm
 %**********Check Magnetization********************
 checkM=0;
@@ -34,14 +34,15 @@ if checkM
     title(strcat('m layer:',num2str(al-1)));
     end
 end
-imwrite((mx(:,:,1))/2,strcat('Mx_',num2str(1*step_z),'.png'))
-imwrite((my(:,:,1))/2,strcat('My_',num2str(1*step_z),'.png'))
-imwrite((mz(:,:,1)+1)/2,strcat('Mz_',num2str(1*step_z),'.png'))
+imwrite((mx(:,:,2)+1)/2,strcat('Mx_',num2str(2*step_z),'.png'))
+imwrite((my(:,:,2)+1)/2,strcat('My_',num2str(2*step_z),'.png'))
+imwrite((mz(:,:,2)+1)/2,strcat('Mz_',num2str(2*step_z),'.png'))
+dlmwrite('mz_2nm.txt',mz(:,:,2));
 %**********Check Magnetization********************
 
 writefile=1;
 saveStray=0;
-plotim=1;
+plotim=0;
 fx=figure;
 set(fx, 'Units', 'Normalized', 'OuterPosition', [0.1, 0.1, 0.7, 0.5]);
 title('Bx');xlabel('nm');ylabel('T');
@@ -87,7 +88,7 @@ yrange=1:256;
 %     shading flat
 % end
 
-for al=119%[(tf_ll+5):5:128]%33%(85-12)%[(tf_ll+1):10:128]%first layer is 1
+for al=[(tf_ll+1)+1:1:40]%33%(85-12)%[(tf_ll+1):10:128]%first layer is 1
 al
     filename=strcat('Bfield_',num2str((al-tf_ll)*step_z),'nm');
     blayer=al;

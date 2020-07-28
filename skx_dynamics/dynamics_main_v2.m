@@ -24,7 +24,7 @@
 cd('C:\Users\Anthony\Dropbox\Shared_MFM\Data\Nanostructures\fp553_nanostructures\180410-4_fp553_1b_d2_2um_n4k-p1650\CTF\skel (p16-24)')
 filename='pulse (';
 fullFileName1=strcat(filename,'16)','.png');
-pulseId=17:24;
+pulseId=1:29;
 flip_n=-1;%1: +V-V+V... | -1: -V+V-V...
 %%==========directory of skeleton file for motion tracking=================
 
